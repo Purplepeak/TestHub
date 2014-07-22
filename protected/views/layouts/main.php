@@ -32,53 +32,101 @@
           </div>
           <div class="navbar-collapse collapse">
             <?php
-              $this->widget('zii.widgets.CMenu',array(
-                'activeCssClass'=>'active',
-                'activateParents'=>true,
-                'htmlOptions'=>array('class'=>'nav navbar-nav th-navbar-nav'),
-                'items'=>array(
-                  array(
-              		'label'=>'Главная',
-              		'url'=>array('/site/index'),
-              		'linkOptions'=>array('id'=>'menuBlog')
-                  ),
-                ),
-              ));
-              
-              $this->widget('zii.widgets.CMenu',array(
-                'activeCssClass'=>'active',
-                'activateParents'=>true,
-                'htmlOptions'=>array('class'=>'nav navbar-nav th-navbar-nav navbar-right'),
-                'submenuHtmlOptions'=>array('class'=>'dropdown-menu'),
-                'items'=>array(
-                  array(
-                    'label'=>'Войти',
-                    'url'=>array('#'),
-                    'linkOptions'=>array('class'=>'dropdown-toggle', 'data-toggle'=>'dropdown'),
-                    'visible'=>Yii::app()->user->isGuest,
-                    'itemOptions'=>array('class'=>'dropdown'),
-                    'items'=>array(
-                      array('label'=>'Вход для студентов', 'url'=>array('/student/login')),
-                      array('label'=>'Вход для преподавателей', 'url'=>array('/teacher/login')),
-                    ),
-                  ),
+$this->widget('zii.widgets.CMenu', array(
+    'activeCssClass' => 'active',
+    'activateParents' => true,
+    'htmlOptions' => array(
+        'class' => 'nav navbar-nav th-navbar-nav'
+    ),
+    'items' => array(
+        array(
+            'label' => 'Главная',
+            'url' => array(
+                '/site/index'
+            ),
+            'linkOptions' => array(
+                'id' => 'menuBlog'
+            )
+        )
+    )
+));
+
+$this->widget('zii.widgets.CMenu', array(
+    'activeCssClass' => 'active',
+    'activateParents' => true,
+    'htmlOptions' => array(
+        'class' => 'nav navbar-nav th-navbar-nav navbar-right'
+    ),
+    'submenuHtmlOptions' => array(
+        'class' => 'dropdown-menu'
+    ),
+    'items' => array(
+        array(
+            'label' => 'Войти',
+            'url' => array(
+                '#'
+            ),
+            'linkOptions' => array(
+                'class' => 'dropdown-toggle',
+                'data-toggle' => 'dropdown'
+            ),
+            'visible' => Yii::app()->user->isGuest,
+            'itemOptions' => array(
+                'class' => 'dropdown'
+            ),
+            'items' => array(
                 array(
-		'label'=>'Выйти ('.Yii::app()->user->name.')',
-		'url'=>array('/site/logout'),
-		'visible'=>!Yii::app()->user->isGuest),
-                  array(
-              'label'=>'Регистрация',
-              'url'=>array('#'),
-              'linkOptions'=>array('class'=>'dropdown-toggle', 'data-toggle'=>'dropdown'),
-              'itemOptions'=>array('class'=>'dropdown'),
-              'visible'=>Yii::app()->user->isGuest,
-              'items'=>array(
-              array('label'=>'Регистрация для студентов', 'url'=>array('/student/registration')),
-              array('label'=>'Регистрация для преподавателей', 'url'=>array('/teacher/registration')),
-              ),
-              ),
+                    'label' => 'Вход для студентов',
+                    'url' => array(
+                        '/student/login'
+                    )
                 ),
-              )); ?>
+                array(
+                    'label' => 'Вход для преподавателей',
+                    'url' => array(
+                        '/teacher/login'
+                    )
+                )
+            )
+        ),
+        array(
+            'label' => 'Выйти (' . Yii::app()->user->name . ')',
+            'url' => array(
+                '/site/logout'
+            ),
+            'visible' => !Yii::app()->user->isGuest
+        ),
+        array(
+            'label' => 'Регистрация',
+            'url' => array(
+                '#'
+            ),
+            'linkOptions' => array(
+                'class' => 'dropdown-toggle',
+                'data-toggle' => 'dropdown'
+            ),
+            'itemOptions' => array(
+                'class' => 'dropdown'
+            ),
+            'visible' => Yii::app()->user->isGuest,
+            'items' => array(
+                array(
+                    'label' => 'Регистрация для студентов',
+                    'url' => array(
+                        '/student/registration'
+                    )
+                ),
+                array(
+                    'label' => 'Регистрация для преподавателей',
+                    'url' => array(
+                        '/teacher/registration'
+                    )
+                )
+            )
+        )
+    )
+));
+?>
           </div>
           <!--/.nav-collapse -->
         </div>

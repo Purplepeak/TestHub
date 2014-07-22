@@ -2,13 +2,14 @@
 
 class AdminController extends UsersController
 {
+
     public function beforeAction($action)
-	{
-		$this->userModel = Admin::model();
-		$this->index = 'Admin';
-		return parent::beforeAction($action);
-	}
-	
+    {
+        $this->userModel = Admin::model();
+        $this->index = 'Admin';
+        return parent::beforeAction($action);
+    }
+
     public function accessRules()
     {
         return array(
@@ -44,7 +45,7 @@ class AdminController extends UsersController
             )
         );
     }
-    
+
     public function actionAdmin()
     {
         $this->userModel = new Admin('search');

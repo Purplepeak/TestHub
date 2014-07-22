@@ -1,3 +1,5 @@
-<?php 
-class SOauthException extends CException {
+<?php
+
+class SOauthException extends CException
+{
 }

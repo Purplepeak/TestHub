@@ -22,23 +22,31 @@
  */
 class Users extends CActiveRecord
 {
+
     public $_type;
+
     public $passwordText;
+
     public $password2;
+
     public $captcha;
+
     public $interval = 2; // Через сколько дней удалять неактивированные аккаунты
-    
     const GENDER_MALE = 'male';
+
     const GENDER_FEMALE = 'female';
+
     const GENDER_UNDEFINED = 'undefined';
+
     /**
+     *
      * @return string the associated database table name
      */
     public function tableName()
     {
         return 'users';
     }
-    
+
     protected function instantiate($attributes)
     {
         switch ($attributes['type']) {
@@ -57,8 +65,9 @@ class Users extends CActiveRecord
         $model = new $class(null);
         return $model;
     }
-    
+
     /**
+     *
      * @return array validation rules for model attributes.
      */
     public function rules()
@@ -91,15 +100,15 @@ class Users extends CActiveRecord
                 'gender, id, password',
                 'safe'
             ),
-        		
+            
             array(
                 'email',
                 'unique',
-            	'className' => 'Users',
-            	'attributeName' => 'email',
+                'className' => 'Users',
+                'attributeName' => 'email',
                 'message' => 'Этот e-mail уже используется'
             ),
-        		
+            
             array(
                 'passwordText, password2, email',
                 'required',
@@ -143,7 +152,7 @@ class Users extends CActiveRecord
                 'on' => 'register',
                 'message' => 'e-mail введен некорректно'
             ),
-        		
+            
             array(
                 'name, surname',
                 'match',
@@ -168,15 +177,18 @@ class Users extends CActiveRecord
                 'message' => 'Указаный пол не предусматривается правилами'
             ),
             array(
-        	    'captcha',
+                'captcha',
                 'ext.srecaptcha.SReCaptchaValidator',
                 'privateKey' => Yii::app()->params['socialKeys']['recaptcha']['privateKey'],
-            	'on' => 'register'
+                'on' => 'register'
             ),
             array(
-            		'active',
-            		'in',
-            		'range' => array(0, 1)
+                'active',
+                'in',
+                'range' => array(
+                    0,
+                    1
+                )
             ),
             array(
                 'id, password, email, time_registration, name, surname, gender, avatar, group_id',
@@ -185,8 +197,9 @@ class Users extends CActiveRecord
             )
         );
     }
-    
+
     /**
+     *
      * @return array customized attribute labels (name=>label)
      */
     public function attributeLabels()
@@ -194,7 +207,7 @@ class Users extends CActiveRecord
         return array(
             'id' => 'ID',
             'passwordText' => 'Пароль',
-        	'password2' => 'Повторите пароль',
+            'password2' => 'Повторите пароль',
             'email' => 'e-mail',
             'time_registration' => 'Время регистрации',
             'name' => 'Имя',
@@ -202,10 +215,10 @@ class Users extends CActiveRecord
             'gender' => 'Пол',
             'avatar' => 'Аватар',
             'group_id' => 'ID группы',
-        	'captcha' => 'Введите код с картинки через пробел'
+            'captcha' => 'Введите код с картинки через пробел'
         );
     }
-    
+
     /**
      * Retrieves a list of models based on the current search/filter conditions.
      *
@@ -216,13 +229,12 @@ class Users extends CActiveRecord
      * - Pass data provider to CGridView, CListView or any similar widget.
      *
      * @return CActiveDataProvider the data provider that can return the models
-     * based on the search/filter conditions.
+     *         based on the search/filter conditions.
      */
     public function search()
     {
         // @todo Please modify the following code to remove attributes that should not be searched.
-        
-        $criteria = new CDbCriteria;
+        $criteria = new CDbCriteria();
         
         $criteria->compare('id', $this->id);
         $criteria->compare('password', $this->password, true);
@@ -238,7 +250,7 @@ class Users extends CActiveRecord
             'criteria' => $criteria
         ));
     }
-    
+
     protected function beforeSave()
     {
         if (parent::beforeSave()) {
@@ -253,37 +265,41 @@ class Users extends CActiveRecord
         
         return false;
     }
-    
+
     public function deleteNotActivated()
     {
-    	$userCriteria = new CDbCriteria;
-    	$userCriteria->condition = "active=:active AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
-    	$userCriteria->params = array(':active' => 0, ':interval' => $this->interval);
-    	
-    	$confirmCriteria = new CDbCriteria;
-    	$confirmCriteria->condition = "scenario=:scenario AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
-    	$confirmCriteria->params = array(':scenario' => 'confirm', ':interval' => $this->interval);
-    	
-    	$count = $this->count($userCriteria);
-    	
-    	if($count > 10) {
-    		$this->deleteAll($userCriteria);
-    		$this->deleteAll($confirmCriteria);
-    	}
-    	
-    	
+        $userCriteria = new CDbCriteria();
+        $userCriteria->condition = "active=:active AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
+        $userCriteria->params = array(
+            ':active' => 0,
+            ':interval' => $this->interval
+        );
+        
+        $confirmCriteria = new CDbCriteria();
+        $confirmCriteria->condition = "scenario=:scenario AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
+        $confirmCriteria->params = array(
+            ':scenario' => 'confirm',
+            ':interval' => $this->interval
+        );
+        
+        $count = $this->count($userCriteria);
+        
+        if ($count > 10) {
+            $this->deleteAll($userCriteria);
+            $this->deleteAll($confirmCriteria);
+        }
     }
-    
+
     public function validatePassword($password)
     {
         return CPasswordHelper::verifyPassword($password, $this->password);
     }
-    
+
     public function hashPassword($password)
     {
         return CPasswordHelper::hashPassword($password);
     }
-    
+
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
