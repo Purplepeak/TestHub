@@ -1,0 +1,42 @@
+.social-registration {
+	display:block;
+	clear: both;
+	width: auto;
+	margin: 5px 0;
+}
+
+.errorSummary {
+	color:red;
+}
+
+.reg-header {
+	border-bottom: 1px solid #eeeeee;
+}
+
+.reg-header h2 {
+	margin-top: -10px;
+	display:inline-block;
+}
+
+.reg-sign-in {
+	display:inline-block;
+	float: right;
+}
+
+.reg-sign-in a {
+	vertical-align: middle;
+}
+
+.confirm-note {
+	font-size: 15px;
+	font-family: Lucida Grande, Arial, Helvetica, Verdana, sans-serif;
+}
+
+.bold-text {
+	font-weight:bold;
+	font-color:#72b0e0;
+}
+
+.services-bs {
+	width: 252px;
+}
