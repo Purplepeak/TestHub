@@ -21,7 +21,7 @@
   </div>
 <?php endif;?>
 <br>
-<?php $this->renderPartial('//users/_register_form', array('model'=>$model));?>
+<?php $this->renderPartial('//users/register_form', array('model'=>$model));?>
 
 <div class="form-note">
   <p><span style="color:red">*</span> обязательные для заполнения поля</p>
