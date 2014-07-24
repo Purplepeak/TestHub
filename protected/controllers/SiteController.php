@@ -45,6 +45,10 @@ class SiteController extends Controller
 				if($error['type'] == 'SOauthException') {
 					$error['message'] = 'Сервис временно испытывает проблемы с входом через социальные сети, повторите попытку позже. Приносим извинения за временные неудобства.';
 				}
+				if($error['type'] == 'Swift_SwiftException') {
+				    $error['message'] = 'Сервис временно испытывает проблемы. Приносим извинения за временные неудобства.';
+				}
+				
 				$this->render('error', $error);
 			}
 		}

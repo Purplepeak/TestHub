@@ -1,8 +1,16 @@
 <?php
+/**
+ * Класс предназначен для взаимодействия пользователя со своим
+ * аккаунтом.
+ * Сценарий confirm - активация аккаунта.
+ * Сценарий restore - восстановление пароля для аккаунта.
+ */
 
 class AccountInteraction extends CActiveRecord
 {
-
+    /**
+     * Новый пароль, необходимый при работе со сценарием restore.
+     */
     public $newPassword;
 
     public function tableName()
@@ -12,8 +20,6 @@ class AccountInteraction extends CActiveRecord
 
     public function rules()
     {
-        // NOTE: you should only define rules for those attributes that
-        // will receive user inputs.
         return array(
             array(
                 'user_name, user_id, key, email, scenario',
@@ -51,8 +57,7 @@ class AccountInteraction extends CActiveRecord
                 'length',
                 'max' => 250
             ),
-            // The following rule is used by search().
-            // @todo Please remove those attributes that should not be searched.
+            
             array(
                 'id, user_name, user_id, key, email',
                 'safe',
@@ -63,8 +68,6 @@ class AccountInteraction extends CActiveRecord
 
     public function relations()
     {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
         return array();
     }
 
@@ -126,7 +129,6 @@ class AccountInteraction extends CActiveRecord
         $bodyHtml = $this->formatEmail('html', $template);
         $bodyTxt = $this->formatEmail('txt', $template);
         
-        // setup the mailer
         $transport = Swift_SmtpTransport::newInstance('smtp.gmail.com', 587, 'tls');
         $transport->setUsername(Yii::app()->params['siteEmail']['email']);
         $transport->setPassword(Yii::app()->params['siteEmail']['password']);
@@ -149,6 +151,11 @@ class AccountInteraction extends CActiveRecord
         return $result;
     }
 
+    /**
+     * Сохраняет данные в таблицу и отправляет пользователю e-mail, который
+     * форматируется в зависимости от сценария
+     */
+    
     public function saveAndSend($model, $scenario)
     {
         $this->user_id = $model->id;
@@ -176,8 +183,12 @@ class AccountInteraction extends CActiveRecord
                 $title = "Здравствуйте, {$this->user_name}";
                 $template = '/restore_template.';
             }
-            
-            $this->sendEmail($title, $template);
+            try {
+                $this->sendEmail($title, $template);
+            } catch(Swift_SwiftException $e) {
+                Yii::log($e->getMessage(), 'error', 'application.models.accountinteraction');
+                throw new Swift_SwiftException($e->getMessage());
+            }
         }
     }
 

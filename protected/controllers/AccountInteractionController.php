@@ -39,6 +39,11 @@ class AccountInteractionController extends Controller
             )
         );
     }
+    
+    /**
+     * Страница предупреждающая пользователя о необходимости активировать аккаунт. 
+     * Присутствует функция повторной отправки сообщения.
+     */
 
     public function actionConfirmNotification()
     {
@@ -62,6 +67,10 @@ class AccountInteractionController extends Controller
             ));
         }
     }
+    
+    /**
+     * Предупреждает пользователя, что его пароль был изменен.
+     */
 
     public function actionRestoreNotification()
     {
@@ -82,6 +91,11 @@ class AccountInteractionController extends Controller
     {
         $this->render('change_notification');
     }
+    
+    /**
+     * Метод предназначен для автоматической активации аккаунта при 
+     * переходе по ссылке с корректными параметрами.
+     */
 
     public function actionConfirm()
     {
@@ -123,6 +137,11 @@ class AccountInteractionController extends Controller
             ));
         }
     }
+    
+    /**
+     * Восстановление пароля пользователя. Юзер вбивает в форму свою почту, на
+     * которую мы высылаем ссылку на действие changePass().
+     */
 
     public function actionPassRestore()
     {
@@ -140,6 +159,7 @@ class AccountInteractionController extends Controller
             $model->attributes = $_POST['AccountInteractionForm'];
             if ($model->validate()) {
                 $tempModel->saveAndSend($model->user, 'restore');
+                
                 Yii::app()->session['restoreModel'] = $model->user;
                 
                 $this->redirect('restoreNotification');
@@ -151,6 +171,12 @@ class AccountInteractionController extends Controller
         ));
     }
 
+    /**
+     * Метод меняет старый пароль на новый, который пользователь
+     * выбирает самостоятельно. По итогам смены, юзера перенаправляет 
+     * на страницу users/login с предупреждением, что пароль был изменен.
+     */
+    
     public function actionChangePass()
     {
         $email = Yii::app()->request->getQuery('email');

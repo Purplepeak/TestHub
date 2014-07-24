@@ -15,6 +15,10 @@ class SOauth extends CApplicationComponent
         Yii::import('soauth.services.*');
     }
 
+    /**
+     * Метод определяет с каким сервисом нам предстоит работать в дальнейшем
+     */
+    
     public function getClass($provider, $gender = array())
     {
         if (! isset($this->services[$provider])) {
@@ -40,6 +44,11 @@ class SOauth extends CApplicationComponent
         $widget->init();
         $widget->run();
     }
+    
+    /**
+     * Массив содержащий информацию о всех доступных сервисах, которая необходима
+     * виджету для составления представления
+     */
 
     public function getServices()
     {

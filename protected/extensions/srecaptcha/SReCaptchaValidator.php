@@ -41,5 +41,3 @@ class SReCaptchaValidator extends CValidator
       }
 	}
 }
-
-

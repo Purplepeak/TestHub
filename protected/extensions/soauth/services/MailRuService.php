@@ -8,8 +8,6 @@ class MailRuService extends SOauthBase
 
     public $title = 'Mail.ru';
 
-    protected $providerUrl = 'http://vk.com/';
-
     protected $providerAuthorizeUrl = 'https://connect.mail.ru/oauth/authorize';
 
     protected $providerAccessUrl = 'https://connect.mail.ru/oauth/token';

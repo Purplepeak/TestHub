@@ -22,7 +22,7 @@ if($user == 'teacher/login') {
     <strong>Вам пароль был успешно изменен.</strong>
 </div>
 <?php endif;?>
-<p>Введите свой Email и пароль, указанный при регистрации:</p>
+<p>Введите свой e-mail и пароль, указанный при регистрации:</p>
 
 <?php
     foreach(Yii::app()->user->getFlashes() as $key => $message) {

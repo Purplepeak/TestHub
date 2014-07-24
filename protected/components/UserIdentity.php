@@ -81,6 +81,10 @@ class UserIdentity extends CUserIdentity
         
         return $identity;
     }
+    
+    /**
+     * Проверяет наличие социального пользователя в базе
+     */
 
     public function socialAuthenticate($ouathProvider, $oauthId)
     {

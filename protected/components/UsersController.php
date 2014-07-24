@@ -97,6 +97,11 @@ class UsersController extends Controller
                 
                 $model->save(false);
                 
+                /** 
+                 * Для подтверждения аккаунта отправляем пользователю активационное письмо и 
+                 * заносим ключ активации и e-mail в отдельную таблицу базы данных
+                 */
+                
                 $confirmModel = new AccountInteraction();
                 
                 $confirmModel->saveAndSend($model, 'confirm');
@@ -108,6 +113,8 @@ class UsersController extends Controller
                 if (Yii::app()->session) {
                     Yii::app()->session['regModel'] = $model;
                 }
+                
+                // Удаление не активироанных аккаунтов
                 
                 Users::model()->deleteNotActivated();
                 
@@ -148,7 +155,7 @@ class UsersController extends Controller
                 $socialModel = SocialAccounts::model();
                 $socialModel->attributes = $socialAttributes;
                 
-                $oauthModel = $serviceClass->validateSocialModel($socialModel);
+                $oauthModel = $socialModel->validateSocialModel();
                 
                 if (! empty($oauthModel)) {
                     Yii::app()->session['oauth_model'] = $oauthModel;

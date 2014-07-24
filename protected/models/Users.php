@@ -25,23 +25,24 @@ class Users extends CActiveRecord
 
     public $_type;
 
-    public $passwordText;
+    // Пароль
+    public $passwordText; 
 
+    // Строка подтверждения пароля
     public $password2;
 
+    // Поле для капчи
     public $captcha;
 
-    public $interval = 2; // Через сколько дней удалять неактивированные аккаунты
+    // Через сколько дней удалять неактивированные аккаунты
+    public $interval = 2;
+     
     const GENDER_MALE = 'male';
 
     const GENDER_FEMALE = 'female';
 
     const GENDER_UNDEFINED = 'undefined';
 
-    /**
-     *
-     * @return string the associated database table name
-     */
     public function tableName()
     {
         return 'users';
@@ -65,11 +66,7 @@ class Users extends CActiveRecord
         $model = new $class(null);
         return $model;
     }
-
-    /**
-     *
-     * @return array validation rules for model attributes.
-     */
+    
     public function rules()
     {
         return array(
@@ -198,10 +195,6 @@ class Users extends CActiveRecord
         );
     }
 
-    /**
-     *
-     * @return array customized attribute labels (name=>label)
-     */
     public function attributeLabels()
     {
         return array(
@@ -218,22 +211,9 @@ class Users extends CActiveRecord
             'captcha' => 'Введите код с картинки через пробел'
         );
     }
-
-    /**
-     * Retrieves a list of models based on the current search/filter conditions.
-     *
-     * Typical usecase:
-     * - Initialize the model fields with values from filter form.
-     * - Execute this method to get CActiveDataProvider instance which will filter
-     * models according to data in model fields.
-     * - Pass data provider to CGridView, CListView or any similar widget.
-     *
-     * @return CActiveDataProvider the data provider that can return the models
-     *         based on the search/filter conditions.
-     */
+    
     public function search()
     {
-        // @todo Please modify the following code to remove attributes that should not be searched.
         $criteria = new CDbCriteria();
         
         $criteria->compare('id', $this->id);
@@ -251,6 +231,11 @@ class Users extends CActiveRecord
         ));
     }
 
+    /**
+     * Перед сохранением значений в базу данных, хешируем пароль, для повышения 
+     * уровня безопасности пользовательских аккаунтов 
+     */
+    
     protected function beforeSave()
     {
         if (parent::beforeSave()) {
@@ -265,6 +250,12 @@ class Users extends CActiveRecord
         
         return false;
     }
+    
+    /** 
+     * Удаление не активированных пользовательских аккаунтов
+     * Такие аккаунты хранятся в базе не дольше двух дней, если
+     * их общее количество превышает 10 
+     */
 
     public function deleteNotActivated()
     {

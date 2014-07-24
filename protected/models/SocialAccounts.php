@@ -1,35 +1,14 @@
 <?php
 
-/**
- * This is the model class for table "social_accounts".
- *
- * The followings are the available columns in table 'social_accounts':
- * @property integer $id
- * @property string $provider
- * @property string $social_user_id
- * @property string $info
- * @property integer $user_id
- *
- * The followings are the available model relations:
- * @property Users $user
- */
 class SocialAccounts extends CActiveRecord
 {
-    /**
-     * @return string the associated database table name
-     */
     public function tableName()
     {
         return 'social_accounts';
     }
     
-    /**
-     * @return array validation rules for model attributes.
-     */
     public function rules()
     {
-        // NOTE: you should only define rules for those attributes that
-        // will receive user inputs.
         return array(
             array(
                 'provider, social_user_id, info, url',
@@ -63,8 +42,6 @@ class SocialAccounts extends CActiveRecord
                 'length',
                 'max' => 20
             ),
-            // The following rule is used by search().
-            // @todo Please remove those attributes that should not be searched.
             array(
                 'id, provider, social_user_id, info, user_id',
                 'safe',
@@ -73,13 +50,8 @@ class SocialAccounts extends CActiveRecord
         );
     }
     
-    /**
-     * @return array relational rules.
-     */
     public function relations()
     {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
         return array(
             'user' => array(
                 self::BELONGS_TO,
@@ -89,9 +61,6 @@ class SocialAccounts extends CActiveRecord
         );
     }
     
-    /**
-     * @return array customized attribute labels (name=>label)
-     */
     public function attributeLabels()
     {
         return array(
@@ -104,10 +73,38 @@ class SocialAccounts extends CActiveRecord
         );
     }
     
+    /**
+     * Метод проверяет, присутствует ли пользователь в таблице social_accounts.
+     * Если присутствует, значит регистрация при помощи социального аккаунта была пройдена, 
+     * все необходимые данные занесены в таблицы `users` и `social_accounts`. Залогиниваем юзера.
+     * Иначе возвращаем модель для дальнейшей работы с ней в UsersController;
+     */
+    
+    public function validateSocialModel()
+    {
+        $identity = new UserIdentity();
+        $identity->userClass = $this;
+    
+        $identity->socialAuthenticate($this->provider, $this->social_user_id);
+    
+        if ($identity->errorCode === UserIdentity::ERROR_NONE) {
+            Yii::app()->user->login($identity);
+        }
+    
+        if ($identity->errorCode === UserIdentity::ERROR_UNKNOWN_IDENTITY) {
+    
+            $this->isNewRecord = true;
+    
+            if ($this->validate()) {
+                return $this;
+            } else {
+                return false;
+            }
+        }
+    }
+    
     public function search()
     {
-        // @todo Please modify the following code to remove attributes that should not be searched.
-        
         $criteria = new CDbCriteria;
         
         $criteria->compare('id', $this->id);

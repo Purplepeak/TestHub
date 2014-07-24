@@ -93,16 +93,7 @@ class Teacher extends Users
             )
         );
     }
-    /*
-    public function behaviors()
-    {
-    	return array(
-    			'withRelated'=>array(
-    					'class'=>'ext.wr.WithRelatedBehavior',
-    			),
-    	);
-    }
-    */
+   
     public function behaviors(){
     	return array( 'CAdvancedArBehavior' => array(
     			'class' => 'application.extensions.CAdvancedArBehavior'));
@@ -117,6 +108,13 @@ class Teacher extends Users
     	
     	return CMap::mergeArray(parent::attributeLabels(), $attributeLabels);
     }
+    
+    /**
+     * Группы можно указывать через: пробел, запятую, несколько подряд идущих групп
+     * через дефис.
+     * Задача этого метода - отформатировать строку с группами и превратить ее
+     * в массив с номерами отдельных групп, к которым преподаватель имеет отношение.
+     */
     
     public function normalizeGroups($string)
     {
@@ -156,6 +154,11 @@ class Teacher extends Users
     	
     	return $result;
     }
+    
+    /**
+     * Проверяет, существуют ли введенные преподавателем группы
+     * в базе данных.
+     */
     
     public function isGroupExist()
     {

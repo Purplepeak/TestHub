@@ -5,14 +5,20 @@ class SOauthWidget extends CWidget
 
     public $component = 'soauth';
 
+    // Доступные сервисы
     public $services = null;
 
+    // Действие, для составленияы url, используемых в виджете 
     public $action;
+    
+    // login или registration. Влияет на текст социальной кнопки
+    public $scenario;
 
-    public $scenario; // login или registration. Влияет на текст социальной кнопки
     public $cssFile = true;
+    
+    // Для использования представления 'bootstrap-buttons', необходимо иметь установленный Bootstrap и Social Buttons for Bootstrap
+    private $view = 'bootstrap-buttons';
 
-    private $view = 'bootstrap-buttons'; // Для использования этого представления необходимо иметь установленный Bootstrap и Social Buttons for Bootstrap
     public function init()
     {
         parent::init();

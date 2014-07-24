@@ -92,6 +92,11 @@ class Student extends Users
         );
     }
     
+    /**
+     * В соответствии с указанной группой, студенту присваивается
+     * id группы вычисленное методом $this->studentGroupId($number);
+     */
+    
     protected function afterSave()
     {
         parent::afterSave();
@@ -112,6 +117,11 @@ class Student extends Users
         
         return $group->id;
     }
+    
+    /**
+     * Проверяет, существует ли введенная студентом группа
+     * в базе данных.
+     */
     
     public function isGroupExist()
     {

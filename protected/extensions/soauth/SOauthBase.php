@@ -1,15 +1,21 @@
 <?php
 
+/**
+ * SOauthBase это класс с базовыми методами, которые используют все доступные сервисы
+ */
+
 abstract class SOauthBase extends CComponent
 {
 
     public $attributes = array();
 
+    // Название сервиса с заглавной буквы
     public $title;
 
-    public $type;
-
+    // Рабочее название сервиса
     public $provider;
+    
+    public $type;
 
     protected $providerUrl;
 
@@ -18,9 +24,7 @@ abstract class SOauthBase extends CComponent
     protected $clientSecret;
 
     protected $redirectUrl;
-
-    protected $providerOptions = array();
-
+    
     protected $providerAuthorizeUrl;
 
     protected $providerAccessUrl;
@@ -36,17 +40,9 @@ abstract class SOauthBase extends CComponent
         'male' => 2,
         'undefined' => 3
     );
-
-    /**
-     *
-     * @var string Error description key name in _GET options.
-     */
+    
     protected $errorDescriptionParam = 'error_description';
 
-    /**
-     *
-     * @var string Error code for access_denied response.
-     */
     protected $errorAccessDeniedCode = 'access_denied';
 
     public function init($provider, $gender)
@@ -59,13 +55,16 @@ abstract class SOauthBase extends CComponent
             $this->gender = $gender;
         }
     }
+    
+    /**
+     * Суть данного метода, получить access token от сервиса
+     */
 
     public function authenticate()
     {
         if (isset($_GET[$this->errorParam])) {
             $error_code = $_GET[$this->errorParam];
             if ($error_code === $this->errorAccessDeniedCode) {
-                // access_denied error (user canceled)
                 Yii::app()->request->redirect(Yii::app()->request->hostInfo);
             } else {
                 $error = $error_code;
@@ -77,7 +76,7 @@ abstract class SOauthBase extends CComponent
             return false;
         }
         
-        // Get the access_token and save them to the session.
+        // В случе, если code передан, получаем access token
         if (isset($_GET['code'])) {
             $code = $_GET['code'];
             $response = $this->getServiceResponse($code);
@@ -86,7 +85,7 @@ abstract class SOauthBase extends CComponent
                 $this->response = $response;
             }
         } else {
-            // Use the URL of the current page as the callback URL.
+            // Если code не был получен, делаем запрос на getCode($redirect_uri)
             if (isset($_GET['redirect_uri'])) {
                 $redirect_uri = $this->redirectUrl;
             } else {
@@ -99,11 +98,19 @@ abstract class SOauthBase extends CComponent
         return $this->authenticated;
     }
 
+    /**
+     * Возвращает url, который необходим для получения code
+     */ 
+    
     public function getCode($redirect_uri)
     {
         return $this->providerAuthorizeUrl . '?client_id=' . $this->clientId . '&redirect_uri=' . urlencode($redirect_uri) . '&response_type=code';
     }
 
+    /**
+     *  При передаче code, получаем от сервиса ответ, который содежит 
+     *  в себе необходимый нам access_token
+     */
     public function getServiceResponse($code)
     {
         if (strpos($this->redirectUrl, '?') !== false) {
@@ -115,17 +122,25 @@ abstract class SOauthBase extends CComponent
         return $response;
     }
 
+    /**
+     * Возвращает url, который необходим для получения access_token
+     */ 
+    
     public function getTokenUrl($code)
     {
         return $this->providerAccessUrl . '?client_id=' . $this->clientId . '&redirect_uri=' . urlencode($this->redirectUrl) . '&client_secret=' . $this->clientSecret . '&code=' . $code;
     }
+    
+    /**
+     * Возвращает атрибуты пользователя (id, имя, фамилия и т.д.)
+     */
 
     public function getAttributes($params)
     {
         $attributes = $this->makeRequest($this->providerAttributesUrl . '?' . $params);
         return $attributes;
     }
-
+    
     public function normalizeAttributes($provider, $id, $name, $surname, $gender, $url, $photo)
     {
         $info = array(
@@ -143,29 +158,14 @@ abstract class SOauthBase extends CComponent
         );
     }
 
-    public function validateSocialModel($oauthModel)
-    {
-        $identity = new UserIdentity();
-        $identity->userClass = $oauthModel;
-        
-        $identity->socialAuthenticate($oauthModel->provider, $oauthModel->social_user_id);
-        
-        if ($identity->errorCode === UserIdentity::ERROR_NONE) {
-            Yii::app()->user->login($identity);
-        }
-        
-        if ($identity->errorCode === UserIdentity::ERROR_UNKNOWN_IDENTITY) {
-            
-            $oauthModel->isNewRecord = true;
-            
-            if ($oauthModel->validate()) {
-                return $oauthModel;
-            } else {
-                return false;
-            }
-        }
-    }
-
+    /**
+     * 
+     * Метод делает запрос по указанному url. Результатом запроса
+     * должен быть список параметров в формате JSON. Этот список будет 
+     * обработан методом parseJson(), в результате чего бы получим объект
+     * содержащий все полученные параметры.
+     */
+    
     protected function makeRequest($url, $options = array(), $parseJson = true)
     {
         $ch = $this->initRequest($url, $options);
@@ -209,6 +209,11 @@ abstract class SOauthBase extends CComponent
         
         return $ch;
     }
+    
+    /**
+     * Преобразует и обрабатывает на на наличие ошибок полученную
+     * JSON строку
+     */
 
     protected function parseJson($response)
     {

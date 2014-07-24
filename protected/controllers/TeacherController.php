@@ -24,13 +24,12 @@ class TeacherController extends UsersController
 
     public function actionTests()
     {
+        $model1 = $this->userModel;
+        
+        var_dump($model1->withRelated->kkk());
+        
         $this->render('//users/_register_form', array(
             'model' => $this->userModel
         ));
-        if (2 > 1) {
-            $this->renderPartial('//users/social_register', array(
-                'model' => $this->userModel
-            ));
-        }
     }
 }
