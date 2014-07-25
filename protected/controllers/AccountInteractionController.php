@@ -53,12 +53,6 @@ class AccountInteractionController extends Controller
             unset(Yii::app()->session['regModel']);
             $sendMessage = Yii::app()->request->getQuery('sendMessage');
             
-            if ($sendMessage == 1) {
-                $confirmModel = new AccountInteraction();
-                
-                $confirmModel->saveAndSend($userModel, 'confirm');
-            }
-            
             $this->render('notification', array(
                 'model' => $userModel
             ));
