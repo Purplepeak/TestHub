@@ -277,7 +277,9 @@ class Users extends CActiveRecord
         
         if ($count > 10) {
             $this->deleteAll($userCriteria);
-            $this->deleteAll($confirmCriteria);
+            
+            $confirmModel = new AccountInteraction();
+            $confirmModel->deleteAll($confirmCriteria);
         }
     }
 

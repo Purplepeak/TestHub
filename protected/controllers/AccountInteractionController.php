@@ -24,7 +24,8 @@ class AccountInteractionController extends Controller
                     'passRestore',
                     'changePass',
                     'restoreNotification',
-                    'changeNotification'
+                    'changeNotification',
+                    'resend',
                 ),
                 'users' => array(
                     '*'
@@ -55,7 +56,7 @@ class AccountInteractionController extends Controller
             if ($sendMessage == 1) {
                 $confirmModel = new AccountInteraction();
                 
-                $confirmModel->confirmation($userModel);
+                $confirmModel->saveAndSend($userModel, 'confirm');
             }
             
             $this->render('notification', array(
@@ -66,6 +67,20 @@ class AccountInteractionController extends Controller
                 'site/index'
             ));
         }
+    }
+    
+    public function actionResend($id, $name, $email)
+    {
+        $userModel = Users::model();
+        $userModel->id = $id;
+        $userModel->name = $name;
+        $userModel->email = $email;
+        
+        $confirmModel = new AccountInteraction();
+        
+        $confirmModel->saveAndSend($userModel, 'confirm');
+        
+        Yii::app()->end();
     }
     
     /**

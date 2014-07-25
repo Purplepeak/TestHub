@@ -171,10 +171,10 @@ class AccountInteraction extends CActiveRecord
             ));
             
             if ($exist != null) {
-                $this->deleteByPk($exist->id);
+                $this->updateByPk($exist->id, array('key' => $this->key));
+            } else {
+                $this->save(false);
             }
-            
-            $this->save(false);
             
             if ($scenario == 'confirm') {
                 $title = 'Добро пожаловать на TestHub';
