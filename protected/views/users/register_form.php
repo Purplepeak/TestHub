@@ -75,7 +75,7 @@
 		<?php echo $form->labelEx($model,'captcha'); ?>
 		<?php $this->widget('ext.srecaptcha.SReCaptchaWidget', array(
 				'theme' => 'white',
-				'publicKey' => Yii::app()->params['socialKeys']['recaptcha']['publicKey'],
+				'publicKey' => Yii::app()->params['privateConfig']['recaptcha']['publicKey'],
 				'lang' => 'ru'
 		));?>
 		<?php echo $form->error($model,'captcha'); ?>

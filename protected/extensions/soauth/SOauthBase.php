@@ -48,8 +48,8 @@ abstract class SOauthBase extends CComponent
     public function init($provider, $gender)
     {
         $this->redirectUrl = Yii::app()->request->hostInfo . Yii::app()->request->requestUri;
-        $this->clientId = Yii::app()->params['socialKeys'][$provider]['clientId'];
-        $this->clientSecret = Yii::app()->params['socialKeys'][$provider]['clientSecret'];
+        $this->clientId = Yii::app()->params['privateConfig'][$provider]['clientId'];
+        $this->clientSecret = Yii::app()->params['privateConfig'][$provider]['clientSecret'];
         
         if (! empty($gender)) {
             $this->gender = $gender;

@@ -208,7 +208,7 @@ class Users extends CActiveRecord
             'gender' => 'Пол',
             'avatar' => 'Аватар',
             'group_id' => 'ID группы',
-            'captcha' => 'Введите код с картинки через пробел'
+            'captcha' => 'Введите код с картинки'
         );
     }
     

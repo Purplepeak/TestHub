@@ -26,7 +26,7 @@ if($user == 'teacher/login') {
 
 <?php
     foreach(Yii::app()->user->getFlashes() as $key => $message) {
-        echo '<div class="flash-' . $key . '">' . $message . "</div>\n";
+        echo '<div class="alert alert-danger">' . CHtml::encode($message) . "</div>\n";
     }
 ?>
 
