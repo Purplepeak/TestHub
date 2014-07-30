@@ -65,7 +65,11 @@ class UsersController extends Controller
 
     public function actionIndex()
     {
-        $dataProvider = new CActiveDataProvider($this->index);
+        $dataProvider = new CActiveDataProvider($this->index, array(
+            'criteria'=>array(
+                'condition'=>'active=0',
+            ),
+        ));
         $this->render('index', array(
             'dataProvider' => $dataProvider
         ));
@@ -73,9 +77,13 @@ class UsersController extends Controller
 
     public function actionAdmin()
     {
-        $this->userModel->unsetAttributes(); // clear any default values
-        if (isset($_GET[$this->index]))
+        $this->userModel->unsetAttributes();
+        if (isset($_GET[$this->index])) {
             $this->userModel->attributes = $_GET[$this->index];
+            if(CHtml::modelName($this->userModel) === 'Teacher') {
+                $this->userModel->group_id = isset($_GET['Post']['group_id']) ? $_GET['Post']['group_id'] : '';
+            }
+        }
         
         $this->render('admin', array(
             'model' => $this->userModel

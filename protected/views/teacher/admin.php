@@ -2,11 +2,6 @@
 /* @var $this TeacherController */
 /* @var $model Teacher */
 
-$this->breadcrumbs=array(
-	'Teachers'=>array('index'),
-	'Manage',
-);
-
 $this->menu=array(
 	array('label'=>'List Teacher', 'url'=>array('index')),
 	array('label'=>'Create Teacher', 'url'=>array('create')),
@@ -46,11 +41,15 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 	'filter'=>$model,
 	'columns'=>array(
 		'id',
-		'username',
 		'password',
 		'email',
 		'time_registration',
 		'name',
+array(
+    'name'=>'group_id',
+    'value'=>'$data->groupsToString',
+    'filter'=>Group::model()->forFilter,
+),
 		/*
 		'surname',
 		'groups',

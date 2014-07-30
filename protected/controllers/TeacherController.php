@@ -24,12 +24,7 @@ class TeacherController extends UsersController
 
     public function actionTests()
     {
-        $model1 = $this->userModel;
-        
-        var_dump($model1->withRelated->kkk());
-        
-        $this->render('//users/_register_form', array(
-            'model' => $this->userModel
-        ));
+        $a = array_map('mb_strtolower', array('ОЛЕЖЕ', 'кук'));
+        var_dump($a);
     }
 }

@@ -27,6 +27,7 @@ class Teacher extends Users
     public $accessCode;
     public $groups;
     public $_type = 'teacher';
+    public $group_id ='';
     
     public function defaultScope()
     {
@@ -73,6 +74,42 @@ class Teacher extends Users
         
     }
     
+    public function getGroupsToString(){
+        $t = CHtml::listData( $this->groups1, 'id', 'number' );
+        return implode(',', $t);
+    }
+    
+    public function search()
+    {
+        $criteria = new CDbCriteria();
+    
+        $criteria->with = array(
+            'groups1' => array(
+                'select' => array('id', 'number')
+            ),
+        );
+        
+        $criteria->together = true;
+        
+        if(isset($this->group_id) && !empty($this->group_id)){
+            $criteria->compare('groups1.id', '='.$this->groups1, true);
+        }
+    
+        $criteria->compare('id', $this->id);
+        $criteria->compare('password', $this->password, true);
+        $criteria->compare('email', $this->email, true);
+        $criteria->compare('time_registration', $this->time_registration);
+        $criteria->compare('name', $this->name, true);
+        $criteria->compare('surname', $this->surname, true);
+        $criteria->compare('gender', $this->gender, true);
+        $criteria->compare('avatar', $this->avatar, true);
+        $criteria->compare('group_id', $this->group_id);
+    
+        return new CActiveDataProvider($this, array(
+            'criteria' => $criteria
+        ));
+    }
+    
     /**
      * @return array relational rules.
      */
@@ -107,6 +144,10 @@ class Teacher extends Users
     	);
     	
     	return CMap::mergeArray(parent::attributeLabels(), $attributeLabels);
+    }
+    
+    public function tt() {
+        return $this->groups1[0]->number;
     }
     
     /**

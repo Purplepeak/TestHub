@@ -9,10 +9,6 @@
 	<?php echo CHtml::link(CHtml::encode($data->id), array('view', 'id'=>$data->id)); ?>
 	<br />
 
-	<b><?php echo CHtml::encode($data->getAttributeLabel('username')); ?>:</b>
-	<?php echo CHtml::encode($data->username); ?>
-	<br />
-
 	<b><?php echo CHtml::encode($data->getAttributeLabel('password')); ?>:</b>
 	<?php echo CHtml::encode($data->password); ?>
 	<br />
@@ -33,19 +29,9 @@
 	<?php echo CHtml::encode($data->surname); ?>
 	<br />
 
-	<?php /*
-	<b><?php echo CHtml::encode($data->getAttributeLabel('groups')); ?>:</b>
-	<?php echo CHtml::encode($data->groups); ?>
-	<br />
+	
+	<?php var_dump($data->groups1);?>
 
-	<b><?php echo CHtml::encode($data->getAttributeLabel('gender')); ?>:</b>
-	<?php echo CHtml::encode($data->gender); ?>
-	<br />
-
-	<b><?php echo CHtml::encode($data->getAttributeLabel('avatar')); ?>:</b>
-	<?php echo CHtml::encode($data->avatar); ?>
-	<br />
-
-	*/ ?>
+	 
 
 </div>

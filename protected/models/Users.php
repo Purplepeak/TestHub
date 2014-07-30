@@ -176,7 +176,7 @@ class Users extends CActiveRecord
             array(
                 'captcha',
                 'ext.srecaptcha.SReCaptchaValidator',
-                'privateKey' => Yii::app()->params['socialKeys']['recaptcha']['privateKey'],
+                'privateKey' => Yii::app()->params['privateConfig']['recaptcha']['privateKey'],
                 'on' => 'register'
             ),
             array(
@@ -242,6 +242,11 @@ class Users extends CActiveRecord
             if ($this->isNewRecord) {
                 if ($this->scenario == 'register') {
                     $this->password = $this->hashPassword($this->passwordText);
+                    $formatName = array_map('mb_strtolower', array('name' => $this->name, 'surname' => $this->surname));
+                    $formatName = array_map('ucfirst', $formatName);
+                    
+                    $this->name = $formatName['name'];
+                    $this->surname = $formatName['surname'];
                 }
             }
             
@@ -249,6 +254,11 @@ class Users extends CActiveRecord
         }
         
         return false;
+    }
+    
+    public function getFullName()
+    {
+       
     }
     
     /** 

@@ -14,7 +14,7 @@
 	<br />
 
 	<b><?php echo CHtml::encode($data->getAttributeLabel('techer_id')); ?>:</b>
-	<?php echo CHtml::encode($data->techer_id); ?>
+	<?php echo CHtml::encode($data->teacher); ?>
 	<br />
 
 

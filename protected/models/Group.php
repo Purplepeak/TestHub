@@ -66,7 +66,8 @@ class Group extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'number' => 'Number',
+			'number' => 'Номер группы',
+		    'teacher' => 'Преподаватель'
 		);
 	}
 
@@ -94,6 +95,14 @@ class Group extends CActiveRecord
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
 		));
+	}
+	
+	public function getForFilter(){
+	    return CHtml::listData(
+	        self::model()->findAll(array(
+	            'select' => array('id', 'number')
+	        )), 'id', 'name'
+	    );
 	}
 
 	/**
