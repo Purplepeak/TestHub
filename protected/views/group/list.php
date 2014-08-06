@@ -1,23 +1,10 @@
-<h2>Группа <?= $model->number; ?></h2>
+<?php
+/* @var $this GroupController */
+/* @var $model Group */
+?>
 
-<?php $this->widget('zii.widgets.CDetailView', array(
-	'data'=>$model,
-	'attributes'=>array(
-		'id',
-		'number',
-		'techer_id',
-	),
-)); ?>
-
-<?php $this->widget('zii.widgets.grid.CGridView', array(
-	'id'=>'student-grid',
-	'dataProvider'=>$students->search(),
-	'filter'=>$students,
-	'columns'=>array(
-		'name',
-	),
-)); ?>
-
+<h2>Список групп</h2>
+<hr>
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'group-grid',
     //'itemsCssClass' => 'asgasg',
@@ -32,16 +19,21 @@
     ),
 	'columns'=>array(
 	    array(
-	        'name' => 'group_id',
-	        'header'=>'Студент',
+	    'name'=>'number',
+		'value'=>'CHtml::link($data->number, Yii::app()->createUrl("group/view", array("id"=>$data->id)))',
+	    'type'  => 'raw',
+	        ),
+	    array(
+	        'name' => 'teacher_id',
+	        'header'=>'Преподаватель',
 	        'type'=>'html',
 	        'value'=> function($data) {
 	            $namesLinks = array();
-	            foreach ($data->student as $name) {
-	                $namesLinks[] = GxHtml::link(GxHtml::encode($name->getFullName()), array('student/view', 'id' => GxActiveRecord::extractPkValue($name, true)));
+	            foreach ($data->teacher as $name) {
+	                $namesLinks[] = GxHtml::link(GxHtml::encode($name->getFullName()), array('teacher/view', 'id' => GxActiveRecord::extractPkValue($name, true)));
 	            }
 	            
-	            if(empty($data->student)) {
+	            if(empty($data->teacher)) {
 	                return 'N/A';
 	            }
 	            

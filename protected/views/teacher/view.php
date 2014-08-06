@@ -2,10 +2,6 @@
 /* @var $this TeacherController */
 /* @var $model Teacher */
 
-$this->breadcrumbs=array(
-	'Teachers'=>array('index'),
-	$model->name,
-);
 
 $this->menu=array(
 	array('label'=>'List Teacher', 'url'=>array('index')),

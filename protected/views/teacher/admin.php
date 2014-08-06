@@ -48,7 +48,7 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 array(
     'name'=>'group_id',
     'value'=>'$data->groupsToString',
-    'filter'=>Group::model()->forFilter,
+    //'filter'=>Group::model()->forFilter,
 ),
 		/*
 		'surname',

@@ -242,11 +242,12 @@ class Users extends CActiveRecord
             if ($this->isNewRecord) {
                 if ($this->scenario == 'register') {
                     $this->password = $this->hashPassword($this->passwordText);
-                    $formatName = array_map('mb_strtolower', array('name' => $this->name, 'surname' => $this->surname));
-                    $formatName = array_map('ucfirst', $formatName);
                     
-                    $this->name = $formatName['name'];
-                    $this->surname = $formatName['surname'];
+                    $formatName = array_map('mb_strtolower', array($this->name, $this->surname));
+                    $formatName = array_map('mb_convert_case', $formatName, array_fill(0 , count($formatName) , MB_CASE_TITLE));
+                    
+                    $this->name = $formatName[0];
+                    $this->surname = $formatName[1];
                 }
             }
             
@@ -258,7 +259,7 @@ class Users extends CActiveRecord
     
     public function getFullName()
     {
-       
+       return "{$this->surname} {$this->name}";
     }
     
     /** 
@@ -277,7 +278,7 @@ class Users extends CActiveRecord
         );
         
         $confirmCriteria = new CDbCriteria();
-        $confirmCriteria->condition = "scenario=:scenario AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
+        $confirmCriteria->condition = "scenario=:scenario AND create_time < DATE_SUB(NOW(), INTERVAL :interval DAY)";
         $confirmCriteria->params = array(
             ':scenario' => 'confirm',
             ':interval' => $this->interval

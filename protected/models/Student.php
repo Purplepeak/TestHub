@@ -21,21 +21,26 @@
  */
 class Student extends Users
 {
+
     /**
+     *
      * @return string the associated database table name
      */
     public $password2;
+
     public $group;
+
     public $_type = 'student';
-    
+
     public function defaultScope()
     {
         return array(
             'condition' => "type='{$this->_type}'"
         );
     }
-    
+
     /**
+     *
      * @return array validation rules for model attributes.
      */
     public function rules()
@@ -47,31 +52,31 @@ class Student extends Users
             'required',
             'on' => 'register, oauth',
             'message' => 'Поле не должно быть пустым'
-        ),
-        
+        ), 
+
         array(
             'group',
             'match',
             'pattern' => '/^[0-9А-Яа-яёЁ]+$/ui',
             'message' => 'Необходимо указать номер вашей группы в цифровом формате'
-        ),
-        array(
+        ), array(
             'group',
             'isGroupExist'
         ));
         
         return $rules;
     }
-    
+
     public function attributeLabels()
     {
-    	$studentLabels = parent::attributeLabels();
-    	$studentLabels['group'] = 'Группа';
-    	
-    	return $studentLabels;
+        $studentLabels = parent::attributeLabels();
+        $studentLabels['group'] = 'Группа';
+        
+        return $studentLabels;
     }
-    
+
     /**
+     *
      * @return array relational rules.
      */
     public function relations()
@@ -91,12 +96,11 @@ class Student extends Users
             )
         );
     }
-    
+
     /**
      * В соответствии с указанной группой, студенту присваивается
      * id группы вычисленное методом $this->studentGroupId($number);
      */
-    
     protected function afterSave()
     {
         parent::afterSave();
@@ -105,34 +109,34 @@ class Student extends Users
             'group_id' => $groupId
         ));
     }
-    
+
     public function studentGroupId($number)
     {
-        $criteria            = new CDbCriteria;
+        $criteria = new CDbCriteria();
         $criteria->condition = 'number=:number';
-        $criteria->params    = array(
+        $criteria->params = array(
             ':number' => $number
         );
-        $group               = Group::model()->find($criteria);
+        $group = Group::model()->find($criteria);
         
         return $group->id;
     }
-    
+
     /**
      * Проверяет, существует ли введенная студентом группа
      * в базе данных.
      */
-    
     public function isGroupExist()
     {
-    	if(!empty($this->group)) {
-    		$normalizeGroup = mb_strtolower($this->group);
-    		$group = Group::model()->findByAttributes(array('number' => $normalizeGroup));
-    		
-    		if($group === null)
-    		{
-    			$this->addError('group', 'Данной группы нет в списке');
-    		}
-    	}
+        if (! empty($this->group)) {
+            $normalizeGroup = mb_strtolower($this->group);
+            $group = Group::model()->findByAttributes(array(
+                'number' => $normalizeGroup
+            ));
+            
+            if ($group === null) {
+                $this->addError('group', 'Данной группы нет в списке');
+            }
+        }
     }
 }

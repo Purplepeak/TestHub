@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="language" content="en" />
+    
     <title><?php echo CHtml::encode($this->pageTitle); ?></title>
     <link rel="icon" href="<?= Yii::app()->request->baseUrl; ?>/images/favicon.ico">
     
@@ -13,6 +13,7 @@
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/font-awesome.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/custom-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/mainpage.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/pager.css">
     
     <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
     <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>

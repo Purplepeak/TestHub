@@ -28,7 +28,7 @@ class GroupController extends Controller
 	{
 		return array(
 			array('allow',  // allow all users to perform 'index' and 'view' actions
-				'actions'=>array('index','view'),
+				'actions'=>array('index','view', 'list', 'test'),
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
@@ -51,8 +51,13 @@ class GroupController extends Controller
 	 */
 	public function actionView($id)
 	{
+	    $students = new Student('search');
+	    
+	    $studentsArray = Student::model()->find('group_id=:group_id', array('group_id'=>$id));
+	    
 		$this->render('view',array(
 			'model'=>$this->loadModel($id),
+		    'students'=>$students,
 		));
 	}
 
@@ -127,6 +132,22 @@ class GroupController extends Controller
 			'dataProvider'=>$dataProvider,
 		));
 	}
+	
+	public function actionList()
+	{
+	    $model=new Group('search');
+	    $model->unsetAttributes();
+	    if(isset($_GET['Group'])) {
+	        $model->attributes=$_GET['Group'];
+	        $model->teacher_id = isset($_GET['Group']['teacher_id']) ? $_GET['Group']['teacher_id'] : '';
+	    }
+	    
+	    $this->render('list',array(
+	        'model'=>$model,
+	    ));
+	       
+	     
+	}
 
 	/**
 	 * Manages all models.
@@ -156,5 +177,14 @@ class GroupController extends Controller
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
+	}
+	
+	public function actionTest()
+	{
+	    $a = $this->loadModel('1');
+	    $t = $a->getTeachersToString();
+	    
+	    var_dump($a->teacher, $t);
+	    //$this->render('//accountInteraction/change_error');
 	}
 }

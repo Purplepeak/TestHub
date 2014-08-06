@@ -13,9 +13,9 @@
  */
 class Group extends CActiveRecord
 {
-	/**
-	 * @return string the associated database table name
-	 */
+	public $teacher_id = '';
+	public $group_id ='';
+    
 	public function tableName()
 	{
 		return 'group';
@@ -66,8 +66,7 @@ class Group extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'number' => 'Номер группы',
-		    'teacher' => 'Преподаватель'
+			'number' => 'Группа',
 		);
 	}
 
@@ -85,15 +84,30 @@ class Group extends CActiveRecord
 	 */
 	public function search()
 	{
-		// @todo Please modify the following code to remove attributes that should not be searched.
-
 		$criteria=new CDbCriteria;
+		
+		$criteria->with = array(
+		    'teacher' => array(
+		        'select' => array('id', 'name', 'surname', 'type')
+		    ),
+		);
+		
+		$criteria->together = true;
+		
+		if(!empty($this->teacher_id)){
+		    $criteria->addSearchCondition(
+		        new CDbExpression( 'CONCAT(teacher.name, " ", teacher.surname)' ),
+		        $this->teacher_id
+		    );
+		}
 
-		$criteria->compare('id',$this->id);
 		$criteria->compare('number',$this->number,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
+		    'pagination'=>array(
+		        'pageSize'=>20,
+		    ),
 		));
 	}
 	

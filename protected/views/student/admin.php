@@ -2,11 +2,6 @@
 /* @var $this StudentController */
 /* @var $model Student */
 
-$this->breadcrumbs=array(
-	'Students'=>array('index'),
-	'Manage',
-);
-
 $this->menu=array(
 	array('label'=>'List Student', 'url'=>array('index')),
 	array('label'=>'Create Student', 'url'=>array('create')),
@@ -46,7 +41,6 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 	'filter'=>$model,
 	'columns'=>array(
 		'id',
-		'username',
 		'password',
 		'email',
 		'time_registration',

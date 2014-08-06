@@ -17,7 +17,9 @@ return array(
     // autoloading model and component classes
     'import' => array(
         'application.models.*',
-        'application.components.*'
+        'application.components.*',
+        'ext.giix-components.*',
+        'ext.CSLinkPager'
     ),
     
     'modules' => array(
@@ -25,6 +27,9 @@ return array(
         
         'gii' => array(
             'class' => 'system.gii.GiiModule',
+            'generatorPaths' => array(
+                'ext.giix-core', // giix generators
+            ),
             'password' => '901117',
             // If removed, Gii defaults to localhost only. Edit carefully to taste.
             'ipFilters' => array(

@@ -24,7 +24,12 @@ class TeacherController extends UsersController
 
     public function actionTests()
     {
-        $a = array_map('mb_strtolower', array('ОЛЕЖЕ', 'кук'));
+        $studentsArray = Group::model()->findByPk('2');
+        
+        $a = $studentsArray->student;
+        
+        
         var_dump($a);
+        $this->render('//accountInteraction/change_error');
     }
 }
