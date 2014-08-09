@@ -88,17 +88,14 @@ class Group extends CActiveRecord
 		
 		$criteria->with = array(
 		    'teacher' => array(
-		        'select' => array('id', 'name', 'surname', 'type')
+		        'select' => array('id', 'name', 'surname', 'type'),
+		        'together' => true
 		    ),
 		);
 		
-		//$criteria->together = true;
-		
 		if(!empty($this->teacher_id)){
-		    $criteria->addSearchCondition(
-		        new CDbExpression( 'CONCAT(teacher.name, " ", teacher.surname)' ),
-		        $this->teacher_id
-		    );
+		    $criteria->addSearchCondition('teacher.surname', $this->teacher_id);
+		    $criteria->addSearchCondition('teacher.name', $this->teacher_id, true, 'OR');
 		}
 
 		$criteria->compare('number',$this->number,true);

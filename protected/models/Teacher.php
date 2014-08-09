@@ -103,19 +103,20 @@ class Teacher extends Users
     
         $criteria->with = array(
             'groups1' => array(
-                'select' => array('id', 'number')
+                'select' => array('id', 'number'),
+                'together' => true
             ),
         );
-        
-        $criteria->together = true;
         
         if(isset($this->group_id) && !empty($this->group_id)){
             $criteria->compare('groups1.id', '='.$this->groups1, true);
         }
         
-        $criteria->select = array('*', 'CONCAT(surname, ", ", name) AS fullname');
+        if(!empty($this->fullname)){
+            $criteria->addSearchCondition('surname', $this->fullname);
+            $criteria->addSearchCondition('name', $this->fullname, true, 'OR');
+        }
         
-        $criteria->compare('CONCAT(surname, ", ", name)',$this->fullname,true);
         $criteria->compare('id', $this->id);
         $criteria->compare('password', $this->password, true);
         $criteria->compare('email', $this->email, true);
