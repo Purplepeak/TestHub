@@ -7,8 +7,6 @@
 <hr>
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'group-grid',
-    //'itemsCssClass' => 'asgasg',
-    //'pagerCssClass' => 'asgasasg',
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',
 	'dataProvider'=>$model->search(),
     'enableSorting' => false,

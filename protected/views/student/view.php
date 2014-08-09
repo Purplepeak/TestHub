@@ -1,12 +1,6 @@
 <?php
 /* @var $this StudentController */
 /* @var $model Student */
-
-$this->breadcrumbs=array(
-	'Students'=>array('index'),
-	$model->name,
-);
-
 $this->menu=array(
 	array('label'=>'List Student', 'url'=>array('index')),
 	array('label'=>'Create Student', 'url'=>array('create')),
@@ -22,7 +16,6 @@ $this->menu=array(
 	'data'=>$model,
 	'attributes'=>array(
 		'id',
-		'username',
 		'password',
 		'email',
 		'time_registration',

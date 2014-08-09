@@ -33,7 +33,7 @@ class Group extends CActiveRecord
 			array('number', 'length', 'max'=>45),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array('id, number', 'safe', 'on'=>'search'),
+			array('id, number, teacher_id', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -92,7 +92,7 @@ class Group extends CActiveRecord
 		    ),
 		);
 		
-		$criteria->together = true;
+		//$criteria->together = true;
 		
 		if(!empty($this->teacher_id)){
 		    $criteria->addSearchCondition(

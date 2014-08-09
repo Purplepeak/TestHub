@@ -28,6 +28,7 @@ class Teacher extends Users
     public $groups;
     public $_type = 'teacher';
     public $group_id ='';
+    public $fullname='';
     
     public function defaultScope()
     {
@@ -68,7 +69,8 @@ class Teacher extends Users
         array(
             'groups',
             'isGroupExist'
-        ));
+        ),
+        array('fullname', 'safe', 'on'=>'search'));
         
         return $rules;
         
@@ -77,6 +79,22 @@ class Teacher extends Users
     public function getGroupsToString(){
         $t = CHtml::listData( $this->groups1, 'id', 'number' );
         return implode(',', $t);
+    }
+    
+    public function relations()
+    {
+        return array(
+            'groups1' => array(
+                self::MANY_MANY,
+                'Group',
+                'teacher_group(teacher_id, group_id)'
+            ),
+            'tests1' => array(
+                self::HAS_MANY,
+                'Test',
+                'teacher_id'
+            )
+        );
     }
     
     public function search()
@@ -94,7 +112,10 @@ class Teacher extends Users
         if(isset($this->group_id) && !empty($this->group_id)){
             $criteria->compare('groups1.id', '='.$this->groups1, true);
         }
-    
+        
+        $criteria->select = array('*', 'CONCAT(surname, ", ", name) AS fullname');
+        
+        $criteria->compare('CONCAT(surname, ", ", name)',$this->fullname,true);
         $criteria->compare('id', $this->id);
         $criteria->compare('password', $this->password, true);
         $criteria->compare('email', $this->email, true);
@@ -108,27 +129,6 @@ class Teacher extends Users
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria
         ));
-    }
-    
-    /**
-     * @return array relational rules.
-     */
-    public function relations()
-    {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
-        return array(
-            'groups1' => array(
-                self::MANY_MANY,
-                'Group',
-                'teacher_group(teacher_id, group_id)'
-            ),
-            'tests1' => array(
-                self::HAS_MANY,
-                'Test',
-                'teacher_id'
-            )
-        );
     }
    
     public function behaviors(){

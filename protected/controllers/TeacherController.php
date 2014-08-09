@@ -21,6 +21,11 @@ class TeacherController extends UsersController
         $this->userModel = new Teacher('search');
         parent::actionAdmin();
     }
+    
+    public function actionList()
+    {
+        $this->render('list', array('model' => $this->userModel));
+    }
 
     public function actionTests()
     {

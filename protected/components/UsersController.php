@@ -28,6 +28,7 @@ class UsersController extends Controller
                     'registration',
                     'login',
                     'tests',
+                    'list',
                     'socialregistration'
                 ),
                 'users' => array(
