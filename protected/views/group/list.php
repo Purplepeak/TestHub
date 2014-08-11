@@ -18,7 +18,7 @@
 	'columns'=>array(
 	    array(
 	    'name'=>'number',
-		'value'=>'CHtml::link($data->number, Yii::app()->createUrl("group/view", array("id"=>$data->id)))',
+		'value'=>'CHtml::link($data->number, Yii::app()->createUrl("student/list", array("id"=>$data->id)))',
 	    'type'  => 'raw',
 	        ),
 	    array(

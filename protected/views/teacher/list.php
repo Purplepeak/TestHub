@@ -18,7 +18,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
             'type' => 'raw'
         ),
         array(
-            'name' => 'group_id',
+            'name' => 'groupNumber',
             'header' => 'Группы',
             'type' => 'html',
             'value' => function ($data)

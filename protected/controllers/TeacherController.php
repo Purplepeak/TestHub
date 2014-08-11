@@ -29,6 +29,7 @@ class TeacherController extends UsersController
         if(isset($_GET['Teacher'])) {
             $model->attributes=$_GET['Teacher'];
             $model->fullname = isset($_GET['Teacher']['fullname']) ? $_GET['Teacher']['fullname'] : '';
+            $model->groupNumber = isset($_GET['Teacher']['groupNumber']) ? $_GET['Teacher']['groupNumber'] : '';
         }
         
         $this->render('list', array('model' => $model));

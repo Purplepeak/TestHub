@@ -36,6 +36,10 @@ class Users extends CActiveRecord
 
     // Через сколько дней удалять неактивированные аккаунты
     public $interval = 2;
+    
+    public $fullname = '';
+    
+    public $searchGroup;
      
     const GENDER_MALE = 'male';
 
@@ -216,6 +220,40 @@ class Users extends CActiveRecord
     {
         $criteria = new CDbCriteria();
         
+        if($this->_type == 'teacher') {
+            $criteria->with = array(
+                'groups1' => array(
+                    'select' => array(
+                        'id',
+                        'number'
+                    ),
+                    'together' => true
+                )
+            );
+            
+            if (isset($this->groupNumber) && ! empty($this->groupNumber)) {
+                $criteria->compare('groups1.number', '=' . $this->groupNumber, true);
+            }
+        }
+        
+        if($this->_type == 'student') {
+            if(isset($this->searchGroup)) {
+                $criteria->condition = 'group_id=' .$this->searchGroup;
+            }
+        }
+        
+        $criteria->order = 'surname ASC';
+        $criteria->condition = 'active=1';
+    
+        if(isset($this->searchGroup)) {
+            $criteria->condition = 'group_id=' .$this->searchGroup;
+        }
+    
+        if (! empty($this->fullname)) {
+            $criteria->addSearchCondition('surname', $this->fullname);
+            $criteria->addSearchCondition('name', $this->fullname, true, 'OR');
+        }
+    
         $criteria->compare('id', $this->id);
         $criteria->compare('password', $this->password, true);
         $criteria->compare('email', $this->email, true);
@@ -225,9 +263,12 @@ class Users extends CActiveRecord
         $criteria->compare('gender', $this->gender, true);
         $criteria->compare('avatar', $this->avatar, true);
         $criteria->compare('group_id', $this->group_id);
-        
+    
         return new CActiveDataProvider($this, array(
-            'criteria' => $criteria
+            'criteria' => $criteria,
+            'pagination'=>array(
+                'pageSize'=>20,
+            ),
         ));
     }
 
