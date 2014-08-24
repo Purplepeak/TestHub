@@ -81,8 +81,6 @@ class Student extends Users
      */
     public function relations()
     {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
         return array(
             'student_group' => array(
                 self::BELONGS_TO,
@@ -137,6 +135,13 @@ class Student extends Users
             if ($group === null) {
                 $this->addError('group', 'Данной группы нет в списке');
             }
+        }
+    }
+    
+    public function addSearchConditions($criteria)
+    {
+        if(isset($this->searchGroup)) {
+            $criteria->addInCondition('group_id', array($this->searchGroup));
         }
     }
 }

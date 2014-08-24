@@ -10,6 +10,7 @@
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',
 	'dataProvider'=>$model->search(),
     'enableSorting' => false,
+    'emptyText' => 'Результатов не найдено',
     'summaryText' => '',
 	'filter'=>$model,
     'pager' => array(
@@ -22,7 +23,7 @@
 	    'type'  => 'raw',
 	        ),
 	    array(
-	        'name' => 'teacher_id',
+	        'name' => 'fullname',
 	        'header'=>'Преподаватель',
 	        'type'=>'html',
 	        'value'=> function($data) {

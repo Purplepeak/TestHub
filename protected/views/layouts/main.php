@@ -43,12 +43,21 @@ $this->widget('zii.widgets.CMenu', array(
         array(
             'label' => 'Главная',
             'url' => array(
-                '/site/index'
-            ),
-            'linkOptions' => array(
-                'id' => 'menuBlog'
+                'site/index'
             )
-        )
+        ),
+        array(
+	        'label' => 'Группы',
+            'url' => array(
+                'group/list'
+            )
+        ),
+        array(
+            'label' => 'Преподаватели',
+            'url' => array(
+                'teacher/list'
+            )
+        ),
     )
 ));
 

@@ -208,7 +208,21 @@ class Teacher extends Users
             $this->groups1 = $teacherGroups;
         }
     }
-    /*
-     * protected function afterSave() { parent::afterSave(); $criteria = new CDbCriteria(); $criteria->addInCondition('number', $this->teacherGroups); $groups = Group::model()->findAll($criteria); $this->groups1 = $groups; $this->withRelated->save(true,array('groups1')); }
-     */
+    
+    public function addSearchConditions($criteria)
+    {
+        $criteria->with = array(
+            'groups1' => array(
+                'select' => array(
+                    'id',
+                    'number'
+                ),
+                'together' => true
+            )
+        );
+        
+        if (isset($this->groupNumber) && ! empty($this->groupNumber)) {
+            $criteria->compare('groups1.number', '=' . $this->groupNumber, true);
+        }
+    }
 }

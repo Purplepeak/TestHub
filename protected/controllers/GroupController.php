@@ -46,22 +46,6 @@ class GroupController extends Controller
 	}
 
 	/**
-	 * Displays a particular model.
-	 * @param integer $id the ID of the model to be displayed
-	 */
-	public function actionView($id)
-	{
-	    $students = new Student('search');
-	    
-	    $studentsArray = Student::model()->find('group_id=:group_id', array('group_id'=>$id));
-	    
-		$this->render('view',array(
-			'model'=>$this->loadModel($id),
-		    'students'=>$students,
-		));
-	}
-
-	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
 	 */
@@ -139,7 +123,7 @@ class GroupController extends Controller
 	    $model->unsetAttributes();
 	    if(isset($_GET['Group'])) {
 	        $model->attributes=$_GET['Group'];
-	        $model->teacher_id = isset($_GET['Group']['teacher_id']) ? $_GET['Group']['teacher_id'] : '';
+	        $model->fullname = isset($_GET['Group']['fullname']) ? $_GET['Group']['fullname'] : '';
 	    }
 	    
 	    $this->render('list',array(
@@ -163,14 +147,7 @@ class GroupController extends Controller
 			'model'=>$model,
 		));
 	}
-
-	/**
-	 * Returns the data model based on the primary key given in the GET variable.
-	 * If the data model is not found, an HTTP exception will be raised.
-	 * @param integer $id the ID of the model to be loaded
-	 * @return Group the loaded model
-	 * @throws CHttpException
-	 */
+	
 	public function loadModel($id)
 	{
 		$model=Group::model()->findByPk($id);

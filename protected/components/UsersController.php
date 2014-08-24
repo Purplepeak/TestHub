@@ -68,7 +68,7 @@ class UsersController extends Controller
     {
         $dataProvider = new CActiveDataProvider($this->index, array(
             'criteria'=>array(
-                'condition'=>'active=0',
+                'condition'=>'active=true',
             ),
         ));
         $this->render('index', array(
@@ -133,9 +133,7 @@ class UsersController extends Controller
             }
         }
         
-        $this->render('//users/registration', array(
-            'model' => $model
-        ));
+        $this->redirectIfLogged('//users/registration', array('model' => $model), array('site/index'));
     }
 
     public function actionLogin()
@@ -191,9 +189,8 @@ class UsersController extends Controller
                     'site/index'
                 ));
         }
-        $this->render('//users/login', array(
-            'model' => $model
-        ));
+        
+        $this->redirectIfLogged('//users/login', array('model' => $model), array('site/index'));
     }
 
     public function actionDelete()
@@ -259,7 +256,7 @@ class UsersController extends Controller
             'surname' => $userAttributes->surname,
             'gender' => $userAttributes->gender,
             'avatar' => $userAttributes->photo,
-            'active' => 1
+            'active' => true
         );
         
         $this->performAjaxValidation($userModel);
@@ -286,8 +283,6 @@ class UsersController extends Controller
             }
         }
         
-        $this->render('//users/registration', array(
-            'model' => $userModel
-        ));
+        $this->redirectIfLogged('//users/registration', array('model' => $userModel), array('site/index'));
     }
 }

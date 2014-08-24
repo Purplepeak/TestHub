@@ -19,7 +19,7 @@ if($user == 'teacher/login') {
 <hr>
 <?php if(Yii::app()->request->getQuery('newPassword') == 1):?>
 <div class="alert alert-success">
-    <strong>Вам пароль был успешно изменен.</strong>
+    <strong>Ваш пароль был успешно изменен.</strong>
 </div>
 <?php endif;?>
 <p>Введите свой e-mail и пароль, указанный при регистрации:</p>
@@ -65,5 +65,5 @@ if($user == 'teacher/login') {
 	<p>
 	  <?php echo CHtml::link('Не зарегистрированы?', array($user . '/registration'), array('style'=>'font-size:16px'));?>
 	</p>
-<?php $this->endWidget(); ?>
+<?php $this->endWidget();?>
 </div><!-- form -->

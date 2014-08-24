@@ -20,4 +20,17 @@ class Controller extends CController
             Yii::app()->end();
         }
     }
+    
+    
+    /**
+     * Рендерит представление, если юзер не залогинен
+     */
+    public function redirectIfLogged($renderView, $data, $redirectAction)
+    {
+        if(Yii::app()->user->isGuest) {
+            $this->render($renderView, $data);
+        } else {
+            $this->redirect($redirectAction);
+        }
+    }
 }

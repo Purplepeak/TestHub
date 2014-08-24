@@ -21,38 +21,31 @@ class TeacherController extends UsersController
         $this->userModel = new Teacher('search');
         parent::actionAdmin();
     }
-    
+
     public function actionList()
     {
-        $model=new Teacher('search');
+        $model = new Teacher('search');
         $model->unsetAttributes();
-        if(isset($_GET['Teacher'])) {
-            $model->attributes=$_GET['Teacher'];
+        if (isset($_GET['Teacher'])) {
+            $model->attributes = $_GET['Teacher'];
             $model->fullname = isset($_GET['Teacher']['fullname']) ? $_GET['Teacher']['fullname'] : '';
             $model->groupNumber = isset($_GET['Teacher']['groupNumber']) ? $_GET['Teacher']['groupNumber'] : '';
         }
         
-        $this->render('list', array('model' => $model));
+        $this->render('list', array(
+            'model' => $model
+        ));
     }
 
     public function actionTests()
     {
-        ini_set('xdebug.var_display_max_depth', 5);
-        ini_set('xdebug.var_display_max_children', 256);
-        ini_set('xdebug.var_display_max_data', 1024);
+        $a = new SMailer;
         
-        $key = 'лукашенко';
-        $criteria=new CDbCriteria;
-        $criteria->addSearchCondition('surname', $key);
-        $criteria->addSearchCondition('name', $key, true, 'OR');
+        $a->init('confirm', 'Татьяна', 'shrpeak@yandex.ru', 'asfasfas423sdhsdh', null);
+        $a->sendEmail();
+        //$a->renderWidget();
         
-        $model = $this->userModel;
-        $u = $model->findAll($criteria);
-        
-        $y = Group::model()->with(array('teacher'=>array('condition'=>'active=3')))->findByPk('1');
-        
-        
-        var_dump($y);
-        $this->render('//accountInteraction/change_error');
+        var_dump($a->formatEmail());
+        // $this->render('//accountInteraction/change_error');
     }
 }

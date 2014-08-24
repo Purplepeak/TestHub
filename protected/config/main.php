@@ -19,7 +19,8 @@ return array(
         'application.models.*',
         'application.components.*',
         'ext.giix-components.*',
-        'ext.CSLinkPager'
+        'ext.CSLinkPager',
+        'ext.smailer.*'
     ),
     
     'modules' => array(
@@ -49,7 +50,8 @@ return array(
             'urlFormat' => 'path',
             'showScriptName' => false,
             'rules' => array(
-                'fblogin' => 'social/fblogin'
+                'fblogin' => 'social/fblogin',
+                '' => 'site/index',
             )
         ),
         
@@ -116,8 +118,8 @@ return array(
         'rememberMeTime' => 3600 * 24 * 30, // Запоминаем пользователя на указанный срок
         'privateConfig' => require (dirname(__FILE__) . '/private.php'),
         'siteEmail' => array(
-            'email' => 'testhubme@gmail.com', // Почта для отправки пользователям различной информации, например, при регистрации
-            'password' => '901117901117'
+            'email' => 'testhubv2@gmail.com', // Почта для отправки пользователям различной информации, например, при регистрации
+            'password' => '901117testhub'
         )
         )
 );

@@ -31,10 +31,7 @@ class SiteController extends Controller
 	{
 		$this->render('index');
 	}
-
-	/**
-	 * This is the action to handle external exceptions.
-	 */
+	
 	public function actionError()
 	{
 		if($error=Yii::app()->errorHandler->error)
@@ -49,14 +46,24 @@ class SiteController extends Controller
 				    $error['message'] = 'Сервис временно испытывает проблемы. Приносим извинения за временные неудобства.';
 				}
 				
-				$this->render('error', $error);
+				$layout = 'error';
+				
+				switch($error['code']) {
+					case '404':
+					    $layout = 'error404';
+					    break;
+					case '500':
+					    $error['message'] = 'Сервис временно испытывает проблемы. Приносим извинения за временные неудобства.';
+					    break;
+					default:
+					    $error['message'] = 'Возникла непредвиденная ошибка. Приносим извинения за временные неудобства.';
+					    break;
+				}
+				$this->render($layout, $error);
 			}
 		}
 	}
-
-	/**
-	 * Displays the contact page
-	 */
+	
 	public function actionContact()
 	{
 		$model=new ContactForm;

@@ -91,11 +91,6 @@ class Users extends CActiveRecord
                 'default',
                 'value' => self::GENDER_UNDEFINED
             ),
-            array(
-                'avatar',
-                'default',
-                'value' => Yii::app()->request->baseUrl . Yii::app()->params['defaultAvatar']
-            ),
             
             array(
                 'gender, id, password',
@@ -185,11 +180,7 @@ class Users extends CActiveRecord
             ),
             array(
                 'active',
-                'in',
-                'range' => array(
-                    0,
-                    1
-                )
+                'boolean',
             ),
             array(
                 'id, password, email, time_registration, name, surname, gender, avatar, group_id',
@@ -220,34 +211,10 @@ class Users extends CActiveRecord
     {
         $criteria = new CDbCriteria();
         
-        if($this->_type == 'teacher') {
-            $criteria->with = array(
-                'groups1' => array(
-                    'select' => array(
-                        'id',
-                        'number'
-                    ),
-                    'together' => true
-                )
-            );
-            
-            if (isset($this->groupNumber) && ! empty($this->groupNumber)) {
-                $criteria->compare('groups1.number', '=' . $this->groupNumber, true);
-            }
-        }
-        
-        if($this->_type == 'student') {
-            if(isset($this->searchGroup)) {
-                $criteria->condition = 'group_id=' .$this->searchGroup;
-            }
-        }
+        $this->addSearchConditions($criteria);
         
         $criteria->order = 'surname ASC';
-        $criteria->condition = 'active=1';
-    
-        if(isset($this->searchGroup)) {
-            $criteria->condition = 'group_id=' .$this->searchGroup;
-        }
+        $criteria->addInCondition('active', array(true));
     
         if (! empty($this->fullname)) {
             $criteria->addSearchCondition('surname', $this->fullname);
@@ -304,9 +271,10 @@ class Users extends CActiveRecord
     }
     
     /** 
+     * Метод используется в dev-версии.
      * Удаление не активированных пользовательских аккаунтов
      * Такие аккаунты хранятся в базе не дольше двух дней, если
-     * их общее количество превышает 10 
+     * их общее количество превышает 10.
      */
 
     public function deleteNotActivated()
@@ -314,14 +282,7 @@ class Users extends CActiveRecord
         $userCriteria = new CDbCriteria();
         $userCriteria->condition = "active=:active AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
         $userCriteria->params = array(
-            ':active' => 0,
-            ':interval' => $this->interval
-        );
-        
-        $confirmCriteria = new CDbCriteria();
-        $confirmCriteria->condition = "scenario=:scenario AND create_time < DATE_SUB(NOW(), INTERVAL :interval DAY)";
-        $confirmCriteria->params = array(
-            ':scenario' => 'confirm',
+            ':active' => false,
             ':interval' => $this->interval
         );
         
@@ -329,9 +290,6 @@ class Users extends CActiveRecord
         
         if ($count > 10) {
             $this->deleteAll($userCriteria);
-            
-            $confirmModel = new AccountInteraction();
-            $confirmModel->deleteAll($confirmCriteria);
         }
     }
 
@@ -343,6 +301,10 @@ class Users extends CActiveRecord
     public function hashPassword($password)
     {
         return CPasswordHelper::hashPassword($password);
+    }
+    
+    public function addSearchConditions($criteria)
+    {
     }
 
     public static function model($className = __CLASS__)

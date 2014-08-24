@@ -130,7 +130,7 @@ class AccountInteractionController extends Controller
                 
                 $confirmedUser = Users::model()->findByPk($confirmedAccountId);
                 Users::model()->updateByPk($confirmedUser->id, array(
-                    'active' => 1
+                    'active' => true
                 ));
                 
                 $identity = UserIdentity::forceLogin($confirmedUser);
@@ -175,9 +175,7 @@ class AccountInteractionController extends Controller
             }
         }
         
-        $this->render('pass_restore', array(
-            'model' => $model
-        ));
+        $this->redirectIfLogged('pass_restore', array('model' => $model), array('site/index'));
     }
 
     /**
@@ -212,7 +210,9 @@ class AccountInteractionController extends Controller
                     ));
                     
                     $account->newPassword = $_POST['Users']['passwordText'];
-                    $account->sendEmail('Смена пароля', '/passchange_template.');
+                    
+                    $account->sendEmail('passChange');
+                    
                     $changeModel->deleteByPk($account->id);
                     
                     $this->redirect(array(

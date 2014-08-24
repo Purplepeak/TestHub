@@ -13,8 +13,8 @@
  */
 class Group extends CActiveRecord
 {
-	public $teacher_id = '';
 	public $group_id ='';
+	public $fullname ='';
     
 	public function tableName()
 	{
@@ -89,13 +89,14 @@ class Group extends CActiveRecord
 		$criteria->with = array(
 		    'teacher' => array(
 		        'select' => array('id', 'name', 'surname', 'type'),
-		        'together' => true
+		        'together' => true,
+		        'condition'=>'active=true',
 		    ),
 		);
 		
-		if(!empty($this->teacher_id)){
-		    $criteria->addSearchCondition('teacher.surname', $this->teacher_id);
-		    $criteria->addSearchCondition('teacher.name', $this->teacher_id, true, 'OR');
+		if(!empty($this->fullname)){
+		    $criteria->addSearchCondition('teacher.surname', $this->fullname);
+		    $criteria->addSearchCondition('teacher.name', $this->fullname, true, 'OR');
 		}
 
 		$criteria->compare('number',$this->number,true);

@@ -1,18 +1,19 @@
 <?php
+
 /**
  * Класс предназначен для взаимодействия пользователя со своим
  * аккаунтом.
  * Сценарий confirm - активация аккаунта.
  * Сценарий restore - восстановление пароля для аккаунта.
  */
-
 class AccountInteraction extends CActiveRecord
 {
     /**
-     * Новый пароль, необходимый при работе со сценарием restore.
+     * Свойство необходимое для отправки пользователю письма
+     * с новым паролем.
      */
     public $newPassword;
-
+    
     public function tableName()
     {
         return 'account_interaction';
@@ -22,7 +23,7 @@ class AccountInteraction extends CActiveRecord
     {
         return array(
             array(
-                'user_name, user_id, key, email, scenario',
+                'user_id, key, email, scenario',
                 'required'
             ),
             array(
@@ -43,11 +44,6 @@ class AccountInteraction extends CActiveRecord
                 'safe'
             ),
             array(
-                'user_name',
-                'length',
-                'max' => 30
-            ),
-            array(
                 'key',
                 'length',
                 'max' => 128
@@ -59,7 +55,7 @@ class AccountInteraction extends CActiveRecord
             ),
             
             array(
-                'id, user_name, user_id, key, email',
+                'id, user_id, key, email',
                 'safe',
                 'on' => 'search'
             )
@@ -68,7 +64,13 @@ class AccountInteraction extends CActiveRecord
 
     public function relations()
     {
-        return array();
+        return array(
+            'user' => array(
+                self::BELONGS_TO,
+                'Users',
+                'user_id'
+            )
+        );
     }
 
     public function attributeLabels()
@@ -86,7 +88,6 @@ class AccountInteraction extends CActiveRecord
         $criteria = new CDbCriteria();
         
         $criteria->compare('id', $this->id);
-        $criteria->compare('user_name', $this->user_name);
         $criteria->compare('user_id', $this->user_id);
         $criteria->compare('key', $this->key, true);
         $criteria->compare('email', $this->email, true);
@@ -96,70 +97,13 @@ class AccountInteraction extends CActiveRecord
         ));
     }
 
-    public function formatEmail($format, $template)
-    {
-        $root = $_SERVER['DOCUMENT_ROOT'] . Yii::app()->request->baseUrl . '/templates';
-        
-        $template = file_get_contents($root . $template . $format);
-        
-        $patterns = array(
-            '/{EMAIL}/',
-            '/{KEY}/',
-            '/{SITEPATH}/',
-            '/{NAME}/',
-            '/{BASE_URL}/',
-            '/{PASSWORD}/'
-        );
-        $replacements = array(
-            $this->email,
-            $this->key,
-            Yii::app()->request->hostInfo,
-            $this->user_name,
-            Yii::app()->request->baseUrl,
-            $this->newPassword
-        );
-        
-        $template = preg_replace($patterns, $replacements, $template);
-        
-        return $template;
-    }
-
-    public function sendEmail($title, $template)
-    {
-        $bodyHtml = $this->formatEmail('html', $template);
-        $bodyTxt = $this->formatEmail('txt', $template);
-        
-        $transport = Swift_SmtpTransport::newInstance('smtp.gmail.com', 587, 'tls');
-        $transport->setUsername(Yii::app()->params['siteEmail']['email']);
-        $transport->setPassword(Yii::app()->params['siteEmail']['password']);
-        
-        $mailer = Swift_Mailer::newInstance($transport);
-        $message = Swift_Message::newInstance();
-        $message->setSubject($title);
-        $message->setFrom(array(
-            Yii::app()->params['siteEmail']['email'] => 'TestHub'
-        ));
-        $message->setTo(array(
-            $this->email => $this->user_name
-        ));
-        
-        $message->setBody($bodyTxt);
-        $message->addPart($bodyHtml, 'text/html');
-        
-        $result = $mailer->send($message);
-        
-        return $result;
-    }
-
     /**
      * Сохраняет данные в таблицу и отправляет пользователю e-mail, который
      * форматируется в зависимости от сценария
      */
-    
     public function saveAndSend($model, $scenario)
     {
         $this->user_id = $model->id;
-        $this->user_name = $model->name;
         $this->email = $model->email;
         $this->scenario = $scenario;
         $this->key = md5($this->email . time());
@@ -171,7 +115,9 @@ class AccountInteraction extends CActiveRecord
             ));
             
             if ($exist != null) {
-                $this->updateByPk($exist->id, array('key' => $this->key));
+                $this->updateByPk($exist->id, array(
+                    'key' => $this->key
+                ));
             } else {
                 $this->save(false);
             }
@@ -180,15 +126,24 @@ class AccountInteraction extends CActiveRecord
                 $title = 'Добро пожаловать на TestHub';
                 $template = '/signup_template.';
             } elseif ($scenario == 'restore') {
-                $title = "Здравствуйте, {$this->user_name}";
+                $title = "Здравствуйте, {$this->user->name}";
                 $template = '/restore_template.';
             }
-            try {
-                $this->sendEmail($title, $template);
-            } catch(Swift_SwiftException $e) {
-                Yii::log($e->getMessage(), 'error', 'application.models.accountinteraction');
-                throw new Swift_SwiftException($e->getMessage());
-            }
+            
+            $this->sendEmail($scenario);
+        }
+    }
+    
+    public function sendEmail($scenario)
+    {
+        $mailer = new Smailer;
+        $mailer->init($scenario, $this->user->name, $this->email, $this->key, $this->newPassword);
+        
+        try {
+            $mailer->sendEmail();
+        } catch (Swift_SwiftException $e) {
+            Yii::log($e->getMessage(), 'error', 'application.models.accountinteraction');
+            throw new Swift_SwiftException($e->getMessage());
         }
     }
 
