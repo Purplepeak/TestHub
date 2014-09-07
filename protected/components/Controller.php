@@ -15,7 +15,7 @@ class Controller extends CController
 
     protected function performAjaxValidation($model)
     {
-        if (isset($_POST['ajax']) && ($_POST['ajax'] === 'register-form' || $_POST['ajax'] === 'change-pass-form' || $_POST['ajax'] === 'group-form')) {
+        if (isset($_POST['ajax']) && ($_POST['ajax'] === 'register-form' || $_POST['ajax'] === 'change-pass-form' || $_POST['ajax'] === 'group-form' || $_POST['ajax'] === 'avatar-form')) {
             echo CActiveForm::validate($model);
             Yii::app()->end();
         }

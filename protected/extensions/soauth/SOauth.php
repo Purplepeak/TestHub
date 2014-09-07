@@ -19,7 +19,7 @@ class SOauth extends CApplicationComponent
      * Метод определяет с каким сервисом нам предстоит работать в дальнейшем
      */
     
-    public function getClass($provider, $gender = array())
+    public function getClass($provider, $gender = array(), $pictureSizes = array())
     {
         if (! isset($this->services[$provider])) {
             throw new SOauthException("Undefined service name: {$provider}");

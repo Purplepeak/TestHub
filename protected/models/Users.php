@@ -1,46 +1,42 @@
 <?php
 
-/**
- * This is the model class for table "users".
- *
- * The followings are the available columns in table 'users':
- * @property integer $id
- * @property string $password
- * @property string $email
- * @property integer $time_registration
- * @property string $name
- * @property string $surname
- * @property string $gender
- * @property string $avatar
- * @property integer $group_id
- *
- * The followings are the available model relations:
- * @property Test[] $tests
- * @property Group[] $groups
- * @property Test[] $tests1
- * @property Group $group
- */
 class Users extends CActiveRecord
 {
 
     public $_type;
-
+    
     // Пароль
-    public $passwordText; 
-
+    public $passwordText;
+    
     // Строка подтверждения пароля
     public $password2;
-
+    
     // Поле для капчи
     public $captcha;
-
+    
     // Через сколько дней удалять неактивированные аккаунты
     public $interval = 2;
-    
+
     public $fullname = '';
-    
+
     public $searchGroup;
-     
+
+    public $newAvatar;
+
+    public $avatar190;
+
+    public $avatar50;
+
+    public $avatar30;
+    
+    public $avatarX;
+    
+    public $avatarY;
+    
+    public $avatarWidth;
+    
+    public $avatarHeight;
+
     const GENDER_MALE = 'male';
 
     const GENDER_FEMALE = 'female';
@@ -70,13 +66,14 @@ class Users extends CActiveRecord
         $model = new $class(null);
         return $model;
     }
-    
+
     public function rules()
     {
         return array(
             array(
                 'name, surname',
                 'required',
+                'on' => 'register',
                 'message' => 'Поле не должно быть пустым'
             ),
             
@@ -87,14 +84,39 @@ class Users extends CActiveRecord
             ),
             
             array(
+                'newAvatar',
+                'required',
+                'message' => '',
+                'on' => 'changeAvatar'
+            ),
+            
+            array(
+                'newAvatar',
+                'file',
+                'safe' => true,
+                'types' => 'jpg, gif, png',
+                'allowEmpty' => true,
+                'maxSize' => 1000 * 1024,
+                'tooLarge' => 'Размер картинки не должен превышать 1МБ',
+                'wrongType' => 'Допустимые расширения аватара: jpg, gif, png',
+                'on' => 'changeAvatar'
+            ),
+            
+            array(
                 'gender',
                 'default',
                 'value' => self::GENDER_UNDEFINED
             ),
             
             array(
-                'gender, id, password',
+                'gender, newAvatar, id, password',
                 'safe'
+            ),
+            
+            array(
+                'avatarX, avatarY, avatarWidth, avatarHeight',
+                'safe',
+                'on' => 'changeAvatar'
             ),
             
             array(
@@ -180,7 +202,7 @@ class Users extends CActiveRecord
             ),
             array(
                 'active',
-                'boolean',
+                'boolean'
             ),
             array(
                 'id, password, email, time_registration, name, surname, gender, avatar, group_id',
@@ -203,10 +225,11 @@ class Users extends CActiveRecord
             'gender' => 'Пол',
             'avatar' => 'Аватар',
             'group_id' => 'ID группы',
-            'captcha' => 'Введите код с картинки'
+            'captcha' => 'Введите символы с картинки',
+            'newAvatar' => 'Выберите аватар'
         );
     }
-    
+
     public function search()
     {
         $criteria = new CDbCriteria();
@@ -214,13 +237,15 @@ class Users extends CActiveRecord
         $this->addSearchConditions($criteria);
         
         $criteria->order = 'surname ASC';
-        $criteria->addInCondition('active', array(true));
-    
+        $criteria->addInCondition('active', array(
+            true
+        ));
+        
         if (! empty($this->fullname)) {
             $criteria->addSearchCondition('surname', $this->fullname);
             $criteria->addSearchCondition('name', $this->fullname, true, 'OR');
         }
-    
+        
         $criteria->compare('id', $this->id);
         $criteria->compare('password', $this->password, true);
         $criteria->compare('email', $this->email, true);
@@ -230,20 +255,19 @@ class Users extends CActiveRecord
         $criteria->compare('gender', $this->gender, true);
         $criteria->compare('avatar', $this->avatar, true);
         $criteria->compare('group_id', $this->group_id);
-    
+        
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria,
-            'pagination'=>array(
-                'pageSize'=>20,
-            ),
+            'pagination' => array(
+                'pageSize' => 20
+            )
         ));
     }
 
     /**
-     * Перед сохранением значений в базу данных, хешируем пароль, для повышения 
-     * уровня безопасности пользовательских аккаунтов 
+     * Перед сохранением значений в базу данных, хешируем пароль, для повышения
+     * уровня безопасности пользовательских аккаунтов
      */
-    
     protected function beforeSave()
     {
         if (parent::beforeSave()) {
@@ -251,8 +275,11 @@ class Users extends CActiveRecord
                 if ($this->scenario == 'register') {
                     $this->password = $this->hashPassword($this->passwordText);
                     
-                    $formatName = array_map('mb_strtolower', array($this->name, $this->surname));
-                    $formatName = array_map('mb_convert_case', $formatName, array_fill(0 , count($formatName) , MB_CASE_TITLE));
+                    $formatName = array_map('mb_strtolower', array(
+                        $this->name,
+                        $this->surname
+                    ));
+                    $formatName = array_map('mb_convert_case', $formatName, array_fill(0, count($formatName), MB_CASE_TITLE));
                     
                     $this->name = $formatName[0];
                     $this->surname = $formatName[1];
@@ -264,32 +291,33 @@ class Users extends CActiveRecord
         
         return false;
     }
-    
+
     public function getFullName()
     {
-       return "{$this->surname} {$this->name}";
+        return "{$this->surname} {$this->name}";
     }
-    
-    /** 
+
+    /**
      * Метод используется в dev-версии.
      * Удаление не активированных пользовательских аккаунтов
      * Такие аккаунты хранятся в базе не дольше двух дней, если
      * их общее количество превышает 10.
      */
-
     public function deleteNotActivated()
     {
-        $userCriteria = new CDbCriteria();
-        $userCriteria->condition = "active=:active AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
-        $userCriteria->params = array(
-            ':active' => false,
-            ':interval' => $this->interval
-        );
-        
-        $count = $this->count($userCriteria);
-        
-        if ($count > 10) {
-            $this->deleteAll($userCriteria);
+        if (Yii::app()->params['dev']) {
+            $userCriteria = new CDbCriteria();
+            $userCriteria->condition = "active=:active AND time_registration < DATE_SUB(NOW(), INTERVAL :interval DAY)";
+            $userCriteria->params = array(
+                ':active' => false,
+                ':interval' => $this->interval
+            );
+            
+            $count = $this->count($userCriteria);
+            
+            if ($count > 10) {
+                $this->deleteAll($userCriteria);
+            }
         }
     }
 
@@ -302,10 +330,62 @@ class Users extends CActiveRecord
     {
         return CPasswordHelper::hashPassword($password);
     }
-    
-    public function addSearchConditions($criteria)
+
+    public function uploadAvatar($user)
     {
+        if ($this->scenario === 'changeAvatar') {
+            $imageDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarFolder'), $this->id);
+            
+            if(!file_exists($imageDir)) {
+                mkdir($imageDir, 0777, true);
+            }
+            
+            SHelper::deleteFolder($imageDir);
+            
+            $safeName = $this->getSafeImageName($this->newAvatar->name);
+            $this->newAvatar->saveAs($imageDir . $safeName);
+            
+            $sitePath = Yii::app()->request->hostInfo . Yii::app()->request->baseUrl;
+            $avatarPath = Yii::app()->params['avatarRelativePath'] . '/' . $user->id;
+            
+            self::model()->updateByPk($user->id, array(
+                'avatar' => $avatarPath .'/'. $safeName
+            ));
+            
+            $avatarThumb = new Thumbnail($imageDir);
+            $avatarThumb->cropWithCoordinates($sitePath . $avatarPath . '/' . $safeName, $this->avatarX, $this->avatarY, $this->avatarWidth, $this->avatarHeight, $this->avatarWidth, $this->avatarHeight, 'crop');
+            
+            self::model()->updateByPk($user->id, array(
+                'main_avatar' => $avatarPath .'/'. "{$this->avatarWidth}x$this->avatarHeight" . '/' . 'crop' . '/' . $safeName
+            ));
+            
+            //$this->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
+        }
     }
+
+    private function getSafeImageName($name)
+    {
+        $nameReg = '{(.*)(\\..+)}ui';
+        if (preg_match($nameReg, $name, $nameArray)) {
+            $fileName = $nameArray[1];
+            $fileExt = $nameArray[2];
+        }
+        
+        $safeName = preg_replace('/[^a-zA-ZА-ЯЁа-яё0-9\+\-\)\(\)\]\[]/ui', '', $fileName) . "{$fileExt}";
+        
+        return $safeName;
+    }
+
+    public function saveMainAvatar($user)
+    {
+        $avatarThumb = new Thumbnail(Yii::getPathOfAlias('avatarFolder') . "/{$user->id}/");
+        $avatarThumb->cropWithCoordinates($this->avatar, Yii::app()->request->getPost('x'), Yii::app()->request->getPost('y'), Yii::app()->request->getPost('width'), Yii::app()->request->getPost('height'), Yii::app()->request->getPost('width'), Yii::app()->request->getPost('height'), 'crop');
+        
+        //$this->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
+    }
+
+    public function addSearchConditions($criteria)
+    {}
 
     public static function model($className = __CLASS__)
     {

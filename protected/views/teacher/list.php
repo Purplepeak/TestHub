@@ -5,7 +5,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',
     'dataProvider' => $model->search(),
     'enableSorting' => false,
-    'emptyText' => 'Результатов не найдено',
+    'emptyText' => 'Преподавателей не найдено',
     'summaryText' => '',
     'filter' => $model,
     'pager' => array(
@@ -24,19 +24,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
             'type' => 'html',
             'value' => function ($data)
             {
-                $groupLinks = array();
-                foreach ($data->groups1 as $group) {
-                    $groupLinks[] = GxHtml::link(GxHtml::encode($group->number), array(
-                        'group/view',
-                        'id' => GxActiveRecord::extractPkValue($group, true)
-                    ));
-                }
-                
-                if (empty($data->groups1)) {
-                    return 'N/A';
-                }
-                
-                return implode(', ', $groupLinks);
+                return $data->groupsToString();
             }
         )
     )

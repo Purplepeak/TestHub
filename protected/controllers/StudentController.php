@@ -28,6 +28,13 @@ class StudentController extends UsersController
         
         $this->render('list', array('model' => $model));
     }
+    
+    public function actionChangeAvatar()
+    {
+        $this->userModel = new Student('changeAvatar');
+        
+        parent::actionChangeAvatar();
+    }
 
     public function actionAdmin()
     {

@@ -21,14 +21,14 @@ class VkService extends SOauthBase
         $response = $this->response;
         
         $response = json_decode($response);
-        $params = 'uids=' . $response->user_id . '&fields=uid,first_name,last_name,nickname,screen_name,sex,bdate,city,country,timezone,photo&access_token=' . $response->access_token;
+        $params = 'uids=' . $response->user_id . '&fields=uid,first_name,last_name,nickname,screen_name,sex,bdate,city,country,timezone,' . $this->vkPictureSize . '&access_token=' . $response->access_token;
         
         $attributes = $this->getAttributes($params);
         $attributes = $attributes->response[0];
         
         $attributes->sex = $this->normalizeGender($attributes->sex);
         
-        $attributes = $this->normalizeAttributes($this->provider, $attributes->uid, $attributes->first_name, $attributes->last_name, $attributes->sex, $this->providerUrl . $attributes->screen_name, $attributes->photo);
+        $attributes = $this->normalizeAttributes($this->provider, $attributes->uid, $attributes->first_name, $attributes->last_name, $attributes->sex, $this->providerUrl . $attributes->screen_name, $attributes->{$this->vkPictureSize});
         
         return $attributes;
     }

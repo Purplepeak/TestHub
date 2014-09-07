@@ -34,7 +34,7 @@ class MailRuService extends SOauthBase
         $attributes = $attributes[0];
         $attributes->sex = $this->normalizeGender($attributes->sex);
         
-        $attributes = $this->normalizeAttributes($this->provider, $attributes->uid, $attributes->first_name, $attributes->last_name, $attributes->sex, $attributes->link, $attributes->pic_50);
+        $attributes = $this->normalizeAttributes($this->provider, $attributes->uid, $attributes->first_name, $attributes->last_name, $attributes->sex, $attributes->link, $attributes->{$this->mailPictureSize});
         
         return $attributes;
     }

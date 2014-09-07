@@ -1,4 +1,12 @@
-<?php /* @var $this Controller */ ?>
+<?php /* @var $this Controller */ 
+$userType = '';
+$userId = '';
+
+if(!Yii::app()->user->isGuest) {
+    $userType = Yii::app()->user->__userData['type'];
+    $userId = Yii::app()->user->__userData['id'];
+}
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
@@ -11,12 +19,17 @@
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/bootstrap-social.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/js/imgareaselect/css/imgareaselect-default.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/custom-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/mainpage.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/pager.css">
     
     <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
-    <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    <script src="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/js/bootstrap.min.js"></script>
+    <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/imgareaselect/scripts/jquery.imgareaselect.pack.js"></script>
+    <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/main.js"></script>
+    <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/img_preview.js"></script>
+    
   </head>
   <body>
     <div class="container th-container">
@@ -64,6 +77,7 @@ $this->widget('zii.widgets.CMenu', array(
 $this->widget('zii.widgets.CMenu', array(
     'activeCssClass' => 'active',
     'activateParents' => true,
+    'encodeLabel'=>false,
     'htmlOptions' => array(
         'class' => 'nav navbar-nav th-navbar-nav navbar-right'
     ),
@@ -99,12 +113,49 @@ $this->widget('zii.widgets.CMenu', array(
                 )
             )
         ),
+array(
+    'label' => '<img src="' .Yii::app()->request->baseUrl . Yii::app()->params['defaultMenuAvatar']. '">',
+    'url' => array(
+        '/' .$userType. '/view/id/' .$userId
+    ),
+    'linkOptions' => array(
+        'class' => 'menu-avatar',
+    ),
+    'visible' => !Yii::app()->user->isGuest
+),
         array(
-            'label' => 'Выйти (' . Yii::app()->user->name . ')',
+            'label' => Yii::app()->user->name,
             'url' => array(
-                '/site/logout'
+                '#'
             ),
-            'visible' => !Yii::app()->user->isGuest
+            'linkOptions' => array(
+                'class' => 'dropdown-toggle',
+                'data-toggle' => 'dropdown'
+            ),
+            'itemOptions' => array(
+                'class' => 'dropdown'
+            ),
+            'visible' => !Yii::app()->user->isGuest,
+            'items' => array(
+                array(
+                    'label' => 'Профиль',
+                    'url' => array(
+                        '/' .$userType. '/profile'
+                    )
+                ),
+                array(
+                    'label' => 'Сменить аватар',
+                    'url' => array(
+                        '/' .$userType. '/changeAvatar/'
+                    )
+                ),
+                array(
+                    'label' => 'Выйти',
+                    'url' => array(
+                        '/site/logout'
+                    )
+                )
+            )
         ),
         array(
             'label' => 'Регистрация',

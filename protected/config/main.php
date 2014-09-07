@@ -8,6 +8,9 @@
 return array(
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
     'name' => 'TestHub',
+    'aliases' => array(
+        'avatarFolder' => 'webroot.avatars'
+    ),
     
     // preloading 'log' component
     'preload' => array(
@@ -29,8 +32,8 @@ return array(
         'gii' => array(
             'class' => 'system.gii.GiiModule',
             'generatorPaths' => array(
-                'ext.giix-core', // giix generators
-            ),
+                'ext.giix-core' // giix generators
+                        ),
             'password' => '901117',
             // If removed, Gii defaults to localhost only. Edit carefully to taste.
             'ipFilters' => array(
@@ -43,7 +46,7 @@ return array(
     // application components
     'components' => array(
         'user' => array(
-            // enable cookie-based authentication
+            'class' => 'SWebUser',
             'allowAutoLogin' => true
         ),
         'urlManager' => array(
@@ -51,7 +54,7 @@ return array(
             'showScriptName' => false,
             'rules' => array(
                 'fblogin' => 'social/fblogin',
-                '' => 'site/index',
+                '' => 'site/index'
             )
         ),
         
@@ -76,13 +79,13 @@ return array(
                     'categories' => 'system.db.*'
                 ),
                 array(
-                    'class'=>'CFileLogRoute',
-                    'levels'=>'trace, info, error, warning',
-                    'categories'=>'application.*',
-                ),
-                
+                    'class' => 'CFileLogRoute',
+                    'levels' => 'trace, info, error, warning',
+                    'categories' => 'application.*'
+                )
             )
-        ),
+        )
+        ,
         'request' => array(
             'enableCsrfValidation' => true,
             'enableCookieValidation' => true,
@@ -114,12 +117,15 @@ return array(
     // application-level parameters that can be accessed
     // using Yii::app()->params['paramName']
     'params' => array(
+        'dev' => true,
         'defaultAvatar' => '/images/default_avatar.png',
+        'defaultMenuAvatar' => '/images/default_menu_avatar.png',
+        'avatarRelativePath' => '/avatars',
         'rememberMeTime' => 3600 * 24 * 30, // Запоминаем пользователя на указанный срок
         'privateConfig' => require (dirname(__FILE__) . '/private.php'),
         'siteEmail' => array(
             'email' => 'testhubv2@gmail.com', // Почта для отправки пользователям различной информации, например, при регистрации
             'password' => '901117testhub'
         )
-        )
+    )
 );

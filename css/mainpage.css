@@ -59,3 +59,46 @@
 	text-align: center;
 	vertical-align: middle;
 }
+
+.menu-avatar {
+    margin-top: -10px;
+}
+
+/* REGISTRATION */
+
+.row > p {
+	color: #777777;
+	font-size: 10px;
+	font-style: italic;
+}
+
+.th-avatar-from {
+	width: 500px;
+	display: block;
+	margin-top: 20px;
+}
+
+.upload-button, .avatar-send {
+	display: inline-block;
+}
+
+/* USER_PROFILE */
+
+.profile-header {
+	max-width: 400px;
+	overflow: hidden;
+}
+
+.user-avatar-wrapper {
+	display: inline-block;
+	float: left;
+}
+
+.user-data {
+	display: inline-block;
+	float: right;
+}
+
+.change-avatar-wrapper, .src-avatar {
+	display: inline-block;
+}

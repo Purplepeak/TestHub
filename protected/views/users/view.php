@@ -1,35 +1,61 @@
 <?php
-/* @var $this UsersController */
-/* @var $model Users */
-
-$this->breadcrumbs=array(
-	'Users'=>array('index'),
-	$model->name,
+$attributes = array(
+    'name',
+    'surname',
+    'email'
 );
 
-$this->menu=array(
-	array('label'=>'List Users', 'url'=>array('index')),
-	array('label'=>'Create Users', 'url'=>array('create')),
-	array('label'=>'Update Users', 'url'=>array('update', 'id'=>$model->id)),
-	array('label'=>'Delete Users', 'url'=>'#', 'linkOptions'=>array('submit'=>array('delete','id'=>$model->id),'confirm'=>'Are you sure you want to delete this item?')),
-	array('label'=>'Manage Users', 'url'=>array('admin')),
-);
+if(!isset($model->avatar)) {
+    $avatar = Yii::app()->request->baseUrl . Yii::app()->params['defaultAvatar'];
+} else {
+    $avatar = $model->avatar;
+}
+
+$modelAttributes = array();
+
+if ($model->_type == 'teacher') {
+    array_push($attributes, array(
+        'label' => 'Роль',
+        'type' => 'raw',
+        'value' => 'Преподаватель'
+    ), array(
+        'name' => 'groups',
+        'type' => 'html',
+        'value' => $model->groupsToString()
+    ));
+}
+
+if ($model->_type == 'student') {
+    array_push($attributes, array(
+        'label' => 'Роль',
+        'type' => 'raw',
+        'value' => 'Студент'
+    ), array(
+        'name' => 'group',
+        'type' => 'html',
+        'value' => CHtml::link($model->student_group->number, array(
+            'student/list',
+            'id' => $model->student_group->id
+        ))
+    ));
+}
 ?>
 
-<h1>View Users #<?php echo $model->id; ?></h1>
+<div class="profile-header">
+	<div class="user-avatar-wrapper">
+		<img src="<?= $avatar?>">
+	</div>
+	<div class="user-data">
+    <?php
+    
+    $this->widget('zii.widgets.CDetailView', array(
+        'data' => $model,
+        'nullDisplay' => 'N/A',
+        'cssFile' => Yii::app()->baseUrl . '/css/detail-view.css',
+        'attributes' => $attributes
+    ));
+    ?>
+  </div>
+</div>
 
-<?php $this->widget('zii.widgets.CDetailView', array(
-	'data'=>$model,
-	'attributes'=>array(
-		'id',
-		'username',
-		'password',
-		'email',
-		'time_registration',
-		'name',
-		'surname',
-		'gender',
-		'avatar',
-		'group_id',
-	),
-)); ?>
+

@@ -3,18 +3,17 @@
 /**
  * SOauthBase это класс с базовыми методами, которые используют все доступные сервисы
  */
-
 abstract class SOauthBase extends CComponent
 {
 
     public $attributes = array();
-
+    
     // Название сервиса с заглавной буквы
     public $title;
-
+    
     // Рабочее название сервиса
     public $provider;
-    
+
     public $type;
 
     protected $providerUrl;
@@ -24,7 +23,7 @@ abstract class SOauthBase extends CComponent
     protected $clientSecret;
 
     protected $redirectUrl;
-    
+
     protected $providerAuthorizeUrl;
 
     protected $providerAccessUrl;
@@ -34,13 +33,21 @@ abstract class SOauthBase extends CComponent
     protected $authenticated = 'false';
 
     protected $response;
+    
+    protected $fbPictureSize = 'width=200&height=200';
+    
+    protected $vkPictureSize = 'photo_200';
+    
+    protected $mailPictureSize = 'pic_190';
+
+    protected $pictureSizes = array();
 
     protected $gender = array(
         'female' => 1,
         'male' => 2,
         'undefined' => 3
     );
-    
+
     protected $errorDescriptionParam = 'error_description';
 
     protected $errorAccessDeniedCode = 'access_denied';
@@ -55,11 +62,10 @@ abstract class SOauthBase extends CComponent
             $this->gender = $gender;
         }
     }
-    
+
     /**
      * Суть данного метода, получить access token от сервиса
      */
-
     public function authenticate()
     {
         if (isset($_GET[$this->errorParam])) {
@@ -100,16 +106,15 @@ abstract class SOauthBase extends CComponent
 
     /**
      * Возвращает url, который необходим для получения code
-     */ 
-    
+     */
     public function getCode($redirect_uri)
     {
         return $this->providerAuthorizeUrl . '?client_id=' . $this->clientId . '&redirect_uri=' . urlencode($redirect_uri) . '&response_type=code';
     }
 
     /**
-     *  При передаче code, получаем от сервиса ответ, который содежит 
-     *  в себе необходимый нам access_token
+     * При передаче code, получаем от сервиса ответ, который содежит
+     * в себе необходимый нам access_token
      */
     public function getServiceResponse($code)
     {
@@ -124,23 +129,21 @@ abstract class SOauthBase extends CComponent
 
     /**
      * Возвращает url, который необходим для получения access_token
-     */ 
-    
+     */
     public function getTokenUrl($code)
     {
         return $this->providerAccessUrl . '?client_id=' . $this->clientId . '&redirect_uri=' . urlencode($this->redirectUrl) . '&client_secret=' . $this->clientSecret . '&code=' . $code;
     }
-    
+
     /**
      * Возвращает атрибуты пользователя (id, имя, фамилия и т.д.)
      */
-
     public function getAttributes($params)
     {
         $attributes = $this->makeRequest($this->providerAttributesUrl . '?' . $params);
         return $attributes;
     }
-    
+
     public function normalizeAttributes($provider, $id, $name, $surname, $gender, $url, $photo)
     {
         $info = array(
@@ -159,13 +162,11 @@ abstract class SOauthBase extends CComponent
     }
 
     /**
-     * 
      * Метод делает запрос по указанному url. Результатом запроса
-     * должен быть список параметров в формате JSON. Этот список будет 
+     * должен быть список параметров в формате JSON. Этот список будет
      * обработан методом parseJson(), в результате чего бы получим объект
      * содержащий все полученные параметры.
      */
-    
     protected function makeRequest($url, $options = array(), $parseJson = true)
     {
         $ch = $this->initRequest($url, $options);
@@ -209,12 +210,11 @@ abstract class SOauthBase extends CComponent
         
         return $ch;
     }
-    
+
     /**
      * Преобразует и обрабатывает на на наличие ошибок полученную
      * JSON строку
      */
-
     protected function parseJson($response)
     {
         try {
@@ -257,5 +257,20 @@ abstract class SOauthBase extends CComponent
         }
         
         return $gender;
+    }
+
+    public function setFbPictureSize($value)
+    {
+        $this->fbPictureSize = $value;
+    }
+    
+    public function setVkPictureSize($value)
+    {
+        $this->vkPictureSize = $value;
+    }
+    
+    public function setMailPictureSize($value)
+    {
+        $this->mailPictureSize = $value;
     }
 }

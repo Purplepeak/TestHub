@@ -29,7 +29,10 @@ class UsersController extends Controller
                     'login',
                     'tests',
                     'list',
-                    'socialregistration'
+                    'socialregistration',
+                    'profile',
+                    'changeAvatar',
+                    'saveAvatar'
                 ),
                 'users' => array(
                     '*'
@@ -67,9 +70,9 @@ class UsersController extends Controller
     public function actionIndex()
     {
         $dataProvider = new CActiveDataProvider($this->index, array(
-            'criteria'=>array(
-                'condition'=>'active=true',
-            ),
+            'criteria' => array(
+                'condition' => 'active=true'
+            )
         ));
         $this->render('index', array(
             'dataProvider' => $dataProvider
@@ -81,7 +84,7 @@ class UsersController extends Controller
         $this->userModel->unsetAttributes();
         if (isset($_GET[$this->index])) {
             $this->userModel->attributes = $_GET[$this->index];
-            if(CHtml::modelName($this->userModel) === 'Teacher') {
+            if (CHtml::modelName($this->userModel) === 'Teacher') {
                 $this->userModel->group_id = isset($_GET['Post']['group_id']) ? $_GET['Post']['group_id'] : '';
             }
         }
@@ -106,8 +109,8 @@ class UsersController extends Controller
                 
                 $model->save(false);
                 
-                /** 
-                 * Для подтверждения аккаунта отправляем пользователю активационное письмо и 
+                /**
+                 * Для подтверждения аккаунта отправляем пользователю активационное письмо и
                  * заносим ключ активации и e-mail в отдельную таблицу базы данных
                  */
                 
@@ -133,7 +136,11 @@ class UsersController extends Controller
             }
         }
         
-        $this->redirectIfLogged('//users/registration', array('model' => $model), array('site/index'));
+        $this->redirectIfLogged('//users/registration', array(
+            'model' => $model
+        ), array(
+            'site/index'
+        ));
     }
 
     public function actionLogin()
@@ -178,9 +185,8 @@ class UsersController extends Controller
         }
         
         $model = new LoginForm();
+        $model->scenario = 'login';
         $model->userClass = $this->userModel;
-        
-        $this->performAjaxValidation($model);
         
         if (isset($_POST['LoginForm'])) {
             $model->attributes = $_POST['LoginForm'];
@@ -190,7 +196,11 @@ class UsersController extends Controller
                 ));
         }
         
-        $this->redirectIfLogged('//users/login', array('model' => $model), array('site/index'));
+        $this->redirectIfLogged('//users/login', array(
+            'model' => $model
+        ), array(
+            'site/index'
+        ));
     }
 
     public function actionDelete()
@@ -224,7 +234,7 @@ class UsersController extends Controller
 
     public function actionView()
     {
-        $this->render('view', array(
+        $this->render('//users/view', array(
             'model' => $this->loadModel()
         ));
     }
@@ -283,6 +293,68 @@ class UsersController extends Controller
             }
         }
         
-        $this->redirectIfLogged('//users/registration', array('model' => $userModel), array('site/index'));
+        $this->redirectIfLogged('//users/registration', array(
+            'model' => $userModel
+        ), array(
+            'site/index'
+        ));
+    }
+
+    public function actionProfile()
+    {
+        if (Yii::app()->user->isGuest) {
+            $this->redirect(array(
+                'login'
+            ));
+        } else {
+            $model = Users::model()->findByPk(Yii::app()->user->__userData['id']);
+            
+            $this->render('//users/view', array(
+                'model' => $model
+            ));
+        }
+    }
+
+    public function actionChangeAvatar()
+    {
+        if (Yii::app()->user->isGuest) {
+            $this->redirect(array(
+                'login'
+            ));
+        }
+        
+        $model = $this->userModel;
+        $user = Users::model()->findByPk(Yii::app()->user->__userData['id']);
+        $model->id = $user->id;
+        
+        // var_dump($model, get_class($model));
+        
+        if (isset($_POST[$this->index])) {
+            $post = $_POST[$this->index];
+            
+            $model->avatarX = $post['avatarX'];
+            $model->avatarY = $post['avatarY'];
+            $model->avatarWidth = $post['avatarWidth'];
+            $model->avatarHeight = $post['avatarHeight'];
+            
+            $model->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
+            
+            if ($model->validate()) {
+                //$model->uploadAvatar($user);
+              var_dump($post, $model->newAvatar, $model->avatarX, $model->avatarY, $model->avatarWidth, $model->avatarHeight, $model->avatarWidth, $model->avatarHeight);
+            }
+        }
+        
+        $this->render('//users/change_avatar', array(
+            'model' => $model,
+            'user' => $user
+        ));
+    }
+
+    public function actionSaveAvatar()
+    {
+        if (isset($_POST[$this->index])) {
+            var_dump($_POST[$this->index]);
+        }
     }
 }

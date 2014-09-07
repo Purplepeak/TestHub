@@ -1,11 +1,7 @@
 <?php
 
-class AccountInteractionForm extends CFormModel
+class AccountInteractionForm extends DefaultForm
 {
-
-    public $email;
-
-    public $userClass;
 
     public $user;
 
@@ -13,25 +9,15 @@ class AccountInteractionForm extends CFormModel
 
     public function rules()
     {
-        return array(
-            array(
-                'email',
-                'required',
-                'message' => 'Поле не должно быть пустым'
-            ),
-            array(
-                'email',
-                'findUser',
-                'on' => 'passRestore'
-            )
-        );
-    }
-
-    public function attributeLabels()
-    {
-        return array(
-            'email' => 'e-mail'
-        );
+        $rules = parent::rules();
+        
+        array_push($rules, array(
+            'email',
+            'findUser',
+            'on' => 'passRestore'
+        ));
+        
+        return $rules;
     }
 
     public function findUser()

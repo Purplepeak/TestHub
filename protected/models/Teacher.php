@@ -225,4 +225,21 @@ class Teacher extends Users
             $criteria->compare('groups1.number', '=' . $this->groupNumber, true);
         }
     }
+    
+    public function groupsToString()
+    {
+        $groupLinks = array();
+        foreach ($this->groups1 as $group) {
+            $groupLinks[] = GxHtml::link(GxHtml::encode($group->number), array(
+                'student/list',
+                'id' => GxActiveRecord::extractPkValue($group, true)
+            ));
+        }
+        
+        if (empty($this->groups1)) {
+            return 'N/A';
+        }
+        
+        return implode(', ', $groupLinks);
+    }
 }

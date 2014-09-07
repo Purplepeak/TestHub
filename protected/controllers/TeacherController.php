@@ -37,15 +37,18 @@ class TeacherController extends UsersController
         ));
     }
 
+    public function actionChangeAvatar()
+    {
+        $this->userModel = new Teacher('changeAvatar');
+        
+        parent::actionChangeAvatar();
+    }
+
     public function actionTests()
     {
-        $a = new SMailer;
-        
-        $a->init('confirm', 'Татьяна', 'shrpeak@yandex.ru', 'asfasfas423sdhsdh', null);
-        $a->sendEmail();
-        //$a->renderWidget();
-        
-        var_dump($a->formatEmail());
-        // $this->render('//accountInteraction/change_error');
+        //$d = scandir(Yii::getPathOfAlias('avatarFolder') . '/308');
+        //SHelper::deleteFolder(Yii::getPathOfAlias('avatarFolder') . '/308/', true);
+        //var_dump(Yii::app()->request->hostInfo);
+        //var_dump(getimagesize('http://local.testhub.com/test.me/avatars/303/1402484508001.png'));
     }
 }

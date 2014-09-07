@@ -19,7 +19,7 @@ class FacebookService extends SOauthBase
         $accessToken = $this->response;
         
         $attributes = $this->getAttributes($accessToken);
-        $attributes->photo = 'https://graph.facebook.com/' . $attributes->id . '/picture';
+        $attributes->photo = 'https://graph.facebook.com/' . $attributes->id . '/picture?' . $this->fbPictureSize;
         
         $attributes = $this->normalizeAttributes($this->provider, $attributes->id, $attributes->first_name, $attributes->last_name, $attributes->gender, $attributes->link, $attributes->photo);
         

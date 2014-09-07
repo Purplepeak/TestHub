@@ -26,6 +26,8 @@ class AccountInteractionController extends Controller
                     'restoreNotification',
                     'changeNotification',
                     'resend',
+                    'sendNewConfirmation',
+                    'avatar'
                 ),
                 'users' => array(
                     '*'
@@ -40,12 +42,12 @@ class AccountInteractionController extends Controller
             )
         );
     }
-    
+
     /**
-     * Страница предупреждающая пользователя о необходимости активировать аккаунт. 
+     * Страница предупреждающая пользователя о необходимости активировать аккаунт.
+     *
      * Присутствует функция повторной отправки сообщения.
      */
-
     public function actionConfirmNotification()
     {
         if (isset(Yii::app()->session) && isset(Yii::app()->session['regModel'])) {
@@ -62,7 +64,7 @@ class AccountInteractionController extends Controller
             ));
         }
     }
-    
+
     public function actionResend($id, $name, $email)
     {
         $userModel = Users::model();
@@ -76,11 +78,45 @@ class AccountInteractionController extends Controller
         
         Yii::app()->end();
     }
-    
+
+    public function actionSendNewConfirmation()
+    {
+        $model = new AccountInteractionForm;
+        $model->scenario = 'newConfirm';
+        $model->userClass = Users::model();
+        
+        if (isset($_POST['AccountInteractionForm'])) {
+            $model->attributes = $_POST['AccountInteractionForm'];
+            
+            if ($model->validate()) {
+                
+                $confirmModel = new AccountInteraction();
+                
+                $userModel = Users::model();
+                
+                $user = $userModel->find('email = :email', array(
+                    ':email' => $model->email
+                ));
+                $confirmModel->saveAndSend($user, 'confirm');
+                
+                Yii::app()->session['regModel'] = $user;
+                
+                $this->redirect(array(
+                    'confirmNotification'
+                ));
+            }
+        }
+        
+        $this->redirectIfLogged('new_confirmation', array(
+            'model' => $model
+        ), array(
+            'site/index'
+        ));
+    }
+
     /**
      * Предупреждает пользователя, что его пароль был изменен.
      */
-
     public function actionRestoreNotification()
     {
         if (isset(Yii::app()->session) && isset(Yii::app()->session['restoreModel'])) {
@@ -100,12 +136,11 @@ class AccountInteractionController extends Controller
     {
         $this->render('change_notification');
     }
-    
+
     /**
-     * Метод предназначен для автоматической активации аккаунта при 
+     * Метод предназначен для автоматической активации аккаунта при
      * переходе по ссылке с корректными параметрами.
      */
-
     public function actionConfirm()
     {
         $email = Yii::app()->request->getQuery('email');
@@ -117,9 +152,7 @@ class AccountInteractionController extends Controller
             $account = $confirmModel->findByEmailKey($email, $key, $scenario);
             
             if ($account === null) {
-                $this->redirect(array(
-                    'site/index'
-                ));
+                $this->render('failed_confirm');
             } else {
                 $confirmedAccountId = $account->user_id;
                 $account->deleteByPk($account->id);
@@ -134,29 +167,28 @@ class AccountInteractionController extends Controller
                 ));
                 
                 $identity = UserIdentity::forceLogin($confirmedUser);
-                Yii::app()->user->login($identity);
+                Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
+                
+                Yii::app()->user->setFlash('success', "Ваш аккаунт был успешно активирован.");
                 
                 $this->redirect(array(
                     'site/index'
                 ));
             }
         } else {
-            $this->redirect(array(
-                'site/index'
-            ));
+            $this->render('failed_confirm');
         }
     }
-    
+
     /**
-     * Восстановление пароля пользователя. Юзер вбивает в форму свою почту, на
+     * Восстановление пароля пользователя.
+     * Юзер вбивает в форму свою почту, на
      * которую мы высылаем ссылку на действие changePass().
      */
-
     public function actionPassRestore()
     {
         $model = new AccountInteractionForm();
         $model->scenario = 'passRestore';
-        $userType = Yii::app()->request->getQuery('user');
         
         $model->userClass = Users::model();
         
@@ -175,15 +207,19 @@ class AccountInteractionController extends Controller
             }
         }
         
-        $this->redirectIfLogged('pass_restore', array('model' => $model), array('site/index'));
+        $this->redirectIfLogged('pass_restore', array(
+            'model' => $model
+        ), array(
+            'site/index'
+        ));
     }
 
     /**
      * Метод меняет старый пароль на новый, который пользователь
-     * выбирает самостоятельно. По итогам смены, юзера перенаправляет 
+     * выбирает самостоятельно.
+     * По итогам смены, юзера перенаправляет
      * на страницу users/login с предупреждением, что пароль был изменен.
      */
-    
     public function actionChangePass()
     {
         $email = Yii::app()->request->getQuery('email');
@@ -226,9 +262,12 @@ class AccountInteractionController extends Controller
                 ));
             }
         } else {
-            $this->redirect(array(
-                'passRestore'
-            ));
+            $this->render('change_error');
         }
+    }
+    
+    public function actionAvatar()
+    {
+        
     }
 }

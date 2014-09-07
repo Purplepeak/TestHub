@@ -24,11 +24,11 @@ if($user == 'teacher/login') {
 <?php endif;?>
 <p>Введите свой e-mail и пароль, указанный при регистрации:</p>
 
-<?php
-    foreach(Yii::app()->user->getFlashes() as $key => $message) {
-        echo '<div class="alert alert-danger">' . CHtml::encode($message) . "</div>\n";
-    }
-?>
+<?php if(Yii::app()->user->hasFlash('confirmError')):?>
+    <div class="alert alert-danger">
+        <?= Yii::app()->user->getFlash('confirmError') . ' Если вы не получили письма, попробуйте отправить его ' .CHtml::link('еще раз', array('accountInteraction/sendNewConfirmation')) . '.' ?>
+    </div>
+<?php endif; ?>
 
 <div class="form">
 <?php $form=$this->beginWidget('CActiveForm', array(

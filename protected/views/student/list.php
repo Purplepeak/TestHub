@@ -12,7 +12,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',
     'dataProvider' => $model->search(),
     'enableSorting' => false,
-    'emptyText' => 'Результатов не найдено',
+    'emptyText' => 'Студентов не найдено',
     'summaryText' => '',
     'filter' => $model,
     'pager' => array(

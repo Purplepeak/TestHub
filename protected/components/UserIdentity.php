@@ -14,12 +14,14 @@ class UserIdentity extends CUserIdentity
      * are both 'demo'.
      * In practical applications, this should be changed to authenticate
      * against some persistent user identity storage (e.g. database).
-     * 
+     *
      * @return boolean whether authentication succeeds.
      */
     private $_id;
 
     public $userClass;
+    
+    public $user;
 
     public $email;
 
@@ -43,10 +45,11 @@ class UserIdentity extends CUserIdentity
         
         if ($user === null) {
             return $this->errorCode = self::ERROR_EMAIL_INVALID;
-        } else 
+        } else {
             if (! $user->validatePassword($this->password)) {
                 return $this->errorCode = self::ERROR_PASSWORD_INVALID;
             }
+        }
         
         if ($user->active == 0) {
             return $this->errorCode = self::ERROR_ACTIVATION_INVALID;
@@ -54,6 +57,7 @@ class UserIdentity extends CUserIdentity
         
         $this->_id = $user->id;
         $this->username = $user->name;
+        $this->setUserData($user);
         return $this->errorCode = self::ERROR_NONE;
     }
 
@@ -75,17 +79,16 @@ class UserIdentity extends CUserIdentity
     public static function forceLogin($model)
     {
         $identity = new self(null, $model->password);
-        
+        $identity->setUserData($model);
         $identity->_id = $model->id;
         $identity->username = $model->name;
         
         return $identity;
     }
-    
+
     /**
      * Проверяет наличие социального пользователя в базе
      */
-
     public function socialAuthenticate($ouathProvider, $oauthId)
     {
         $user = $this->userClass->find('social_user_id=:social_user_id AND provider=:provider', array(
@@ -100,5 +103,15 @@ class UserIdentity extends CUserIdentity
             $this->username = $user->user->name;
             $this->errorCode = self::ERROR_NONE;
         }
+    }
+    
+    public function setUserData(CActiveRecord $user)
+    {
+        $this->user = $user->attributes;
+    }
+    
+    public function getUserData()
+    {
+        return $this->user;
     }
 }

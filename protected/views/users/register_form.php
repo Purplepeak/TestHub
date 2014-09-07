@@ -1,4 +1,4 @@
-<div class="form">
+<div class="form th-register-from">
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'register-form',
 	'enableAjaxValidation'=>true,
@@ -50,6 +50,7 @@
 	<?php if($model->_type == 'teacher'):?>
 	  <div class="row">
 		<?php echo $form->labelEx($model,'groups'); ?>
+		<p>Укажите группы в которых вы преподаете. Если групп несколько, можно указать их через запятые/пробелы или же перечислить несколько подряд идущих групп 1050-1053.</p>
 		<?php echo $form->textField($model,'groups'); ?>
 		<?php echo $form->error($model,'groups'); ?>
 	  </div>
@@ -58,6 +59,7 @@
 	<?php if($model->_type == 'student'):?>
 	  <div class="row">
 		<?php echo $form->labelEx($model,'group'); ?>
+		<p>Укажите номер группы в которой вы обучаетесь.</p>
 		<?php echo $form->textField($model,'group'); ?>
 		<?php echo $form->error($model,'group'); ?>
 	</div>
@@ -70,7 +72,8 @@
 		<?php echo $form->error($model,'accessCode'); ?>
 	  </div>
     <?php endif;?>
- <?php if($model->scenario == 'register'):?>   
+ <?php if($model->scenario == 'register'):?>
+    <br><br>
     <div class="row">
 		<?php echo $form->labelEx($model,'captcha'); ?>
 		<?php $this->widget('ext.srecaptcha.SReCaptchaWidget', array(

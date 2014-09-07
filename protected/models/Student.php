@@ -119,6 +119,11 @@ class Student extends Users
         
         return $group->id;
     }
+    
+    public function groupToString()
+    {
+        
+    }
 
     /**
      * Проверяет, существует ли введенная студентом группа
