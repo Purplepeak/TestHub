@@ -101,6 +101,8 @@ class UserIdentity extends CUserIdentity
         } else {
             $this->_id = $user->user_id;
             $this->username = $user->user->name;
+            $userModel = Users::model()->findByPk($user->user_id);
+            $this->setUserData($userModel);
             $this->errorCode = self::ERROR_NONE;
         }
     }

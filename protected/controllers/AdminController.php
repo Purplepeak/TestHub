@@ -31,7 +31,8 @@ class AdminController extends UsersController
                     'create',
                     'update',
                     'index',
-                    'view'
+                    'view',
+                    'PopulateUsers'
                 ),
                 'users' => array(
                     'admin'
@@ -50,5 +51,33 @@ class AdminController extends UsersController
     {
         $this->userModel = new Admin('search');
         parent::actionAdmin();
+    }
+    
+    public function actionPopulateUsers()
+    {
+        $attributes = array(
+            'name'=>'Тестер',
+            'surname' => 'Тестеров',
+            'email'=>'tester@example.com',
+            'gender' => 'male',
+            'active' => 0,
+            'groups' => '302 301',
+            'type' => 'teacher',
+            'passwordText' => '$2a$13$hcBaAd16nNnSfyQnvquezeNrMU4Hop./4sOvDyGPW9/BOx0AFZ5F.'
+        );
+        
+        $student = new Teacher('register');
+        $student->attributes = $attributes;
+        
+        $student->isGroupExist();
+        
+        if($student->save(false)) {
+            echo 'basas';
+        } else {
+            var_dump($student->errors);
+        }
+        
+
+        //var_dump();
     }
 }

@@ -31,6 +31,8 @@ class Student extends Users
     public $group;
 
     public $_type = 'student';
+    
+    protected $searchPageSize = 20;
 
     public function defaultScope()
     {

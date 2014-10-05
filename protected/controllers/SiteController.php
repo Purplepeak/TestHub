@@ -39,11 +39,21 @@ class SiteController extends Controller
 			if(Yii::app()->request->isAjaxRequest) {
 				echo $error['message'];
 			} else {
-				if($error['type'] == 'SOauthException') {
-					$error['message'] = 'Сервис временно испытывает проблемы с входом через социальные сети, повторите попытку позже. Приносим извинения за временные неудобства.';
-				}
-				if($error['type'] == 'Swift_SwiftException') {
-				    $error['message'] = 'Сервис временно испытывает проблемы. Приносим извинения за временные неудобства.';
+			    $defaultMessage = 'Сервис временно испытывает проблемы. Приносим извинения за временные неудобства.';
+			    
+				switch($error['type']) {
+					case 'SOauthException':
+					    $error['message'] = 'Сервис временно испытывает проблемы с входом через социальные сети, повторите попытку позже. Приносим извинения за временные неудобства.';
+					    break;
+					case 'Swift_SwiftException':
+					    $error['message'] = $defaultMessage;
+					    break;
+					case 'SAvatarCropperException':
+					    $error['message'] = $defaultMessage;
+					    break;
+					default:
+					    $error['message'] = $defaultMessage;
+					    break;
 				}
 				
 				$layout = 'error';
@@ -53,12 +63,13 @@ class SiteController extends Controller
 					    $layout = 'error404';
 					    break;
 					case '500':
-					    $error['message'] = 'Сервис временно испытывает проблемы. Приносим извинения за временные неудобства.';
+					    $error['message'] = $defaultMessage;
 					    break;
 					default:
 					    $error['message'] = 'Возникла непредвиденная ошибка. Приносим извинения за временные неудобства.';
 					    break;
 				}
+				
 				$this->render($layout, $error);
 			}
 		}
@@ -94,5 +105,34 @@ class SiteController extends Controller
 	{
 		Yii::app()->user->logout();
 		$this->redirect(Yii::app()->homeUrl);
+	}
+	
+	public function actionGetAvatar($id, $res, $method, $img)
+	{
+	    $user = Users::model()->findByPk($id);
+	    $avatarDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarFolder'), $user->id);
+	    $croppedAvatarDir = sprintf("%s" . "%d" . "%s" . "%d" . "/" . "%s" . "/", $avatarDir, $user->avatarWidth, 'x', $user->avatarHeight, $method);
+	    
+	    
+	    $resReg = '{(\d+)x(\d+)}';
+	    
+	    if (!preg_match($resReg, $res, $thumbRes)) {
+	        Yii::log("Regular expression {$resReg} for the thumbnail size does not match the link.", CLogger::LEVEL_ERROR, 'application.extensions.savatar');
+	        throw new SAvatarCropperException("Regular expression {$resReg} for the thumbnail size does not match the link.");
+	    }
+	    
+	    $thumbWidth = $thumbRes[1];
+	    $thumbHeight = $thumbRes[2];
+	    
+	    
+	    $cropper = new SAvatarCropper($avatarDir);
+	    
+	    $cropper->setAllowedSizes(Yii::app()->params['allowedAvatarSizes']);
+	    
+	    if(!$cropper->isAllowedSize($thumbWidth, $thumbHeight)) {
+	        throw new CHttpException(404);
+	    }
+	     
+	    $cropper->getResizedImage($croppedAvatarDir . $img, $thumbWidth, $thumbHeight, $method);
 	}
 }

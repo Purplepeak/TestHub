@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: localhost
--- Время создания: Июл 21 2014 г., 17:21
+-- Время создания: Сен 23 2014 г., 15:02
 -- Версия сервера: 5.6.15-log
 -- Версия PHP: 5.5.6
 
@@ -28,14 +28,14 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `account_interaction` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(30) NOT NULL,
   `user_id` int(11) NOT NULL,
   `key` varchar(128) NOT NULL,
   `email` varchar(250) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `scenario` enum('confirm','restore') NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=23 ;
+  PRIMARY KEY (`id`),
+  KEY `FK_account_interaction` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `number` varchar(45) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=264 ;
 
 -- --------------------------------------------------------
 
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `social_accounts` (
   `url` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_social_user_idx` (`user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
 -- --------------------------------------------------------
 
@@ -161,14 +161,25 @@ CREATE TABLE IF NOT EXISTS `users` (
   `avatar` varchar(200) DEFAULT NULL,
   `group_id` int(11) DEFAULT NULL,
   `type` enum('student','teacher','admin') NOT NULL,
-  `active` binary(1) NOT NULL DEFAULT '0',
+  `active` tinyint(1) NOT NULL DEFAULT '0',
+  `avatarX` int(11) DEFAULT NULL,
+  `avatarY` int(11) DEFAULT NULL,
+  `avatarWidth` int(11) DEFAULT NULL,
+  `avatarHeight` int(11) DEFAULT NULL,
+  `cropped_avatar` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_student_group_idx` (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=225 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2010 ;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
 --
+
+--
+-- Ограничения внешнего ключа таблицы `account_interaction`
+--
+ALTER TABLE `account_interaction`
+  ADD CONSTRAINT `FK_account_interaction` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Ограничения внешнего ключа таблицы `social_accounts`

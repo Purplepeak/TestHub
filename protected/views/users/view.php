@@ -5,11 +5,12 @@ $attributes = array(
     'email'
 );
 
-if(!isset($model->avatar)) {
-    $avatar = Yii::app()->request->baseUrl . Yii::app()->params['defaultAvatar'];
+if($model->cropped_avatar) {
+    $avatar = Yii::app()->request->baseUrl .'/avatars/' .$model->id. '/190x190/crop/'. $model->cropped_avatar;
 } else {
-    $avatar = $model->avatar;
+    $avatar = Yii::app()->request->baseUrl . Yii::app()->params['defaultMainAvatar'];
 }
+
 
 $modelAttributes = array();
 
@@ -43,7 +44,7 @@ if ($model->_type == 'student') {
 
 <div class="profile-header">
 	<div class="user-avatar-wrapper">
-		<img src="<?= $avatar?>">
+		<img class="user-main-avatar" src="<?= $avatar ?>">
 	</div>
 	<div class="user-data">
     <?php

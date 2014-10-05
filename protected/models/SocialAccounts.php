@@ -88,7 +88,8 @@ class SocialAccounts extends CActiveRecord
         $identity->socialAuthenticate($this->provider, $this->social_user_id);
     
         if ($identity->errorCode === UserIdentity::ERROR_NONE) {
-            Yii::app()->user->login($identity);
+            //$identity->setUserData($model);
+            Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
         }
     
         if ($identity->errorCode === UserIdentity::ERROR_UNKNOWN_IDENTITY) {

@@ -60,9 +60,7 @@
 	vertical-align: middle;
 }
 
-.menu-avatar {
-    margin-top: -10px;
-}
+
 
 /* REGISTRATION */
 
@@ -85,8 +83,19 @@
 /* USER_PROFILE */
 
 .profile-header {
-	max-width: 400px;
+	max-width: 550px;
 	overflow: hidden;
+}
+
+.th-navbar-nav>li>.menu-avatar {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-top: 10px;
+}
+
+.th-navbar-default .th-navbar-nav>.active>.menu-avatar, .th-navbar-default .th-navbar-nav>.active>.menu-avatar:hover, .th-navbar-default .th-navbar-nav>.active>.menu-avatar:focus {
+    color: #555;
+    background-color: transparent;
 }
 
 .user-avatar-wrapper {
@@ -99,6 +108,6 @@
 	float: right;
 }
 
-.change-avatar-wrapper, .src-avatar {
+.src-avatar {
 	display: inline-block;
 }

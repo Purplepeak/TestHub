@@ -23,7 +23,8 @@ return array(
         'application.components.*',
         'ext.giix-components.*',
         'ext.CSLinkPager',
-        'ext.smailer.*'
+        'ext.smailer.*',
+        'ext.savatar.*'
     ),
     
     'modules' => array(
@@ -54,6 +55,7 @@ return array(
             'showScriptName' => false,
             'rules' => array(
                 'fblogin' => 'social/fblogin',
+                'avatars/<id:\d+>/<res:\d+x\d+>/<method:[a-zA-z]+>/<img:[\w.]+>' => 'site/getAvatar',
                 '' => 'site/index'
             )
         ),
@@ -84,10 +86,9 @@ return array(
                     'categories' => 'application.*'
                 )
             )
-        )
-        ,
+        ),
         'request' => array(
-            'enableCsrfValidation' => true,
+            'enableCsrfValidation' => false,
             'enableCookieValidation' => true,
             'csrfCookie' => array(
                 'httpOnly' => true
@@ -118,8 +119,20 @@ return array(
     // using Yii::app()->params['paramName']
     'params' => array(
         'dev' => true,
-        'defaultAvatar' => '/images/default_avatar.png',
+        'defaultMainAvatar' => '/images/default_avatar.png',
         'defaultMenuAvatar' => '/images/default_menu_avatar.png',
+        'mainAvatarSize' => array(
+            'width' => 190,
+            'height' => 190
+        ),
+        'menuAvatarSize' => array(
+            'width' => 30,
+            'height' => 30
+        ),
+        'allowedAvatarSizes' => array(
+            '190x190',
+            '30x30'
+        ),
         'avatarRelativePath' => '/avatars',
         'rememberMeTime' => 3600 * 24 * 30, // Запоминаем пользователя на указанный срок
         'privateConfig' => require (dirname(__FILE__) . '/private.php'),

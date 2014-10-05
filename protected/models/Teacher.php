@@ -34,6 +34,8 @@ class Teacher extends Users
     public $_type = 'teacher';
 
     public $groupNumber = '';
+    
+    protected $searchPageSize = 80;
 
     public function defaultScope()
     {
@@ -122,11 +124,6 @@ class Teacher extends Users
         );
         
         return CMap::mergeArray(parent::attributeLabels(), $attributeLabels);
-    }
-
-    public function tt()
-    {
-        return $this->groups1[0]->number;
     }
 
     /**

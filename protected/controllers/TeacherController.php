@@ -46,9 +46,11 @@ class TeacherController extends UsersController
 
     public function actionTests()
     {
-        //$d = scandir(Yii::getPathOfAlias('avatarFolder') . '/308');
-        //SHelper::deleteFolder(Yii::getPathOfAlias('avatarFolder') . '/308/', true);
-        //var_dump(Yii::app()->request->hostInfo);
-        //var_dump(getimagesize('http://local.testhub.com/test.me/avatars/303/1402484508001.png'));
+        
+        
+        $a = basename('biba.jpg');
+        
+        var_dump($a);
+        
     }
 }

@@ -28,13 +28,13 @@ class Users extends CActiveRecord
     public $avatar50;
 
     public $avatar30;
-    
+
     public $avatarX;
-    
+
     public $avatarY;
-    
+
     public $avatarWidth;
-    
+
     public $avatarHeight;
 
     const GENDER_MALE = 'male';
@@ -96,7 +96,7 @@ class Users extends CActiveRecord
                 'safe' => true,
                 'types' => 'jpg, gif, png',
                 'allowEmpty' => true,
-                'maxSize' => 1000 * 1024,
+                'maxSize' => 1500 * 1024,
                 'tooLarge' => 'Размер картинки не должен превышать 1МБ',
                 'wrongType' => 'Допустимые расширения аватара: jpg, gif, png',
                 'on' => 'changeAvatar'
@@ -259,7 +259,7 @@ class Users extends CActiveRecord
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria,
             'pagination' => array(
-                'pageSize' => 20
+                'pageSize' => $this->searchPageSize
             )
         ));
     }
@@ -336,52 +336,55 @@ class Users extends CActiveRecord
         if ($this->scenario === 'changeAvatar') {
             $imageDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarFolder'), $this->id);
             
-            if(!file_exists($imageDir)) {
+            if (! file_exists($imageDir)) {
                 mkdir($imageDir, 0777, true);
             }
             
+            $resolution = array_map('round', array(
+                'width' => $this->avatarWidth,
+                'height' => $this->avatarHeight
+            ));
+            
             SHelper::deleteFolder($imageDir);
             
-            $safeName = $this->getSafeImageName($this->newAvatar->name);
+            $safeName = SHelper::getSafeImageName($this->newAvatar->name, 'avatar', $user->id);
             $this->newAvatar->saveAs($imageDir . $safeName);
             
-            $sitePath = Yii::app()->request->hostInfo . Yii::app()->request->baseUrl;
             $avatarPath = Yii::app()->params['avatarRelativePath'] . '/' . $user->id;
             
             self::model()->updateByPk($user->id, array(
-                'avatar' => $avatarPath .'/'. $safeName
+                'avatar' => $avatarPath . '/' . $safeName
             ));
             
-            $avatarThumb = new Thumbnail($imageDir);
-            $avatarThumb->cropWithCoordinates($sitePath . $avatarPath . '/' . $safeName, $this->avatarX, $this->avatarY, $this->avatarWidth, $this->avatarHeight, $this->avatarWidth, $this->avatarHeight, 'crop');
+            $croppedAvatarName = SHelper::getSafeImageName($this->newAvatar->name, 'cropped', $user->id);
+            
+            $avatarThumb = new SAvatarCropper($imageDir, true);
+            $avatarThumb->newImageName = $croppedAvatarName;
+            $avatarThumb->cropWithCoordinates($imageDir . $safeName, $this->avatarX, $this->avatarY, $resolution['width'], $resolution['height'], $resolution['width'], $resolution['height'], 'crop');
             
             self::model()->updateByPk($user->id, array(
-                'main_avatar' => $avatarPath .'/'. "{$this->avatarWidth}x$this->avatarHeight" . '/' . 'crop' . '/' . $safeName
+                'avatarX' => $this->avatarX,
+                'avatarY' => $this->avatarY,
+                'avatarWidth' => $resolution['width'],
+                'avatarHeight' => $resolution['height'],
+                'cropped_avatar' => $avatarThumb->changedImageName
             ));
             
-            //$this->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
+            
+            $avatarDir = Yii::app()->request->baseUrl . Yii::app()->params['avatarRelativePath']. '/' .$user->id;
+            $avatarCropper = new SAvatarCropper($avatarDir);
+            
+            Yii::app()->user->setState('__userMainAvatar', $avatarCropper->link($avatarThumb->changedImageName, Yii::app()->params['mainAvatarSize']['width'], Yii::app()->params['mainAvatarSize']['height'], 'crop'));
+            Yii::app()->user->setState('__userMenuAvatar', $avatarCropper->link($avatarThumb->changedImageName, Yii::app()->params['menuAvatarSize']['width'], Yii::app()->params['menuAvatarSize']['height'], 'crop'));
         }
-    }
-
-    private function getSafeImageName($name)
-    {
-        $nameReg = '{(.*)(\\..+)}ui';
-        if (preg_match($nameReg, $name, $nameArray)) {
-            $fileName = $nameArray[1];
-            $fileExt = $nameArray[2];
-        }
-        
-        $safeName = preg_replace('/[^a-zA-ZА-ЯЁа-яё0-9\+\-\)\(\)\]\[]/ui', '', $fileName) . "{$fileExt}";
-        
-        return $safeName;
     }
 
     public function saveMainAvatar($user)
     {
-        $avatarThumb = new Thumbnail(Yii::getPathOfAlias('avatarFolder') . "/{$user->id}/");
+        $avatarThumb = new SAvatarCropper(Yii::getPathOfAlias('avatarFolder') . "/{$user->id}/");
         $avatarThumb->cropWithCoordinates($this->avatar, Yii::app()->request->getPost('x'), Yii::app()->request->getPost('y'), Yii::app()->request->getPost('width'), Yii::app()->request->getPost('height'), Yii::app()->request->getPost('width'), Yii::app()->request->getPost('height'), 'crop');
         
-        //$this->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
+        // $this->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
     }
 
     public function addSearchConditions($criteria)

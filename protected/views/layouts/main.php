@@ -1,12 +1,24 @@
 <?php /* @var $this Controller */ 
+
+/**
+ * $userMainAvatar и $userMenuAvatar необходимы для того, чтобы показать залогиненому
+ * пользователю его аватар.
+ */
+
 $userType = '';
 $userId = '';
+$userMainAvatar = '';
+$userMenuAvatar = '';
 
-if(!Yii::app()->user->isGuest) {
+if(!Yii::app()->user->isGuest && !empty(Yii::app()->user->__userData)) {
     $userType = Yii::app()->user->__userData['type'];
     $userId = Yii::app()->user->__userData['id'];
+    $userMainAvatar = Yii::app()->user->__userMainAvatar;
+    $userMenuAvatar = Yii::app()->user->__userMenuAvatar;
 }
+
 ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
@@ -19,16 +31,18 @@ if(!Yii::app()->user->isGuest) {
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/bootstrap-social.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/font-awesome.css">
-    <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/js/imgareaselect/css/imgareaselect-default.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/custom-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/mainpage.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/pager.css">
     
     <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
     <script src="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/js/bootstrap.min.js"></script>
-    <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/imgareaselect/scripts/jquery.imgareaselect.pack.js"></script>
     <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/main.js"></script>
-    <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/img_preview.js"></script>
+    
+    <script type="text/javascript">
+      var mainAvatar = "<?= $userMainAvatar ?>";
+      var menuAvatar = "<?= $userMenuAvatar ?>";
+    </script>
     
   </head>
   <body>
@@ -114,9 +128,9 @@ $this->widget('zii.widgets.CMenu', array(
             )
         ),
 array(
-    'label' => '<img src="' .Yii::app()->request->baseUrl . Yii::app()->params['defaultMenuAvatar']. '">',
+    'label' => '<img class="js-user-menu-avatar" src="">',
     'url' => array(
-        '/' .$userType. '/view/id/' .$userId
+        '/' .$userType. '/profile'
     ),
     'linkOptions' => array(
         'class' => 'menu-avatar',

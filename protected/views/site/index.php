@@ -2,7 +2,6 @@
 /* @var $this SiteController */
 
 $this->pageTitle=Yii::app()->name;
-//var_dump(Yii::app()->user->model);
 ?>
 
 <div class="main-page-intro">

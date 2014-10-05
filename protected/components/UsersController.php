@@ -32,7 +32,7 @@ class UsersController extends Controller
                     'socialregistration',
                     'profile',
                     'changeAvatar',
-                    'saveAvatar'
+                    'getAvatar'
                 ),
                 'users' => array(
                     '*'
@@ -234,8 +234,11 @@ class UsersController extends Controller
 
     public function actionView()
     {
+        $model = $this->loadModel();
+        
         $this->render('//users/view', array(
-            'model' => $this->loadModel()
+            'model' => $model,
+            'externalProfile' => true,
         ));
     }
 
@@ -265,7 +268,6 @@ class UsersController extends Controller
             'name' => $userAttributes->name,
             'surname' => $userAttributes->surname,
             'gender' => $userAttributes->gender,
-            'avatar' => $userAttributes->photo,
             'active' => true
         );
         
@@ -284,7 +286,7 @@ class UsersController extends Controller
                 $oauthModel->save(false);
                 
                 $identity = UserIdentity::forceLogin($userModel);
-                Yii::app()->user->login($identity);
+                Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
                 unset(Yii::app()->session['oauth_model']);
                 
                 $this->redirect(array(
@@ -327,8 +329,6 @@ class UsersController extends Controller
         $user = Users::model()->findByPk(Yii::app()->user->__userData['id']);
         $model->id = $user->id;
         
-        // var_dump($model, get_class($model));
-        
         if (isset($_POST[$this->index])) {
             $post = $_POST[$this->index];
             
@@ -340,8 +340,7 @@ class UsersController extends Controller
             $model->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');
             
             if ($model->validate()) {
-                //$model->uploadAvatar($user);
-              var_dump($post, $model->newAvatar, $model->avatarX, $model->avatarY, $model->avatarWidth, $model->avatarHeight, $model->avatarWidth, $model->avatarHeight);
+                $model->uploadAvatar($user);
             }
         }
         
@@ -349,12 +348,5 @@ class UsersController extends Controller
             'model' => $model,
             'user' => $user
         ));
-    }
-
-    public function actionSaveAvatar()
-    {
-        if (isset($_POST[$this->index])) {
-            var_dump($_POST[$this->index]);
-        }
     }
 }

@@ -136,7 +136,7 @@ class AccountInteraction extends CActiveRecord
     
     public function sendEmail($scenario)
     {
-        $mailer = new Smailer;
+        $mailer = new SMailer;
         $mailer->init($scenario, $this->user->name, $this->email, $this->key, $this->newPassword);
         
         try {

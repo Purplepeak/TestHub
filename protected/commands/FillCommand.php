@@ -1,56 +1,36 @@
 <?php
 
-class SHelper extends CApplicationComponent
+/**
+ * Команда "fill" позволяет сгенерировать и наполнить базу данными.
+ */
+
+mb_internal_encoding('utf-8');
+
+class FillCommand extends CConsoleCommand
 {
 
-    public static function deleteFolder($dir, $completeDelete = false)
-    {
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != '.' && $object != '..') {
-                    if (is_dir($subDir = $dir . '/' . $object)) {
-                        self::deleteFolder($subDir);
-                        rmdir($subDir);
-                    } else {
-                        unlink($subDir);
-                    }
-                }
-            }
-            
-            if ($completeDelete) {
-                rmdir($dir);
-            }
-        }
-    }
-
-    public static function getSafeImageName($name, $prefix, $id)
-    {
-        $nameReg = '{(.*)(\\..+)}ui';
-        if (preg_match($nameReg, $name, $nameArray)) {
-            $fileName = $nameArray[1];
-            $fileExt = $nameArray[2];
-        }
-        
-        $safeName = uniqid($prefix . '_' . $id . '_') . $fileExt;
-        
-        return $safeName;
-    }
+    /**
+     * Команда добавляет преподавателей к имеющимся группам.
+     * Синтаксис: yiic fill teachers --groupsPerTeacher=4 --groupStart=1001 --groupEnd=1020.
+     * Группам со 1001 до 1020 будут назначены преподаватели. Один преподаватель
+     * берет на себя четыре группы. Число групп относительно groupsPerTeacher
+     * должно быть целым.
+     */
     
-    public function beachers($groupsPerTeacher, $groupStart, $groupEnd, $singleGroup = null)
+    public function actionTeachers($groupsPerTeacher, $groupStart, $groupEnd, $singleGroup = null)
     {
         if (! isset($singleGroup) && $groupsPerTeacher > 1) {
             $numberOfGroups = ($groupEnd - $groupStart) + 1;
-        
+            
             $numbersOfTeachers = floor($numberOfGroups / $groupsPerTeacher);
-        
+            
             $teacherDataArray = $this->getRandomUserData($numbersOfTeachers, 25);
-        
+            
             $firstGroup = $groupStart;
-        
+            
             foreach ($teacherDataArray as $teacher) {
                 $lastGroup = $firstGroup + ($groupsPerTeacher - 1);
-        
+                
                 $attributes = array(
                     'name' => $teacher['name'],
                     'surname' => $teacher['surname'],
@@ -60,33 +40,35 @@ class SHelper extends CApplicationComponent
                     'groups' => "{$firstGroup}-{$lastGroup}",
                     'type' => 'teacher',
                     'password' => '$2a$13$hcBaAd16nNnSfyQnvquezeNrMU4Hop./4sOvDyGPW9/BOx0AFZ5F.'
-                        );
-        
+                );
+                
                 $teacherModel = new Teacher();
-        
+                
                 $teacherModel->attributes = $attributes;
-        
+                
                 $teacherModel->isGroupExist();
-        
+                
                 $teacherModel->save(false);
-        
+                
                 $firstGroup = $lastGroup + 1;
             }
         }
     }
     
-    public function gggg($studentsPerGroup)
+    /**
+     * Команда наполняет группы студентами.
+     * Синтаксис: yiic fill students --studentsPerGroup=25.
+     * studentsPerGroup максимально количество студентов на группу.
+     */
+
+    public function actionStudents($studentsPerGroup)
     {
         $groups = Group::model()->findAll();
-    
-        $io = array();
         
         foreach ($groups as $group) {
             $numberOfStudents = $studentsPerGroup - rand(0, 4);
             $studentDataArray = $this->getRandomUserData($numberOfStudents, 25);
             
-            $uu = array();
-    
             foreach ($studentDataArray as $student) {
                 $attributes = array(
                     'name' => $student['name'],
@@ -97,86 +79,120 @@ class SHelper extends CApplicationComponent
                     'group' => "{$group->number}",
                     'type' => 'student',
                     'password' => '$2a$13$hcBaAd16nNnSfyQnvquezeNrMU4Hop./4sOvDyGPW9/BOx0AFZ5F.'
-                        );
-    
-                array_push($uu, $attributes);
+                );
+                
+                $studentModel = new Student();
+                
+                $studentModel->attributes = $attributes;
+                
+                $studentModel->save(false);
             }
-            
-            array_push($io, $uu);
+        }
+    }
+    
+    /**
+     * Команда добавляет группы в базу.
+     * Синтаксис: yiic fill groups --begin=1001 --end=1020.
+     * Группы со 1001 до 1020 будут добавлены в базу.
+     */
+
+    public function actionGroups($begin, $end)
+    {
+        if ($end < $begin && $end !== '0') {
+            return false;
+            Yii::log('Fill command error $end > $begin', CLogger::LEVEL_ERROR, 'application.command.CConsoleCommand');
         }
         
-        return $io;
+        $groups = array();
+        
+        if ($end !== '0') {
+            $numberOfGroups = $end - $begin;
+            for ($i = 0; $i <= $numberOfGroups; $i ++) {
+                array_push($groups, $begin + $i);
+            }
+        } else {
+            array_push($groups, $begin);
+        }
+        
+        foreach ($groups as $groupNumber) {
+            $groupModel = new Group();
+            $groupModel->attributes = array(
+                'number' => $groupNumber
+            );
+            $groupModel->save(false);
+        }
     }
     
-    public function ttt($studentsPerGroup)
-    {
-        $studentsPerGroup = $studentsPerGroup - rand(0, 4);
-        
-        $amountOfFemaleStudents = round(($studentsPerGroup / 100) * 25);
-        $amountOfMaleStudents = $studentsPerGroup - $amountOfFemaleStudents;
-        
-        
-        return array($amountOfFemaleStudents, $amountOfMaleStudents); 
-    }
+    /**
+     * Метод возвратит массив сгенерированных пользователей.
+     * $amount - количество пользователей.
+     * $femalePercent - процент пользователей женского пола среди
+     * общего голичества пользователей.
+     */
 
-    public function getRandomUserData($amount, $femalePercent)
+    private function getRandomUserData($amount, $femalePercent)
     {
         $amountOfFemaleUsers = round(($amount / 100) * $femalePercent);
         $amountOfMaleUsers = $amount - $amountOfFemaleUsers;
-    
-        if($amountOfFemaleUsers == 0) {
-            $usersArray = array('male' => $amountOfMaleUsers);
+        
+        if ($amountOfFemaleUsers == 0) {
+            $usersArray = array(
+                'male' => $amountOfMaleUsers
+            );
         } else {
-            $usersArray = array('male' => $amountOfMaleUsers, 'female' => $amountOfFemaleUsers);
+            $usersArray = array(
+                'male' => $amountOfMaleUsers,
+                'female' => $amountOfFemaleUsers
+            );
         }
-    
+        
         $totalUsersArray = array();
-    
-        foreach($usersArray as $gender => $amountOfUsers) {
+        
+        foreach ($usersArray as $gender => $amountOfUsers) {
             switch ($gender) {
-            	case 'female':
-            	    $nameScenario = 'femaleName';
-            	    $surnameScenario = 'femaleSurname';
-            	    break;
-            	case 'male':
-            	    $nameScenario = 'maleName';
-            	    $surnameScenario = 'maleSurname';
-            	    break;
-            	default:
-            	    Yii::log('SHelper getRandomUserData() incorrect gender: ' . $gender, CLogger::LEVEL_ERROR, 'application.components.shelper');
-            	    break;
+                case 'female':
+                    $nameScenario = 'femaleName';
+                    $surnameScenario = 'femaleSurname';
+                    break;
+                case 'male':
+                    $nameScenario = 'maleName';
+                    $surnameScenario = 'maleSurname';
+                    break;
+                default:
+                    Yii::log('SHelper getRandomUserData() incorrect gender: ' . $gender, CLogger::LEVEL_ERROR, 'application.components.shelper');
+                    break;
             }
-    
+            
             $names = $this->getDataString($nameScenario);
             $surnames = $this->getDataString($surnameScenario);
-    
+            
             $namesArray = $this->getNamesArray($names);
             $surnamesArray = $this->getNamesArray($surnames);
-    
+            
             $excerptNamesArray = $this->getExcerptArray($namesArray, $amountOfUsers);
             $excerptSurnamesArray = $this->getExcerptArray($surnamesArray, $amountOfUsers);
-    
-            $nameSurnamePare = array_combine($excerptNamesArray, $excerptSurnamesArray);
-    
-            $userData = array();
-    
-            foreach ($excerptNamesArray as $key => $name) {
             
+            $nameSurnamePare = array_combine($excerptNamesArray, $excerptSurnamesArray);
+            
+            $userData = array();
+            
+            foreach ($excerptNamesArray as $key => $name) {
+                
                 array_push($userData, array(
-                'name' => $name,
-                'surname' => $excerptSurnamesArray[$key],
-                'email' => $this->getUserEmail(array(
-                $name,
-                $excerptSurnamesArray[$key]
-                )),
-                'gender' => $gender
+                    'name' => $name,
+                    'surname' => $excerptSurnamesArray[$key],
+                    'email' => $this->getUserEmail(array(
+                        $name,
+                        $excerptSurnamesArray[$key]
+                    )),
+                    'gender' => $gender
                 ));
             }
-    
+            
             array_push($totalUsersArray, $userData);
         }
         
-        if(count($totalUsersArray) == 1) {
+        if (count($totalUsersArray) == 1) {
             $result = $totalUsersArray[0];
         } else {
             $result = array_merge($totalUsersArray[0], $totalUsersArray[1]);
@@ -186,6 +202,10 @@ class SHelper extends CApplicationComponent
         
         return $result;
     }
+    
+    /**
+     * Метод делает выборку массивов из глобального массива сгенерированных пользователей
+     */
 
     private function getExcerptArray($array, $amount)
     {
@@ -193,7 +213,7 @@ class SHelper extends CApplicationComponent
         
         $excerptArray = array();
         
-        if($amount == '1') {
+        if ($amount == '1') {
             array_push($excerptArray, $array[$excerptKeys]);
         } else {
             foreach ($excerptKeys as $value) {
@@ -203,6 +223,12 @@ class SHelper extends CApplicationComponent
         
         return $excerptArray;
     }
+    
+    /**
+     * Метод генерирует e-mail на основе имени и фамилии пользователя.
+     * При этом задействуется useTranslit($string), т.к имена хранятся в 
+     * кирилических символах.
+     */
 
     private function getUserEmail(array $namePair)
     {
@@ -225,6 +251,10 @@ class SHelper extends CApplicationComponent
         
         return $emailLogin . $hostArray[$randomHost];
     }
+    
+    /**
+     * Метод возвращает из текстовых файлов строку с именами / фамилиями.
+     */
 
     private function getDataString($scenario)
     {
@@ -248,10 +278,15 @@ class SHelper extends CApplicationComponent
         
         return file_get_contents(dirname(__FILE__) . $file);
     }
+    
+    /**
+     * Метод обрабатывает полученную getDataString($scenario) строку и возвращает 
+     * массив имен / фамилий.
+     */
 
     private function getNamesArray($namesString)
     {
-        $nameReg = '/[а-я]+/iu';
+        $nameReg = '/[а-яёА-ЯЁ]+/u';
         
         if (! preg_match_all($nameReg, $namesString, $namesArray)) {
             Yii::log('preg_match error occurred in getNamesArray() method SHelper', CLogger::LEVEL_ERROR, 'application.components.shelper');
