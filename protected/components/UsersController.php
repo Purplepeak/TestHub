@@ -5,7 +5,11 @@ class UsersController extends Controller
 
     public $userModel;
 
-    public $index;
+    public $index; // TODO: НЕ НУЖЕН ИСПРАВИТЬ
+
+    protected $model;
+
+    protected $defaultModel;
 
     public $layout = '//layouts/column2';
 
@@ -19,20 +23,20 @@ class UsersController extends Controller
 
     public function accessRules()
     {
+        if ($this->userData) {
+            $userType = $this->userData['type'];
+        } else {
+            $userType = '';
+        }
+        
         return array(
             array(
                 'allow',
                 'actions' => array(
-                    'index',
                     'view',
-                    'registration',
-                    'login',
-                    'tests',
                     'list',
-                    'socialregistration',
-                    'profile',
-                    'changeAvatar',
-                    'getAvatar'
+                    'registration',
+                    'testss', // DELETE AFTER DEV
                 ),
                 'users' => array(
                     '*'
@@ -41,10 +45,20 @@ class UsersController extends Controller
             array(
                 'allow',
                 'actions' => array(
-                    'logout'
+                    'changeAvatar',
+                    'profile'
                 ),
                 'users' => array(
                     '@'
+                )
+            ),
+            array(
+                'allow',
+                'actions' => array(
+                    'startTest'
+                ),
+                'roles' => array(
+                    'startTestUser'
                 )
             ),
             array(
@@ -65,18 +79,6 @@ class UsersController extends Controller
                 )
             )
         );
-    }
-
-    public function actionIndex()
-    {
-        $dataProvider = new CActiveDataProvider($this->index, array(
-            'criteria' => array(
-                'condition' => 'active=true'
-            )
-        ));
-        $this->render('index', array(
-            'dataProvider' => $dataProvider
-        ));
     }
 
     public function actionAdmin()
@@ -143,69 +145,9 @@ class UsersController extends Controller
         ));
     }
 
-    public function actionLogin()
+    public function actionDelete($id)
     {
-        $service = Yii::app()->request->getQuery('service');
-        
-        if (isset($service)) {
-            
-            /**
-             * Так как провайдеры отдают значение гендерной принадлежности пользователя каждый по разному,
-             * необходимо передать расширению значения, которые допустимы для нашей базы.
-             * По умолчанию $genderArray = array('female' => 1,'male' => 2,'undefined' => 3);
-             */
-            
-            $genderArray = array(
-                'female' => 'female',
-                'male' => 'male',
-                'undefined' => 'undefined'
-            );
-            
-            $serviceClass = Yii::app()->soauth->getClass($service, $genderArray);
-            
-            if ($serviceClass->authenticate()) {
-                $socialAttributes = $serviceClass->socialAttributes();
-                
-                $socialModel = SocialAccounts::model();
-                $socialModel->attributes = $socialAttributes;
-                
-                $oauthModel = $socialModel->validateSocialModel();
-                
-                if (! empty($oauthModel)) {
-                    Yii::app()->session['oauth_model'] = $oauthModel;
-                    $this->redirect(array(
-                        'socialRegistration'
-                    ));
-                }
-                
-                $this->redirect(array(
-                    'site/index'
-                ));
-            }
-        }
-        
-        $model = new LoginForm();
-        $model->scenario = 'login';
-        $model->userClass = $this->userModel;
-        
-        if (isset($_POST['LoginForm'])) {
-            $model->attributes = $_POST['LoginForm'];
-            if ($model->validate() && $model->login())
-                $this->redirect(array(
-                    'site/index'
-                ));
-        }
-        
-        $this->redirectIfLogged('//users/login', array(
-            'model' => $model
-        ), array(
-            'site/index'
-        ));
-    }
-
-    public function actionDelete()
-    {
-        $this->loadModel()->delete();
+        $this->loadModel($id)->delete();
         
         if (! Yii::app()->request->isAjaxRequest) {
             $this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array(
@@ -214,9 +156,9 @@ class UsersController extends Controller
         }
     }
 
-    public function actionUpdate()
+    public function actionUpdate($id)
     {
-        $model = $this->loadModel();
+        $model = $this->loadModel($id);
         
         if (isset($_POST[$this->index])) {
             $model->attributes = $_POST[$this->index];
@@ -232,101 +174,29 @@ class UsersController extends Controller
         ));
     }
 
-    public function actionView()
+    public function actionView($id)
     {
-        $model = $this->loadModel();
+        $model = $this->loadModel($id);
         
         $this->render('//users/view', array(
             'model' => $model,
-            'externalProfile' => true,
+            'externalProfile' => true
         ));
     }
-
-    public function loadModel()
-    {
-        if (isset($_GET['id'])) {
-            
-            $model = $this->userModel->findByPk($_GET['id']);
-        }
-        
-        if ($model === null) {
-            throw new CHttpException(404, 'The requested page does not exist.');
-        }
-        
-        return $model;
-    }
-
-    public function actionSocialRegistration()
-    {
-        $userModel = $this->userModel;
-        $userModel->scenario = 'oauth';
-        $userModel->isNewRecord = true;
-        $oauthModel = Yii::app()->session['oauth_model'];
-        
-        $userAttributes = json_decode($oauthModel->info);
-        $userModel->attributes = array(
-            'name' => $userAttributes->name,
-            'surname' => $userAttributes->surname,
-            'gender' => $userAttributes->gender,
-            'active' => true
-        );
-        
-        $this->performAjaxValidation($userModel);
-        
-        if (isset($_POST[$this->index])) {
-            $post = $_POST[$this->index];
-            $userModel->attributes = $post;
-            
-            if ($userModel->validate()) {
-                
-                $userModel->save(false);
-                Users::model()->deleteNotActivated();
-                
-                $oauthModel->user_id = $userModel->id;
-                $oauthModel->save(false);
-                
-                $identity = UserIdentity::forceLogin($userModel);
-                Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
-                unset(Yii::app()->session['oauth_model']);
-                
-                $this->redirect(array(
-                    'site/index'
-                ));
-            }
-        }
-        
-        $this->redirectIfLogged('//users/registration', array(
-            'model' => $userModel
-        ), array(
-            'site/index'
-        ));
-    }
-
+    
     public function actionProfile()
     {
-        if (Yii::app()->user->isGuest) {
-            $this->redirect(array(
-                'login'
-            ));
-        } else {
-            $model = Users::model()->findByPk(Yii::app()->user->__userData['id']);
-            
-            $this->render('//users/view', array(
-                'model' => $model
-            ));
-        }
+        $model = Users::model()->findByPk(Yii::app()->user->__userData['id']);
+        
+        $this->render('//users/view', array(
+            'model' => $model
+        ));
     }
 
     public function actionChangeAvatar()
     {
-        if (Yii::app()->user->isGuest) {
-            $this->redirect(array(
-                'login'
-            ));
-        }
-        
         $model = $this->userModel;
-        $user = Users::model()->findByPk(Yii::app()->user->__userData['id']);
+        $user = Users::model()->findByPk($this->userData['id']);
         $model->id = $user->id;
         
         if (isset($_POST[$this->index])) {

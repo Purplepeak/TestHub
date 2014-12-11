@@ -4,6 +4,14 @@ class StudentTestController extends Controller
 {
 
     public $layout = '//layouts/column2';
+    
+    public function filters()
+    {
+        return array(
+            'accessControl', // perform access control for CRUD operations
+            'postOnly + delete' // we only allow deletion via POST request
+        );
+    }
 
     public function actionIndex()
     {
@@ -25,6 +33,13 @@ class StudentTestController extends Controller
                 'users' => array(
                     '*'
                 )
+            ),
+            array(
+                'allow',
+                'actions' => array(
+                    'myTests'
+                ),
+                'expression' => "UsersController::userAccess('student')"
             ),
             array(
                 'allow', // allow authenticated user to perform 'create' and 'update' actions
@@ -53,6 +68,23 @@ class StudentTestController extends Controller
                 )
             )
         );
+    }
+    
+    public function actionMyTests()
+    {
+        $model = new StudentTest();
+   
+        $model->unsetAttributes();
+    
+        if (isset($_GET['StudentTest'])) {
+            $model->attributes = $_GET['StudentTest'];
+            $model->testName = isset($_GET['StudentTest']['testName']) ? $_GET['StudentTest']['testName'] : '';
+            $model->testTimeLimit = isset($_GET['StudentTest']['testTimeLimit']) ? $_GET['StudentTest']['testTimeLimit'] : '';
+        }
+    
+        $this->render('s_tests', array(
+            'model' => $model
+        ));
     }
 
     public function actionCreate()

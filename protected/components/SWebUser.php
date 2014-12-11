@@ -5,9 +5,12 @@
  * информацию о пользователе.
  *
  */
-
 class SWebUser extends CWebUser
 {
+
+    public $allowAutoLogin = true;
+    
+    private $_model = null;
 
     public function __get($name)
     {
@@ -25,21 +28,37 @@ class SWebUser extends CWebUser
     {
         $userData = $identity->getUserData();
         
-        $this->setState('__userData', $userData);
-        
-        if(!isset($userData['avatar'])) {
+        if (! isset($userData['avatar'])) {
             $mainAvatar = Yii::app()->request->baseUrl . Yii::app()->params['defaultMainAvatar'];
             $menuAvatar = Yii::app()->request->baseUrl . Yii::app()->params['defaultMenuAvatar'];
         } else {
-            $avatarDir = Yii::app()->request->baseUrl . Yii::app()->params['avatarRelativePath']. '/' .$userData['id'];
+            $avatarDir = Yii::app()->request->baseUrl . Yii::app()->params['avatarRelativePath'] . '/' . $userData['id'];
             $avatarCropper = new SAvatarCropper($avatarDir);
             $mainAvatar = $avatarCropper->link($userData['cropped_avatar'], Yii::app()->params['mainAvatarSize']['width'], Yii::app()->params['mainAvatarSize']['height'], 'crop');
             $menuAvatar = $avatarCropper->link($userData['cropped_avatar'], Yii::app()->params['menuAvatarSize']['width'], Yii::app()->params['menuAvatarSize']['height'], 'crop');
         }
         
-        $this->setState('__userMenuAvatar', $menuAvatar);
-        $this->setState('__userMainAvatar', $mainAvatar);
+        $states = array(
+            '__userData' => $userData,
+            '__userMenuAvatar' => $menuAvatar,
+            '__userMainAvatar' => $mainAvatar
+        );
+        
+        $identity->setPersistentStates($states);
         
         parent::login($identity, $duration);
+    }
+    
+    public function getRole() {
+        if($user = $this->getModel()){
+            return $user->type;
+        }
+    }
+    
+    public function getModel(){
+        if (!$this->isGuest && $this->_model === null){
+            $this->_model = Users::model()->findByPk($this->id, array('select' => 'type'));
+        }
+        return $this->_model;
     }
 }

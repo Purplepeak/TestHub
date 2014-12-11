@@ -27,11 +27,6 @@
 	</div>
 
 	<div class="row">
-		<?php echo $form->label($model,'rules'); ?>
-		<?php echo $form->textArea($model,'rules',array('rows'=>6, 'cols'=>50)); ?>
-	</div>
-
-	<div class="row">
 		<?php echo $form->label($model,'minimum_score'); ?>
 		<?php echo $form->textField($model,'minimum_score'); ?>
 	</div>
@@ -44,11 +39,6 @@
 	<div class="row">
 		<?php echo $form->label($model,'attempts'); ?>
 		<?php echo $form->textField($model,'attempts'); ?>
-	</div>
-
-	<div class="row">
-		<?php echo $form->label($model,'difficulty'); ?>
-		<?php echo $form->textField($model,'difficulty',array('size'=>20,'maxlength'=>20)); ?>
 	</div>
 
 	<div class="row">

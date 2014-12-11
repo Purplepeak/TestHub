@@ -34,13 +34,16 @@ class Teacher extends Users
     public $_type = 'teacher';
 
     public $groupNumber = '';
-    
+
     protected $searchPageSize = 80;
+    
+    public $testName;
 
     public function defaultScope()
     {
         return array(
-            'condition' => "type='{$this->_type}'"
+            'condition' => "teacher.type='{$this->_type}'",
+            'alias' => 'teacher',
         );
     }
 
@@ -56,12 +59,12 @@ class Teacher extends Users
             'groups',
             'required',
             'on' => 'register, oauth',
-            'message' => 'Поле не должно быть пустым'
+            'message' => 'Поле не должно быть пустым.'
         ), array(
             'groups',
             'match',
             'pattern' => '/^[0-9А-Яа-яёЁ\s,-]+$/ui',
-            'message' => 'Необходимо указать номера групп через запятую или побел. Так же вы можете указать несколько подряд идущих номеров: 2450-2455'
+            'message' => 'Необходимо указать номера групп через запятую или побел. Вы также можете указать несколько подряд идущих номеров: 2450-2455.'
         ), array(
             'accessCode',
             'required',
@@ -70,7 +73,7 @@ class Teacher extends Users
         ), array(
             'accessCode',
             'compare',
-            'compareValue' => 'testaccess',
+            'compareValue' => Yii::app()->params['teacherAccessCode'],
             'on' => 'register, oauth',
             'message' => 'Введен неверный код доступа.'
         ), array(
@@ -83,12 +86,6 @@ class Teacher extends Users
         ));
         
         return $rules;
-    }
-
-    public function getGroupsToString()
-    {
-        $t = CHtml::listData($this->groups1, 'id', 'number');
-        return implode(',', $t);
     }
 
     public function relations()
@@ -127,56 +124,13 @@ class Teacher extends Users
     }
 
     /**
-     * Группы можно указывать через: пробел, запятую, несколько подряд идущих групп
-     * через дефис.
-     * Задача этого метода - отформатировать строку с группами и превратить ее
-     * в массив с номерами отдельных групп, к которым преподаватель имеет отношение.
-     */
-    public function normalizeGroups($string)
-    {
-        $groupStringReg = '/[0-9-]+[А-Яа-яёЁ\s]*/ui';
-        $dashReg = '/(-\s*[0-9]+)\s+([^,])/';
-        
-        $newString = preg_replace($dashReg, '$1,$2', $string);
-        preg_match_all($groupStringReg, $newString, $matches);
-        $manyGroups = array();
-        $singleGroups = array();
-        foreach ($matches[0] as $number) {
-            $separator = '-';
-            $normalizeString = str_replace(' ', '', $number);
-            
-            if (mb_strpos($normalizeString, $separator) !== false) {
-                $list = explode('-', $normalizeString);
-                
-                if (ctype_digit($list[1]) and ctype_digit($list[0])) {
-                    $numberOfGroups = $list[1] - $list[0];
-                }
-                
-                if ($numberOfGroups < 1) {
-                    $this->addError('groups', 'Некорректо указаны несколько подряд идущих групп');
-                }
-                
-                for ($i = 0; $i <= $numberOfGroups; $i ++) {
-                    array_push($manyGroups, $list[0] + $i);
-                }
-            } else {
-                array_push($singleGroups, $normalizeString);
-            }
-        }
-        
-        $result = array_merge($singleGroups, $manyGroups);
-        
-        return $result;
-    }
-
-    /**
      * Проверяет, существуют ли введенные преподавателем группы
      * в базе данных.
      */
     public function isGroupExist()
     {
         if (! empty($this->groups)) {
-            $groupArray = $this->normalizeGroups($this->groups);
+            $groupArray = Group::model()->normalizeGroups($this->groups, $this, 'groups');
             $teacherGroups = array();
             
             $criteria = new CDbCriteria();
@@ -189,23 +143,12 @@ class Teacher extends Users
                 array_push($teacherGroups, $object->id);
             }
             
-            $incorrectGroups = array_diff($groupArray, $matches);
-            
-            if (count($incorrectGroups) > 7) {
-                $incorrectGroups = array_slice($incorrectGroups, 0, 7);
-                $incorrectList = implode(', ', $incorrectGroups) . ' и т.д.';
-            } else {
-                $incorrectList = implode(', ', $incorrectGroups);
-            }
-            
-            if (! empty($incorrectGroups)) {
-                $this->addError('groups', 'Следующих из указанных вами групп не существует: ' . $incorrectList);
-            }
+            Group::model()->findIncorrectGroups($groupArray, $matches, $this, 'groups', 'Следующих из указанных вами групп не существует: ');
             
             $this->groups1 = $teacherGroups;
         }
     }
-    
+
     public function addSearchConditions($criteria)
     {
         $criteria->with = array(
@@ -222,21 +165,49 @@ class Teacher extends Users
             $criteria->compare('groups1.number', '=' . $this->groupNumber, true);
         }
     }
-    
-    public function groupsToString()
+
+    public function searchTests()
+    {
+        $criteria = new CDbCriteria();
+        
+        $criteria->with = array(
+            'tests1' => array(
+                'select' => array(
+                    'id',
+                    'name',
+                    'deadline'
+                ),
+                'together' => true
+            ),
+        );
+        
+        return new CActiveDataProvider($this, array(
+            'criteria' => $criteria,
+            'pagination' => array(
+                'pageSize' => $this->searchPageSize
+            )
+        ));
+    }
+
+    public static function groupsToString($groups)
     {
         $groupLinks = array();
-        foreach ($this->groups1 as $group) {
+        foreach ($groups as $group) {
             $groupLinks[] = GxHtml::link(GxHtml::encode($group->number), array(
                 'student/list',
                 'id' => GxActiveRecord::extractPkValue($group, true)
             ));
         }
         
-        if (empty($this->groups1)) {
+        if (empty($groups)) {
             return 'N/A';
         }
         
         return implode(', ', $groupLinks);
+    }
+    
+    public static function model($className = __CLASS__)
+    {
+        return parent::model($className);
     }
 }

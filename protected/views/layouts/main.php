@@ -11,12 +11,68 @@ $userMainAvatar = '';
 $userMenuAvatar = '';
 
 if(!Yii::app()->user->isGuest && !empty(Yii::app()->user->__userData)) {
-    $userType = Yii::app()->user->__userData['type'];
-    $userId = Yii::app()->user->__userData['id'];
-    $userMainAvatar = Yii::app()->user->__userMainAvatar;
-    $userMenuAvatar = Yii::app()->user->__userMenuAvatar;
+    $userType = CHtml::encode(Yii::app()->user->__userData['type']);
+    $userId = CHtml::encode(Yii::app()->user->__userData['id']);
+    $userMainAvatar = CHtml::encode(Yii::app()->user->__userMainAvatar);
+    $userMenuAvatar = CHtml::encode(Yii::app()->user->__userMenuAvatar);
 }
 
+//var_dump(Yii::app()->user);
+
+$userFunctions = array(
+    array(
+        'label' => 'Профиль',
+        'url' => array(
+            '/' . $userType . '/profile'
+        )
+    ),
+    array(
+        'label' => 'Сменить аватар',
+        'url' => array(
+            '/' . $userType . '/changeAvatar/'
+        )
+    ),
+    array(
+        'label' => 'Выйти',
+        'url' => array(
+            '/site/logout'
+        )
+    )
+);
+
+if ($userType === 'teacher') {
+    $userFunctions = array_slice($userFunctions, 0, 1, true) + array(
+        'createTest' => array(
+            'label' => 'Создать тест',
+            'url' => array(
+                '/test/create'
+            )
+        ),
+        'teacherTests' => array(
+            'label' => 'Мои тесты',
+            'url' => array(
+                '/test/teacher'
+            )
+        ),
+        'myGroups' => array(
+            'label' => 'Мои Группы',
+            'url' => array(
+                '/group/list/f/mygroups'
+            )
+        ),
+    ) + array_slice($userFunctions, 1, count($userFunctions) - 1, true);
+}
+
+if($userType === 'student') {
+    $userFunctions = array_slice($userFunctions, 0, 1, true) + array(
+        'studentTests' => array(
+            'label' => 'Мои тесты',
+            'url' => array(
+                '/studentTest/myTests'
+            )
+        ),
+    ) + array_slice($userFunctions, 1, count($userFunctions) - 1, true);
+}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -43,6 +99,8 @@ if(!Yii::app()->user->isGuest && !empty(Yii::app()->user->__userData)) {
       var mainAvatar = "<?= $userMainAvatar ?>";
       var menuAvatar = "<?= $userMenuAvatar ?>";
     </script>
+    
+    <?= Yii::app()->params['timezoneDetector']->getHtmlJsCode() ?>
     
   </head>
   <body>
@@ -102,30 +160,9 @@ $this->widget('zii.widgets.CMenu', array(
         array(
             'label' => 'Войти',
             'url' => array(
-                '#'
-            ),
-            'linkOptions' => array(
-                'class' => 'dropdown-toggle',
-                'data-toggle' => 'dropdown'
+                '/site/login'
             ),
             'visible' => Yii::app()->user->isGuest,
-            'itemOptions' => array(
-                'class' => 'dropdown'
-            ),
-            'items' => array(
-                array(
-                    'label' => 'Вход для студентов',
-                    'url' => array(
-                        '/student/login'
-                    )
-                ),
-                array(
-                    'label' => 'Вход для преподавателей',
-                    'url' => array(
-                        '/teacher/login'
-                    )
-                )
-            )
         ),
 array(
     'label' => '<img class="js-user-menu-avatar" src="">',
@@ -150,26 +187,7 @@ array(
                 'class' => 'dropdown'
             ),
             'visible' => !Yii::app()->user->isGuest,
-            'items' => array(
-                array(
-                    'label' => 'Профиль',
-                    'url' => array(
-                        '/' .$userType. '/profile'
-                    )
-                ),
-                array(
-                    'label' => 'Сменить аватар',
-                    'url' => array(
-                        '/' .$userType. '/changeAvatar/'
-                    )
-                ),
-                array(
-                    'label' => 'Выйти',
-                    'url' => array(
-                        '/site/logout'
-                    )
-                )
-            )
+            'items' => $userFunctions
         ),
         array(
             'label' => 'Регистрация',

@@ -18,10 +18,10 @@
     ),
 	'columns'=>array(
 	    array(
-	    'name'=>'number',
-		'value'=>'CHtml::link($data->number, Yii::app()->createUrl("student/list", array("id"=>$data->id)))',
-	    'type'  => 'raw',
-	        ),
+	        'name'=>'number',
+		    'value'=>'CHtml::link(CHtml::encode($data->number), Yii::app()->createUrl("student/list", array("id"=>$data->id)))',
+	        'type'  => 'raw',
+	    ),
 	    array(
 	        'name' => 'fullname',
 	        'header'=>'Преподаватель',
@@ -39,6 +39,15 @@
 	            return implode(', ', $namesLinks);
 	        },
 	        'type'  => 'raw',
+	    ),
+	    array(
+	        'name'=>'numberOfStudents',
+	        'header' => 'Cтудентов в группе',
+	        'value'=>function($data) {
+                return count($data->student);
+            },
+	        'type'  => 'raw',
+	        'filter' => false,
 	    ),
 	    
 	),

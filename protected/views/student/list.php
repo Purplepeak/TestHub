@@ -13,6 +13,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
     'dataProvider' => $model->search(),
     'enableSorting' => false,
     'emptyText' => 'Студентов не найдено',
+    'nullDisplay' => 'N/A',
     'summaryText' => '',
     'filter' => $model,
     'pager' => array(
@@ -22,7 +23,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
         array(
             'name' => 'fullname',
             'header' => $header,
-            'value' => 'CHtml::link($data->getFullName(), Yii::app()->createUrl("student/view", array("id"=>$data->id)))',
+            'value' => 'CHtml::link(CHtml::encode($data->getFullName()), Yii::app()->createUrl("student/view", array("id"=>$data->id)))',
             'type' => 'raw'
         )
     )

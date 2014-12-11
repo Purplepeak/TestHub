@@ -6,6 +6,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
     'dataProvider' => $model->search(),
     'enableSorting' => false,
     'emptyText' => 'Преподавателей не найдено',
+    'nullDisplay' => 'N/A',
     'summaryText' => '',
     'filter' => $model,
     'pager' => array(
@@ -15,7 +16,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
         array(
             'name' => 'fullname',
             'header' => 'Преподаватели',
-            'value' => 'CHtml::link($data->getFullName(), Yii::app()->createUrl("teacher/view", array("id"=>$data->id)))',
+            'value' => 'CHtml::link(CHtml::encode($data->getFullName()), Yii::app()->createUrl("teacher/view", array("id"=>$data->id)))',
             'type' => 'raw'
         ),
         array(
@@ -24,7 +25,7 @@ $this->widget('zii.widgets.grid.CGridView', array(
             'type' => 'html',
             'value' => function ($data)
             {
-                return $data->groupsToString();
+                return Teacher::groupsToString($data->groups1);
             }
         )
     )

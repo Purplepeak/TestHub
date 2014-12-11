@@ -2,6 +2,16 @@
 
 class StudentController extends UsersController
 {
+    protected $model;
+    
+    protected $defaultModel;
+    
+    public function init()
+    {
+        $this->defaultModel = Student::model();
+    
+        parent::init();
+    }
 
     public function beforeAction($action)
     {
@@ -40,5 +50,10 @@ class StudentController extends UsersController
     {
         $this->userModel = new Student('search');
         parent::actionAdmin();
+    }
+    
+    public function actionStartTest()
+    {
+        var_dump('Hello');
     }
 }

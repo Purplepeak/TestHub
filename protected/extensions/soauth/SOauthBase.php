@@ -212,7 +212,7 @@ abstract class SOauthBase extends CComponent
     }
 
     /**
-     * Преобразует и обрабатывает на на наличие ошибок полученную
+     * Преобразует и обрабатывает на наличие ошибок полученную
      * JSON строку
      */
     protected function parseJson($response)

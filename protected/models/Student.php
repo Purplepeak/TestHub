@@ -37,7 +37,8 @@ class Student extends Users
     public function defaultScope()
     {
         return array(
-            'condition' => "type='{$this->_type}'"
+            'condition' => "student.type='{$this->_type}'",
+            'alias' => 'student',
         );
     }
 
@@ -150,5 +151,10 @@ class Student extends Users
         if(isset($this->searchGroup)) {
             $criteria->addInCondition('group_id', array($this->searchGroup));
         }
+    }
+    
+    public static function model($className = __CLASS__)
+    {
+        return parent::model($className);
     }
 }

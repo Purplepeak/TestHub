@@ -2,11 +2,6 @@
 /* @var $this TestController */
 /* @var $model Test */
 
-$this->breadcrumbs=array(
-	'Tests'=>array('index'),
-	'Manage',
-);
-
 $this->menu=array(
 	array('label'=>'List Test', 'url'=>array('index')),
 	array('label'=>'Create Test', 'url'=>array('create')),
@@ -48,16 +43,12 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 		'id',
 		'name',
 		'foreword',
-		'rules',
 		'minimum_score',
 		'time_limit',
-		/*
 		'attempts',
-		'difficulty',
 		'create_time',
 		'deadline',
 		'teacher_id',
-		*/
 		array(
 			'class'=>'CButtonColumn',
 		),

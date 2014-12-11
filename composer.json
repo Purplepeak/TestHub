@@ -1,7 +1,8 @@
 {
     "require": {
-        "yiisoft/yii": "1.1.14",
+        "yiisoft/yii": "1.1.15",
         "twig/twig": "v1.15.1",
-        "swiftmailer/swiftmailer": "v5.2.1"
+        "swiftmailer/swiftmailer": "v5.2.1",
+        "dater/dater": "2.0.2"
     }
 }

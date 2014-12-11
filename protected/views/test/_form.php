@@ -8,85 +8,58 @@
 
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'test-form',
-	// Please note: When you enable ajax validation, make sure the corresponding
-	// controller action is handling ajax validation correctly.
-	// There is a call to performAjaxValidation() commented in generated controller code.
-	// See class documentation of CActiveForm for details on this.
-	'enableAjaxValidation'=>false,
+	'enableAjaxValidation'=>true,
+    'enableClientValidation'=>true,
+    'clientOptions'=>array(
+        'validateOnSubmit'=>true,
+    ),
+    'focus'=>array($model,'name'),
 )); ?>
-
-	<p class="note">Fields with <span class="required">*</span> are required.</p>
 
 	<?php echo $form->errorSummary($model); ?>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'id'); ?>
-		<?php echo $form->textField($model,'id'); ?>
-		<?php echo $form->error($model,'id'); ?>
-	</div>
-
-	<div class="row">
-		<?php echo $form->labelEx($model,'name'); ?>
+		<?php echo $form->labelEx($model,'Название теста'); ?>
 		<?php echo $form->textField($model,'name',array('size'=>45,'maxlength'=>45)); ?>
 		<?php echo $form->error($model,'name'); ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'foreword'); ?>
+		<?php echo $form->labelEx($model,'Предисловие'); ?>
 		<?php echo $form->textArea($model,'foreword',array('rows'=>6, 'cols'=>50)); ?>
 		<?php echo $form->error($model,'foreword'); ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'rules'); ?>
-		<?php echo $form->textArea($model,'rules',array('rows'=>6, 'cols'=>50)); ?>
-		<?php echo $form->error($model,'rules'); ?>
-	</div>
-
-	<div class="row">
 		<?php echo $form->labelEx($model,'minimum_score'); ?>
+		<p>Минимальное количество баллов, необходимых для прохождения теста</p>
 		<?php echo $form->textField($model,'minimum_score'); ?>
 		<?php echo $form->error($model,'minimum_score'); ?>
 	</div>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'time_limit'); ?>
+		<p>Время за которое студент должен выполнить тест</p>
 		<?php echo $form->textField($model,'time_limit'); ?>
 		<?php echo $form->error($model,'time_limit'); ?>
 	</div>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'attempts'); ?>
+		<p>Число попыток сдачи теста</p>
 		<?php echo $form->textField($model,'attempts'); ?>
 		<?php echo $form->error($model,'attempts'); ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'difficulty'); ?>
-		<?php echo $form->textField($model,'difficulty',array('size'=>20,'maxlength'=>20)); ?>
-		<?php echo $form->error($model,'difficulty'); ?>
-	</div>
-
-	<div class="row">
-		<?php echo $form->labelEx($model,'create_time'); ?>
-		<?php echo $form->textField($model,'create_time'); ?>
-		<?php echo $form->error($model,'create_time'); ?>
-	</div>
-
-	<div class="row">
 		<?php echo $form->labelEx($model,'deadline'); ?>
+		<p>Крайний срок для сдачи теста</p>
 		<?php echo $form->textField($model,'deadline'); ?>
 		<?php echo $form->error($model,'deadline'); ?>
 	</div>
 
-	<div class="row">
-		<?php echo $form->labelEx($model,'teacher_id'); ?>
-		<?php echo $form->textField($model,'teacher_id'); ?>
-		<?php echo $form->error($model,'teacher_id'); ?>
-	</div>
-
 	<div class="row buttons">
-		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save'); ?>
+		<?php echo CHtml::submitButton('Создать и перейти к созданию вопросов для теста'); ?>
 	</div>
 
 <?php $this->endWidget(); ?>

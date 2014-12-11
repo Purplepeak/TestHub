@@ -5,11 +5,22 @@
 
 // This is the main Web application configuration. Any writable
 // CWebApplication properties can be configured here.
+
+$dater = new Dater\Dater(new Dater\Locale\Ru(), 'Europe/Moscow');
+$dater->setClientTimezone('Europe/London');
+$timezoneDetector = new Dater\TimezoneDetector();
+//$dater->setClientTimezone($timezoneDetector->getClientTimezone());
+
+$dataHandler = new Dater\DataHandler($dater);
+$dataHandler->convertRequestDataToServerTimezone();
+
 return array(
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
     'name' => 'TestHub',
     'aliases' => array(
-        'avatarFolder' => 'webroot.avatars'
+        'avatarFolder' => 'webroot.avatars',
+        'forewordImages' => 'webroot.uploads.testImages.foreword',
+        'questionImages' => 'webroot.uploads.testImages.question'
     ),
     
     // preloading 'log' component
@@ -24,7 +35,10 @@ return array(
         'ext.giix-components.*',
         'ext.CSLinkPager',
         'ext.smailer.*',
-        'ext.savatar.*'
+        'ext.savatar.*',
+        'ext.DynamicTabularForm.*',
+        'ext.CJuiDateTimePicker.*',
+        'ext.imperavi-redactor-widget.*'
     ),
     
     'modules' => array(
@@ -48,15 +62,35 @@ return array(
     'components' => array(
         'user' => array(
             'class' => 'SWebUser',
+            'loginUrl'=>array('site/login'),
             'allowAutoLogin' => true
+        ),
+        'file'=>array(
+            'class'=>'ext.file.CFile',
+        ),
+        'authManager'=>array(
+            'class'=>'SPhpAuthManager',
+            'defaultRoles' => array('guest'),
         ),
         'urlManager' => array(
             'urlFormat' => 'path',
             'showScriptName' => false,
             'rules' => array(
-                'fblogin' => 'social/fblogin',
                 'avatars/<id:\d+>/<res:\d+x\d+>/<method:[a-zA-z]+>/<img:[\w.]+>' => 'site/getAvatar',
-                '' => 'site/index'
+                '' => 'site/index',
+               '<_c:(studentTest|test|group|student)>/<_a:(myTests|teacher|list)>' => '<_c>/<_a>',
+            )
+        ),
+        'clientScript' => array(
+            'packages' => array(
+                'jquery' => array(
+                    'baseUrl' => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/',
+                    'js' => array('jquery.min.js'),
+                ),
+                'jquery.ui'=>array(
+                    'baseUrl'=>'//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/',
+                    'js'=>array('jquery-ui.min.js'),
+                ),
             )
         ),
         
@@ -88,7 +122,7 @@ return array(
             )
         ),
         'request' => array(
-            'enableCsrfValidation' => false,
+            'enableCsrfValidation' => true,
             'enableCookieValidation' => true,
             'csrfCookie' => array(
                 'httpOnly' => true
@@ -139,6 +173,14 @@ return array(
         'siteEmail' => array(
             'email' => 'testhubv2@gmail.com', // Почта для отправки пользователям различной информации, например, при регистрации
             'password' => '901117testhub'
-        )
+        ),
+        'adminEmail' => 'admin@th.ru',
+        'teacherAccessCode' => 'testaccess',
+        'serverLocale' => 'Europe/Moscow',
+        'dater' => $dater,
+        'dataHandler' => $dataHandler,
+        'timezoneDetector' => $timezoneDetector,
+        'tmpFolder' => '/uploads/tmp', // Папка для временных файлов загружаемых пользователем
+        'testImages' => '/uploads/testImages', // Папка с изображениями, которые содержит тест
     )
 );

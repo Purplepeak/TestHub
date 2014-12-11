@@ -59,7 +59,7 @@ if($user == 'teacher/login') {
 	</div>
 
 	<div class="row buttons">
-		<?php echo CHtml::submitButton('Войти'); ?>
+		<?php echo CHtml::submitButton('Войти', array('class' => 'login-button')); ?>
 	</div>
 	
 	<p>

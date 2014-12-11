@@ -20,7 +20,6 @@
         <?php Yii::app()->soauth->renderWidget(array('action' => "{$model->_type}/login" , 'scenario' => 'registration')); ?>
   </div>
 <?php endif;?>
-<br>
 <?php $this->renderPartial('//users/register_form', array('model'=>$model));?>
 
 <div class="form-note">

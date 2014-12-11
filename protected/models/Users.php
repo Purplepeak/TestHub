@@ -5,6 +5,8 @@ class Users extends CActiveRecord
 
     public $_type;
     
+    protected $tableAlias;
+    
     // Пароль
     public $passwordText;
     
@@ -50,6 +52,7 @@ class Users extends CActiveRecord
 
     protected function instantiate($attributes)
     {
+        //var_dump($attributes);
         switch ($attributes['type']) {
             case 'student':
                 $class = 'Student';
@@ -74,7 +77,7 @@ class Users extends CActiveRecord
                 'name, surname',
                 'required',
                 'on' => 'register',
-                'message' => 'Поле не должно быть пустым'
+                'message' => 'Поле не должно быть пустым.'
             ),
             
             array(
@@ -97,8 +100,8 @@ class Users extends CActiveRecord
                 'types' => 'jpg, gif, png',
                 'allowEmpty' => true,
                 'maxSize' => 1500 * 1024,
-                'tooLarge' => 'Размер картинки не должен превышать 1МБ',
-                'wrongType' => 'Допустимые расширения аватара: jpg, gif, png',
+                'tooLarge' => 'Размер картинки не должен превышать 1МБ.',
+                'wrongType' => 'Допустимые расширения аватара: jpg, gif, png.',
                 'on' => 'changeAvatar'
             ),
             
@@ -124,35 +127,35 @@ class Users extends CActiveRecord
                 'unique',
                 'className' => 'Users',
                 'attributeName' => 'email',
-                'message' => 'Этот e-mail уже используется'
+                'message' => 'Этот e-mail уже используется.'
             ),
             
             array(
                 'passwordText, password2, email',
                 'required',
                 'on' => 'register, changePass',
-                'message' => 'Поле не должно быть пустым'
+                'message' => 'Поле не должно быть пустым.'
             ),
             array(
                 'passwordText, password2',
                 'length',
                 'min' => 6,
                 'max' => 200,
-                'tooShort' => 'Пароль слишком короткий (6 символов минимум)',
-                'tooLong' => 'Пароль слишком длинный (200 символов максимум)'
+                'tooShort' => 'Пароль слишком короткий (6 символов минимум).',
+                'tooLong' => 'Пароль слишком длинный (200 символов максимум).'
             ),
             array(
                 'password2',
                 'compare',
                 'compareAttribute' => 'passwordText',
                 'on' => 'register, changePass',
-                'message' => 'Введенные пароли не совпадают'
+                'message' => 'Введенные пароли не совпадают.'
             ),
             array(
                 'name, surname',
                 'length',
                 'max' => 30,
-                'message' => 'Имя или фамилия введены некорректно'
+                'message' => 'Имя или фамилия введены некорректно.'
             ),
             array(
                 'avatar',
@@ -168,7 +171,7 @@ class Users extends CActiveRecord
                 'email',
                 'email',
                 'on' => 'register',
-                'message' => 'e-mail введен некорректно'
+                'message' => 'e-mail введен некорректно.'
             ),
             
             array(
@@ -176,7 +179,7 @@ class Users extends CActiveRecord
                 'match',
                 'pattern' => '/[А-Яа-яёЁ]+/ui',
                 'on' => 'register',
-                'message' => 'Имя и фамилия можгут содержать только кириллические символы'
+                'message' => 'Имя и фамилия могут содержать только кириллические символы.'
             ),
             array(
                 'type',
@@ -192,7 +195,7 @@ class Users extends CActiveRecord
                     self::GENDER_UNDEFINED
                 ),
                 'allowEmpty' => true,
-                'message' => 'Указаный пол не предусматривается правилами'
+                'message' => 'Указаный пол не предусматривается правилами.'
             ),
             array(
                 'captcha',
@@ -218,7 +221,7 @@ class Users extends CActiveRecord
             'id' => 'ID',
             'passwordText' => 'Пароль',
             'password2' => 'Повторите пароль',
-            'email' => 'e-mail',
+            'email' => 'E-mail',
             'time_registration' => 'Время регистрации',
             'name' => 'Имя',
             'surname' => 'Фамилия',
@@ -256,11 +259,20 @@ class Users extends CActiveRecord
         $criteria->compare('avatar', $this->avatar, true);
         $criteria->compare('group_id', $this->group_id);
         
+        $count = $this->count($criteria);
+        
+        $pages=new CPagination($count);
+        $pages->pageSize=15;
+        $pages->applyLimit($criteria);
+        
+        if($this->_type === 'teacher') {
+            $teacherGroups = TeacherGroup::model()->count();
+            $pages->pageSize = $teacherGroups + $count;
+        }
+        
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria,
-            'pagination' => array(
-                'pageSize' => $this->searchPageSize
-            )
+            'pagination' => $pages
         ));
     }
 

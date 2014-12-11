@@ -1,12 +1,6 @@
 <?php
 /* @var $this TestController */
 /* @var $model Test */
-
-$this->breadcrumbs=array(
-	'Tests'=>array('index'),
-	$model->name,
-);
-
 $this->menu=array(
 	array('label'=>'List Test', 'url'=>array('index')),
 	array('label'=>'Create Test', 'url'=>array('create')),

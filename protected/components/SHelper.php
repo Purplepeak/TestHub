@@ -23,6 +23,25 @@ class SHelper extends CApplicationComponent
             }
         }
     }
+    
+    public static function purifyHtml($html)
+    {
+        $purifier = new CHtmlPurifier();
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('HTML.DefinitionID', 'enduser-customize.html tutorial');
+        $config->set('HTML.DefinitionRev', 1);
+        $config->set('AutoFormat.RemoveEmpty', true);
+        $config->set('HTML.Doctype','HTML 4.01 Strict');
+        //$config->set('HTML.AllowedElements','del');
+        $config->set('Cache.SerializerPath',Yii::app()->getRuntimePath());
+        $config->set('Cache.DefinitionImpl', null); // TODO: remove this later!
+    
+    
+        $purifier->options = $config;
+        $cleanHtml = $purifier->purify($html);
+    
+        return $cleanHtml;
+    }
 
     public static function getSafeImageName($name, $prefix, $id)
     {

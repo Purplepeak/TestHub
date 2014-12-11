@@ -9,10 +9,6 @@
  */
 class Admin extends Users
 {
-	/**
-	 * @return string the associated database table name
-	 */
-	
 	public function defaultScope(){
 		return array(
 				'condition'=>"type='admin'",
@@ -29,5 +25,10 @@ class Admin extends Users
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
 		));
+	}
+	
+	public static function model($className = __CLASS__)
+	{
+	    return parent::model($className);
 	}
 }
