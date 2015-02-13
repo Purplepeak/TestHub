@@ -16,8 +16,7 @@ Testhub
 4) Для работы Oauth авторизации в приватном конфиге      https://github.com/Purplepeak/TestHub/blob/master/protected/config/private.php необходимо прописать clientId и clientSecret для всех предложенных ресурсов.
 Для подключения рекапчи указать privateKey и publicKey.
 
-5) По умолчанию включен режим отладки, для его отключения необходимо присвоить false константам: 
-       YII_DEBUG
-       YII_DEBUG_SHOW_PROFILER
-       YII_DEBUG_PROFILING 
-   в https://github.com/Purplepeak/TestHub/blob/master/index.php.
+5) По умолчанию включен режим отладки, для его отключения необходимо присвоить false следующим константам в index.php: 
+       YII_DEBUG,
+       YII_DEBUG_SHOW_PROFILER,
+       YII_DEBUG_PROFILING.
