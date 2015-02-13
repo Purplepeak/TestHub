@@ -29,6 +29,7 @@ class SiteController extends Controller
                 'allow', // allow all users to perform 'index' and 'view' actions
                 'actions' => array(
                     'index',
+                    'getServerTime',
                     'error',
                     'socialRegistration',
                     'login',
@@ -83,6 +84,12 @@ class SiteController extends Controller
     {
         $this->render('index');
     }
+    
+    public function actionGetServerTime()
+    {
+        $now = new DateTime(); 
+        echo $now->format("M j, Y H:i:s O"); 
+    }
 
     public function actionError()
     {
@@ -105,7 +112,7 @@ class SiteController extends Controller
                         $error['message'] = 'Запрос введеный вами некорректен. Пожалуйста, убедитесь в его правильности.';
                         break;
                     case '403':
-                        $error['message'] = 'У вас нет прав доступа на это страницу.';
+                        $error['message'] = 'У вас нет прав доступа на эту страницу.';
                         break;
                     default:
                         $error['message'] = 'Возникла непредвиденная ошибка. Приносим извинения за временные неудобства.';
@@ -124,9 +131,6 @@ class SiteController extends Controller
                 	    break;
                 	case 'RegExrException':
                 	    $error['message'] = 'Возникла ошибка не позволяющая обработать ваш запрос. Пожалуйста, свяжитесь с администрацией воспользовавшись ссылкой ниже.';
-                	    break;
-                	default:
-                	    $error['message'] = $defaultMessage;
                 	    break;
                 }
                 
@@ -169,9 +173,7 @@ class SiteController extends Controller
                     ));
                 }
                 
-                $this->redirect(array(
-                    'index'
-                ));
+                $this->redirect(Yii::app()->user->returnUrl);
             }
         }
         
@@ -182,7 +184,7 @@ class SiteController extends Controller
         if (isset($_POST['LoginForm'])) {
             $model->attributes = $_POST['LoginForm'];
             if ($model->validate() && $model->login())
-                Yii::app()->request->redirect(Yii::app()->user->returnUrl);
+                $this->redirect(Yii::app()->user->returnUrl);
         }
         
         $this->redirectIfLogged('login', array(
@@ -299,7 +301,7 @@ class SiteController extends Controller
     public function actionGetAvatar($id, $res, $method, $img)
     {
         $user = Users::model()->findByPk($id);
-        $avatarDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarFolder'), $user->id);
+        $avatarDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarDir'), $user->id);
         $croppedAvatarDir = sprintf("%s" . "%d" . "%s" . "%d" . "/" . "%s" . "/", $avatarDir, $user->avatarWidth, 'x', $user->avatarHeight, $method);
         
         $resReg = '{(\d+)x(\d+)}';
@@ -348,6 +350,7 @@ class SiteController extends Controller
         $auth->createOperation('deleteTest');
         $auth->createOperation('viewTeacherTests');
         $auth->createOperation('adminTest');
+        $auth->createOperation('beginTest');
         
         /**
          * Операции для QuestionController
@@ -361,8 +364,15 @@ class SiteController extends Controller
         $auth->createOperation('deleteQuestion');
         $auth->createOperation('adminQuestion');
         
+        /**
+         * Операции для StudentTestController
+         */
+        
+        $auth->createOperation('studentTests');
+        
         $bizRuleTest = 'return Yii::app()->user->id==$params["test"]->teacher_id;';
         $bizRuleQuestion = 'return Yii::app()->user->id==$params["question"]->test->teacher_id;';
+        $bizRuleBeginTest = 'return $params["beginAccess"]==true;';
         // $bizRuleUsers = 'return Yii::app()->user->id==$params["question"]->id;';
         
         /**
@@ -374,6 +384,9 @@ class SiteController extends Controller
         
         $task = $auth->createTask('deleteOwnTest', '', $bizRuleTest);
         $task->addChild('deleteTest');
+        
+        $task = $auth->createTask('beginTestForMe', '', $bizRuleBeginTest);
+        $task->addChild('beginTest');
         
         /**
          * Задачи для QuestionController
@@ -408,6 +421,11 @@ class SiteController extends Controller
         // Права STUDENT для контроллера USERS
         
         $role->addChild('startTestUser');
+        
+        // Права STUDENT для контроллера StudentTests
+        
+        $role->addChild('studentTests');
+        $role->addChild('beginTestForMe');
         
         /**
          * TEACHER

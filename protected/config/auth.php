@@ -49,6 +49,13 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
+  'beginTest' => 
+  array (
+    'type' => 0,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
   'viewQuestion' => 
   array (
     'type' => 0,
@@ -98,6 +105,13 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
+  'studentTests' => 
+  array (
+    'type' => 0,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
   'updateOwnTest' => 
   array (
     'type' => 1,
@@ -118,6 +132,17 @@ return array (
     'children' => 
     array (
       0 => 'deleteTest',
+    ),
+  ),
+  'beginTestForMe' => 
+  array (
+    'type' => 1,
+    'description' => '',
+    'bizRule' => 'return $params["beginAccess"]==true;',
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'beginTest',
     ),
   ),
   'updateOwnQuestion' => 
@@ -163,6 +188,8 @@ return array (
     array (
       0 => 'guest',
       1 => 'startTestUser',
+      2 => 'studentTests',
+      3 => 'beginTestForMe',
     ),
   ),
   'teacher' => 

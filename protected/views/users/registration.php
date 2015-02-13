@@ -10,7 +10,7 @@
   <div class = 'reg-header'>
     <h2>Создать новый профиль</h2>
     <div class = 'reg-sign-in'>
-      Уже зарегистрированы? <?php echo CHtml::link('Войти', array("{$model->_type}/login"));?>
+      Уже зарегистрированы? <?php echo CHtml::link('Войти', array("site/login"));?>
     </div>
   </div>
 <?php endif;?>

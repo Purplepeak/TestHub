@@ -52,7 +52,6 @@ class Users extends CActiveRecord
 
     protected function instantiate($attributes)
     {
-        //var_dump($attributes);
         switch ($attributes['type']) {
             case 'student':
                 $class = 'Student';
@@ -99,8 +98,8 @@ class Users extends CActiveRecord
                 'safe' => true,
                 'types' => 'jpg, gif, png',
                 'allowEmpty' => true,
-                'maxSize' => 1500 * 1024,
-                'tooLarge' => 'Размер картинки не должен превышать 1МБ.',
+                'maxSize' => 2000 * 1024,
+                'tooLarge' => 'Размер картинки не должен превышать 2МБ.',
                 'wrongType' => 'Допустимые расширения аватара: jpg, gif, png.',
                 'on' => 'changeAvatar'
             ),
@@ -127,7 +126,7 @@ class Users extends CActiveRecord
                 'unique',
                 'className' => 'Users',
                 'attributeName' => 'email',
-                'message' => 'Этот e-mail уже используется.'
+                'message' => 'Этот адрес уже используется.'
             ),
             
             array(
@@ -171,7 +170,7 @@ class Users extends CActiveRecord
                 'email',
                 'email',
                 'on' => 'register',
-                'message' => 'e-mail введен некорректно.'
+                'message' => 'Email введен некорректно.'
             ),
             
             array(
@@ -221,7 +220,7 @@ class Users extends CActiveRecord
             'id' => 'ID',
             'passwordText' => 'Пароль',
             'password2' => 'Повторите пароль',
-            'email' => 'E-mail',
+            'email' => 'Email',
             'time_registration' => 'Время регистрации',
             'name' => 'Имя',
             'surname' => 'Фамилия',
@@ -346,10 +345,12 @@ class Users extends CActiveRecord
     public function uploadAvatar($user)
     {
         if ($this->scenario === 'changeAvatar') {
-            $imageDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarFolder'), $this->id);
+            $imageDir = sprintf("%s" . "/" . "%d" . "/", Yii::getPathOfAlias('avatarDir'), $this->id);
             
-            if (! file_exists($imageDir)) {
-                mkdir($imageDir, 0777, true);
+            $imageDirObject = Yii::app()->file->set($imageDir, true);
+            
+            if (! $imageDirObject->exists) {
+                $imageDirObject->createDir(0777, $imageDirObject->realpath);
             }
             
             $resolution = array_map('round', array(
@@ -357,10 +358,12 @@ class Users extends CActiveRecord
                 'height' => $this->avatarHeight
             ));
             
-            SHelper::deleteFolder($imageDir);
+            if(!$imageDirObject->isEmpty) {
+                $imageDirObject->purge();
+            }
             
             $safeName = SHelper::getSafeImageName($this->newAvatar->name, 'avatar', $user->id);
-            $this->newAvatar->saveAs($imageDir . $safeName);
+            $this->newAvatar->saveAs($imageDir .'/'. $safeName);
             
             $avatarPath = Yii::app()->params['avatarRelativePath'] . '/' . $user->id;
             
@@ -372,7 +375,7 @@ class Users extends CActiveRecord
             
             $avatarThumb = new SAvatarCropper($imageDir, true);
             $avatarThumb->newImageName = $croppedAvatarName;
-            $avatarThumb->cropWithCoordinates($imageDir . $safeName, $this->avatarX, $this->avatarY, $resolution['width'], $resolution['height'], $resolution['width'], $resolution['height'], 'crop');
+            $avatarThumb->cropWithCoordinates($imageDir .'/'. $safeName, $this->avatarX, $this->avatarY, $resolution['width'], $resolution['height'], $resolution['width'], $resolution['height'], 'crop');
             
             self::model()->updateByPk($user->id, array(
                 'avatarX' => $this->avatarX,
@@ -393,7 +396,7 @@ class Users extends CActiveRecord
 
     public function saveMainAvatar($user)
     {
-        $avatarThumb = new SAvatarCropper(Yii::getPathOfAlias('avatarFolder') . "/{$user->id}/");
+        $avatarThumb = new SAvatarCropper(Yii::getPathOfAlias('avatarDir') . "/{$user->id}/");
         $avatarThumb->cropWithCoordinates($this->avatar, Yii::app()->request->getPost('x'), Yii::app()->request->getPost('y'), Yii::app()->request->getPost('width'), Yii::app()->request->getPost('height'), Yii::app()->request->getPost('width'), Yii::app()->request->getPost('height'), 'crop');
         
         // $this->newAvatar = CUploadedFile::getInstance($model, 'newAvatar');

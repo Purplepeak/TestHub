@@ -98,7 +98,7 @@ class AccountInteraction extends CActiveRecord
     }
 
     /**
-     * Сохраняет данные в таблицу и отправляет пользователю e-mail, который
+     * Сохраняет данные в таблицу и отправляет пользователю Email, который
      * форматируется в зависимости от сценария
      */
     public function saveAndSend($model, $scenario)

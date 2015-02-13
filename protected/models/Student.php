@@ -61,7 +61,7 @@ class Student extends Users
             'group',
             'match',
             'pattern' => '/^[0-9А-Яа-яёЁ]+$/ui',
-            'message' => 'Необходимо указать номер вашей группы в цифровом формате'
+            'message' => 'Номер группы указан неверно'
         ), array(
             'group',
             'isGroupExist'

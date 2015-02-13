@@ -22,7 +22,7 @@ if($user == 'teacher/login') {
     <strong>Ваш пароль был успешно изменен.</strong>
 </div>
 <?php endif;?>
-<p>Введите свой e-mail и пароль, указанный при регистрации:</p>
+<p>Введите свой Email и пароль, указанный при регистрации:</p>
 
 <?php if(Yii::app()->user->hasFlash('confirmError')):?>
     <div class="alert alert-danger">
@@ -49,7 +49,7 @@ if($user == 'teacher/login') {
 		<?php echo $form->labelEx($model,'password'); ?>
 		<?php echo $form->passwordField($model,'password'); ?>
 		<?php echo $form->error($model,'password'); ?>
-		<?php echo CHtml::link('забыли пароль?', array('accountInteraction/passRestore'), array('class' => 'pass-restore'));?>
+		<?php echo CHtml::link('Забыли пароль?', array('accountInteraction/passRestore'), array('class' => 'pass-restore'));?>
 	</div>
 
 	<div class="row rememberMe">
@@ -62,8 +62,12 @@ if($user == 'teacher/login') {
 		<?php echo CHtml::submitButton('Войти', array('class' => 'login-button')); ?>
 	</div>
 	
-	<p>
-	  <?php echo CHtml::link('Не зарегистрированы?', array($user . '/registration'), array('style'=>'font-size:16px'));?>
-	</p>
+	<div class="dropdown">
+      <a class="sign-in-question dropdown-toggle" href="#" data-toggle="dropdown">Не зарегистрированы?</a>
+      <ul class="dropdown-menu">
+        <li><a href="<?= Yii::app()->controller->createUrl('student/registration') ?>">Студент</a></li>
+        <li><a href="<?= Yii::app()->controller->createUrl('teacher/registration') ?>">Преподаватель</a></li>
+      </ul>
+    </div>
 <?php $this->endWidget();?>
 </div><!-- form -->

@@ -3,8 +3,8 @@
 /* @var $model Group */
 ?>
 
-<h2>Список групп</h2>
-<hr>
+<h2 class='first-header'>Группы</h2>
+
 <?php $this->widget('zii.widgets.grid.CGridView', array(
 	'id'=>'group-grid',
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',

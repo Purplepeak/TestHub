@@ -19,8 +19,14 @@ class StudentAnswer extends CActiveRecord
     public $testId;
 
     public $selectedAnswers;
+
+    public $questionNumber;
     
-    private $resultpoints;
+    const NUMBER_M = 11;
+    
+    const NUMBER_D = 4;
+
+    private $requiredMessage = 'Вы не ответили на вопрос';
 
     /**
      *
@@ -41,8 +47,28 @@ class StudentAnswer extends CActiveRecord
         // will receive user inputs.
         return array(
             array(
-                'question_id, student_id, exec_time',
-                'required'
+                'answer_text',
+                'required',
+                'on' => 'string',
+                'message' => $this->requiredMessage
+            ),
+            array(
+                'answer_number',
+                'required',
+                'on' => 'numeric',
+                'message' => $this->requiredMessage
+            ),
+            array(
+                'answer_id',
+                'required',
+                'on' => 'select_one',
+                'message' => $this->requiredMessage
+            ),
+            array(
+                'selectedAnswers',
+                'required',
+                'on' => 'select_many',
+                'message' => $this->requiredMessage
             ),
             array(
                 'question_id, student_id, answer_id, exec_time, result, test_result',
@@ -50,20 +76,26 @@ class StudentAnswer extends CActiveRecord
                 'integerOnly' => true
             ),
             array(
+                'answer_number',
+                'numerical',
+                'integerOnly' => false,
+                'message' => 'Ответ должен быть в виде цифры'
+            ),
+            array(
                 'answer_text',
                 'length',
-                'max' => 50
+                'max' => 200,
+                'message' => 'Максимальное количество символов: 200'
             ),
             array(
                 'answer_number',
-                'length',
-                'max' => 9
+                'numerical',
+                'numberPattern' => '/^\d{1,' . self::NUMBER_M . '}\.?\d{0,' . self::NUMBER_D . '}$/',
+                'message' => 'Число должно быть либо целым, либо с плавающей точкой. Максимум знаков относительно запятой: ' . self::NUMBER_M . ' — перед запятой, ' . self::NUMBER_D . ' — после.'
             ),
             array(
-                'selectedAnswers',
-                'required',
-                'message' => 'Поле не должно быть пустым',
-                'on' => 'selectMany, selectOne'
+                'questionNumber, scenario',
+                'safe'
             ),
             // The following rule is used by search().
             // @todo Please remove those attributes that should not be searched.
@@ -81,8 +113,6 @@ class StudentAnswer extends CActiveRecord
      */
     public function relations()
     {
-        // NOTE: you may need to adjust the relation name and the related
-        // class name for the relations automatically generated below.
         return array(
             'question' => array(
                 self::BELONGS_TO,
@@ -101,6 +131,29 @@ class StudentAnswer extends CActiveRecord
             )
         );
     }
+    
+    /**
+     * Проверяет ответ число на допустимые значения
+     */
+    
+    public function checkNumericAnswer()
+    {
+        if(!preg_match('/^(\d)+[\.,]?(\d)*$/', $this->answer_number, $matches)) {
+            $this->addError('answer_number', 'Неверный формат числа');
+            
+            return false;
+        }
+        
+        if(mb_strlen(strval($matches[1])) > self::NUMBER_M) {
+            $this->addError('answer_number', 'Число превышает значение максимально допустимого');
+            return false;
+        }
+        
+        if(mb_strlen(strval($matches[2])) > self::NUMBER_D) {
+            $this->addError('answer_number', 'Максимально количество знаков после запятой — четыре');
+            return false;
+        }
+    }
 
     protected function beforeSave()
     {
@@ -114,210 +167,120 @@ class StudentAnswer extends CActiveRecord
                 $this->test_result = $testResult->id;
             }
             
+            $this->compareAnswer();
+            
             return true;
         }
         
         return false;
     }
 
+    protected function afterFind()
+    {
+        parent::afterFind();
+        
+        if (! empty($this->manyAnswers1)) {
+            foreach ($this->manyAnswers1 as $selectedOption) {
+                $this->selectedAnswers[] = $selectedOption->id;
+            }
+        }
+        
+        if (! empty($this->answer_number)) {
+            $this->answer_number = floatval($this->answer_number);
+        }
+    }
+
     protected function afterSave()
     {
         parent::afterSave();
         
-        if ($this->scenario === 'selectOne' || $this->scenario === 'selectMany') {
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition('option_number', $this->selectedAnswers);
-            $criteria->addSearchCondition('question_id', $this->question_id);
-            $studentAnswers = AnswerOptions::model()->findAll($criteria);
+        if ($this->scenario === 'select_many') {
             
-            if (count($studentAnswers) > 1) {
-                $manyAnswersId = array();
-                foreach ($studentAnswers as $studentAnswer) {
-                    array_push($manyAnswersId, array(
+            if (! $this->isNewRecord) {
+                SManyAnswers::model()->deleteAll('answer_id=:answerId', array(
+                    ':answerId' => $this->id
+                ));
+            }
+            if (! empty($this->selectedAnswers)) {
+                $selectedAnswersId = array();
+                foreach ($this->selectedAnswers as $selectedAnswer) {
+                    array_push($selectedAnswersId, array(
                         'answer_id' => $this->id,
-                        's_answer' => $studentAnswer->id
+                        's_answer' => $selectedAnswer
                     ));
                 }
                 
                 $builder = Yii::app()->db->schema->commandBuilder;
-                $insertManyAnswer = $builder->createMultipleInsertCommand('s_many_answers', $manyAnswersId);
+                $insertManyAnswer = $builder->createMultipleInsertCommand('s_many_answers', $selectedAnswersId);
                 $insertManyAnswer->execute();
-            } else {
-                $singleAnswerId = $studentAnswers[0]->id;
-                $this->updateByPk($this->id, array(
-                    'answer_id' => $singleAnswerId
-                ));
             }
         }
-    }
-    
-    public function compareNumbers()
-    {
-        $userAnswerPrecision = ($this->answer_number/100) * $this->question->precision_percent;
-        
-        if(abs($this->question->answer_number - $this->answer_number) <= $userAnswerPrecision) {
-            $this->resultpoints = $this->question->difficulty;
-        } else {
-            $this->resultpoints = 0;
-        }
-        
-        $this->updateByPk($this->id, array(
-            'result' => $this->resultpoints
-        ));
-    }
-    
-    public function compareTextAnswer()
-    {
-        $answer = array('correct' => mb_strtolower($this->question->answer_text), 'studentAnswer' => mb_strtolower($this->answer_text));
-        
-        $formatAnswer = str_replace(' ', '', $answer);
-        
-        if($formatAnswer['correct'] === $formatAnswer['studentAnswer']) {
-            $this->resultpoints = $this->question->difficulty;
-        } else {
-            $this->resultpoints = 0;
-        }
-        
-        $this->updateByPk($this->id, array(
-            'result' => $this->resultpoints
-        ));
-    }
-    
-    public function compareManyAnswers()
-    {
-        $studentAnswers = $this->manyAnswers1;
-    
-        $correctAnswers = $this->question->correctAnswer1;
-    
-        $answersArray = array(
-            'correct' => $correctAnswers,
-            'studentAnswers' => $studentAnswers
-        );
-    
-        $formatAnswers = function ($array)
-        {
-            $formattedAnswers = array();
-    
-            foreach ($array as $answer) {
-                $formattedAnswers[$answer->option_text] = $answer->option_number;
-            }
-    
-            return $formattedAnswers;
-        };
-    
-        $answersArray = array_map($formatAnswers, $answersArray);
-    
-        if (count($answersArray['correct']) != count($answersArray['studentAnswers'])) {
-            $resultPoints = 0;
-        }
-    
-        if (empty(array_diff($answersArray['correct'], $answersArray['studentAnswers']))) {
-            $resultPoints = $this->question->difficulty;
-            
-            StudentTest::model()->updateByPk($this->test_result, array(
-            'result' => $this->testResult->result + $resultPoints
-            ));
-        } else {
-            $resultPoints = 0;
-        }
-        
-        $this->updateByPk($this->id, array(
-            'result' => $resultPoints
-        ));
     }
 
-    public function compareSingleAnswer()
-    {
-        if ($this->answer_id === $this->question->answer_id) {
-            
-            $resultPoints = $this->question->difficulty;
-            
-            StudentTest::model()->updateByPk($this->test_result, array(
-                'result' => $this->testResult->result + $resultPoints
-            ));
-        } else {
-            $resultPoints = 0;
-        }
-        
-        $this->updateByPk($this->id, array(
-            'result' => $resultPoints
-        ));
-    }
-    
     public function compareAnswer()
     {
-        if($this->scenario == 'selectOne') {
+        $this->result = 0;
+        
+        if ($this->scenario == 'select_one') {
             if ($this->answer_id === $this->question->answer_id) {
-                $resultPoints = $this->question->difficulty;
-            } else {
-                $resultPoints = 0;
+                $this->result = $this->question->difficulty;
             }
         }
         
-        if($this->scenario == 'selectMany') {
-            $studentAnswers = $this->manyAnswers1;
+        if ($this->scenario == 'select_many') {
+            $correctOptionsId = array();
             
-            $correctAnswers = $this->question->correctAnswer1;
+            foreach ($this->question->correctAnswer1 as $optionObject) {
+                $correctOptionsId[] = $optionObject->id;
+            }
             
-            $answersArray = array(
-                'correct' => $correctAnswers,
-                'studentAnswers' => $studentAnswers
+            if (count($this->selectedAnswers) == count($correctOptionsId) && empty(array_diff($correctOptionsId, $this->selectedAnswers))) {
+                $this->result = $this->question->difficulty;
+            }
+        }
+        
+        if ($this->scenario == 'number') {
+            $userAnswerPrecision = ($this->answer_number / 100) * $this->question->precision_percent;
+            
+            if (abs($this->question->answer_number - $this->answer_number) <= $userAnswerPrecision) {
+                $this->result = $this->question->difficulty;
+            }
+        }
+        
+        if ($this->scenario == 'string') {
+            $answer = array(
+                'correct' => mb_strtolower($this->question->answer_text),
+                'studentAnswer' => mb_strtolower($this->answer_text)
             );
             
-            $formatAnswers = function ($array)
-            {
-                $formattedAnswers = array();
+            $formatAnswer = str_replace(' ', '', $answer);
             
-                foreach ($array as $answer) {
-                    $formattedAnswers[$answer->option_text] = $answer->option_number;
-                }
-            
-                return $formattedAnswers;
-            };
-            
-            $answersArray = array_map($formatAnswers, $answersArray);
-            
-            if (count($answersArray['correct']) != count($answersArray['studentAnswers'])) {
-                $resultPoints = 0;
-            }
-            
-            if (empty(array_diff($answersArray['correct'], $answersArray['studentAnswers']))) {
-                $resultPoints = $this->question->difficulty;
-            
-                StudentTest::model()->updateByPk($this->test_result, array(
-                'result' => $this->testResult->result + $resultPoints
-                ));
-            } else {
-                $resultPoints = 0;
+            if ($formatAnswer['correct'] === $formatAnswer['studentAnswer']) {
+                $this->result = $this->question->difficulty;
             }
         }
-        
-        if($this->scenario == 'number') {
-            $userAnswerPrecision = ($this->answer_number/100) * $this->question->precision_percent;
-            
-            if(abs($this->question->answer_number - $this->answer_number) <= $userAnswerPrecision) {
-                $resultPoints = $this->question->difficulty;
-            } else {
-                $resultPoints = 0;
-            }
-        }
-        
-        if($this->scenario == 'string') {
-            if ($this->answer_id === $this->question->answer_id) {
-            
-                $resultPoints = $this->question->difficulty;
-            
-                StudentTest::model()->updateByPk($this->test_result, array(
-                'result' => $this->testResult->result + $resultPoints
-                ));
-            } else {
-                $resultPoints = 0;
-            }
-        }
-        
-        $this->updateByPk($this->id, array(
-            'result' => $resultPoints
+    }
+    
+    /**
+     * В заваисимости от того, существует ли ответ на вопрос с ID $questionId, возвращаем модель ответа.
+     */
+
+    public function getAnswerModel($questionId, $questionType, $testId)
+    {
+        $studentCurrentAnswer = $this->find('question_id=:questionId', array(
+            ':questionId' => $questionId
         ));
+        
+        if ($studentCurrentAnswer) {
+            $answerModel = $studentCurrentAnswer;
+            $answerModel->scenario = $questionType;
+        } else {
+            $answerModel = new self($questionType);
+            $answerModel->testId = $testId;
+            $answerModel->student_id = Yii::app()->user->id;
+        }
+        
+        return $answerModel;
     }
 
     /**

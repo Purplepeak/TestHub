@@ -51,14 +51,14 @@ class SAvatarWidget extends CWidget
         
         $this->imgAreaSelectConfig = array(
             'aspectRatio' => '1:1',
-            'maxHeight' => '400',
-            'maxWidth' => '400',
-            'minHeight' => '190',
-            'minWidth' => '190',
+            'maxHeight' => $this->maxImageHeight,
+            'maxWidth' => $this->maxImageWidth,
+            'minHeight' => $this->minImageHeight,
+            'minWidth' => $this->minImageWidth,
             'x1' => '0',
             'y1' => '0',
-            'x2' => '190',
-            'y2' => '190',
+            'x2' => $this->minImageWidth,
+            'y2' => $this->minImageHeight,
         );
     }
 

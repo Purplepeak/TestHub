@@ -47,25 +47,25 @@ class Test extends CActiveRecord
             array(
                 'name, foreword, minimum_score, time_limit, attempts, deadline, testGroups',
                 'required',
-                'message' => 'Поле не должно быть пустым'
+                'message' => 'Поле не должно быть пустым.'
             ),
             array(
                 'minimum_score, time_limit, attempts, teacher_id',
                 'numerical',
                 'integerOnly' => true,
-                'message' => 'Значение должно быть в виде числа'
+                'message' => 'Значение должно быть в виде числа.'
             ),
             array(
                 'name',
                 'length',
                 'max' => 255,
-                'tooLong' => 'Название теста не должно превышать 255 символов'
+                'tooLong' => 'Название теста не должно превышать 255 символов.'
             ),
             array(
                 'testGroups',
                 'match',
                 'pattern' => '/^[0-9А-Яа-яёЁ\s,-]+$/ui',
-                'message' => 'Необходимо указать номера групп через запятую или побел. Так же вы можете указать несколько подряд идущих номеров: 2450-2455'
+                'message' => 'Необходимо указать номера групп через запятую или побел. Так же вы можете указать несколько подряд идущих номеров: 2450-2455.'
             ),
             array(
                 'testGroups',
@@ -160,16 +160,26 @@ class Test extends CActiveRecord
                 $resultTime = $deadlineTime - ($clientTime - $serverTime);
             }
             
+            $this->create_time = date('Y-m-d H:i:s', time());
             $this->deadline = date('Y-m-d H:i', $resultTime);
             
             $this->foreword = SHelper::purifyHtml($this->foreword);
-            
-            //$this->foreword = str_replace('&nbsp;', 'ZZZZZ', $this->foreword);
             
             return true;
         }
         
         return false;
+    }
+    
+    public function beforeDelete()
+    {
+        $file = Yii::app()->file->set(Yii::getPathOfAlias('forewordImages') .'/'. $this->id, true);
+    
+        if($file->exists) {
+            $file->delete();
+        }
+    
+        return parent::beforeDelete();
     }
 
     protected function afterSave()
@@ -232,6 +242,25 @@ class Test extends CActiveRecord
         
         $this->deadline = Yii::app()->params["dataHandler"]->handleDataTimezone($this->deadline . '[Y-m-d H:i]');
     }
+    
+    /**
+     * Метод возвращает массив из ID вопросов теста на которые студент уже ответил
+     */
+    
+    public function getStudentAnswersByQuestionsId($questionNumberIdPair)
+    {
+        $studentAnswersCriteria = new CDbCriteria();
+        $studentAnswersCriteria->addInCondition('question_id', $questionNumberIdPair);
+        $studentAnswers = StudentAnswer::model()->findAll($studentAnswersCriteria);
+        
+        $studentAnswersQuestionId = array();
+        
+        foreach($studentAnswers as $studentAnswer) {
+            $studentAnswersQuestionId[] = $studentAnswer->question_id;
+        }
+        
+        return $studentAnswersQuestionId;
+    }
 
     public function validateDateTime()
     {
@@ -239,10 +268,14 @@ class Test extends CActiveRecord
             $this->addError('deadline', 'Убедитесь, что вы указали дату в правильном формате. Пример: ' . date('Y-m-d H:i') . '.');
         } else {
             if (strtotime($match[0]) < time()) {
-                $this->addError('deadline', 'Дата указанная вами уже истекла или указанный вами год является слишком далеким будушим');
+                $this->addError('deadline', 'Дата указанная вами уже истекла или указанный год является слишком далеким будушим.');
             }
         }
     }
+    
+    /**
+     * Метод проверяет существует ли группа и преподает ли в ней пользователь
+     */
 
     public function isTeacherGroupExist()
     {
@@ -351,6 +384,19 @@ class Test extends CActiveRecord
                         )
         ));
     }
+    
+    /**
+     * Метод вернет false, если время на выполнение теста вышло
+     */
+    
+    public function checkTestTimeLimit($startTime, $timeLimit)
+    {
+        if (time() >= ($startTime + $timeLimit)) {
+            return false;
+        }
+    
+        return true;
+    }
 
     public function search()
     {
@@ -366,7 +412,14 @@ class Test extends CActiveRecord
         $criteria->compare('create_time', $this->create_time);
         $criteria->compare('deadline', $this->deadline);
         $criteria->compare('teacher_id', $this->teacher_id);
-        
+        /*
+         * <ul>
+    <?php foreach($questions as $key=>$question):?>
+      <li><a class="fa fa-angle-right" href="#Question<?= $key+1 ?>">Вопрос №<?= $key+1 ?></a></li>
+    <?php endforeach;?>
+  </ul>
+         * 
+         * */
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria
         ));

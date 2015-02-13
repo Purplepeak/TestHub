@@ -23,6 +23,8 @@ class StudentTest extends CActiveRecord
 
     public $testTimeLimit;
 
+    public $testStatus;
+    
     public function tableName()
     {
         return 'student_test';
@@ -34,8 +36,6 @@ class StudentTest extends CActiveRecord
      */
     public function rules()
     {
-        // NOTE: you should only define rules for those attributes that
-        // will receive user inputs.
         return array(
             array(
                 'test_id, student_id',
@@ -50,8 +50,6 @@ class StudentTest extends CActiveRecord
                 'deadline',
                 'safe'
             ),
-            // The following rule is used by search().
-            // @todo Please remove those attributes that should not be searched.
             array(
                 'id, attempts, deadline, result, test_id, student_id',
                 'safe',
@@ -83,13 +81,13 @@ class StudentTest extends CActiveRecord
                 self::BELONGS_TO,
                 'Users',
                 'student_id'
+            ),
+            'studentAnswers' => array(
+                self::HAS_MANY,
+                'StudentAnswer',
+                'test_result'
             )
         );
-    }
-
-    public function afterFind()
-    {
-        $this->deadline = strtotime($this->deadline);
     }
 
     /**
@@ -141,7 +139,7 @@ class StudentTest extends CActiveRecord
     {
         $criteria = new CDbCriteria();
         
-        $criteria->addCondition($this->getTableAlias() . '.student_id=:studentId AND ' . $this->getTableAlias() . '.deadline < NOW() AND ' . $this->getTableAlias() . '.result IS NULL');
+        $criteria->addCondition($this->getTableAlias() . '.student_id=:studentId AND ' . $this->getTableAlias() . '.deadline > NOW()');
         $criteria->params = array(
             ':studentId' => Yii::app()->user->id
         );
@@ -151,12 +149,29 @@ class StudentTest extends CActiveRecord
                 'select' => array(
                     'test.id',
                     'test.name',
-                    'test.time_limit'
+                    'test.time_limit',
+                    'test.minimum_score'
                 ),
                 'together' => true
             )
         );
         
+        switch($this->testStatus) {
+        	case 'notpassed':
+        	    $condition = $this->getTableAlias() . '.result IS NULL OR ' . $this->getTableAlias() . '.result < test.minimum_score AND ' .$this->getTableAlias().'.attempts > 0';
+        	    break;
+        	case 'passed':
+        	    $condition = $this->getTableAlias() . '.result > test.minimum_score';
+        	    break;
+        	case 'failed':
+        	    $condition = $this->getTableAlias() . '.result < test.minimum_score AND ' .$this->getTableAlias().'.attempts = 0';
+        	    break;
+        	default:
+        	    throw new CHttpException(404);
+        	    break;  
+        }
+        
+        $criteria->addCondition($condition);
         $criteria->compare($this->getTableAlias() . '.deadline', $this->deadline, true);
         $criteria->compare($this->getTableAlias() . '.attempts', $this->attempts, true);
         $criteria->compare($this->getTableAlias() . '.attempts', $this->attempts, true);
@@ -197,6 +212,15 @@ class StudentTest extends CActiveRecord
             'pagination' => $pages,
             'sort' => $sort
         ));
+    }
+
+    public function checkTestInProgress()
+    {
+        if (! empty($this->start_time) && empty($this->end_time) && empty($this->result) && Test::model()->checkTestTimeLimit(strtotime($this->start_time), $this->test->time_limit * 60)) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**

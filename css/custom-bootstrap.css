@@ -15,7 +15,8 @@ body {
 }
 
 .th-navbar-default .th-navbar-nav>li>a {
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .th-navbar-default .th-navbar-nav > li > a:hover, .dropdown-menu>li>a:hover {
@@ -29,7 +30,7 @@ body {
 
 h1, .h1, h2, .h2, h3, .h3 {
     margin-top: 0px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .fa-mail {

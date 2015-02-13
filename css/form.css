@@ -107,8 +107,7 @@ div.form input.success,
 div.form textarea.success,
 div.form select.success
 {
-	background: #E6EFC2;
-	border-color: #C6D880;
+	border: 2px solid #C6D880;
 }
 
 div.form div.success label
@@ -118,11 +117,13 @@ div.form div.success label
 
 div.form .errorSummary
 {
-	border: 2px solid #C00;
+	border: 2px solid #ebccd1;
+	border-radius: 6px;
 	padding: 7px 7px 12px 7px;
 	margin: 0 0 20px 0;
-	background: #FEE;
+	background-color: #f2dede;
 	font-size: 0.9em;
+	color: #a94442;
 }
 
 div.form .errorMessage

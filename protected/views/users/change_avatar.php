@@ -1,5 +1,5 @@
 <div class="change-avatar-header">
-	<h2>Выберите новый аватар</h2>
+    <h2 class='first-header'>Сменить аватар</h2>
 	<p>Поддерживаемые форматы изображения: jpeg, gif, png.</p>
 </div>
 <div class="change-avatar-wrapper">
@@ -8,7 +8,7 @@
 <?php
 $this->widget('SAvatarWidget', array(
     'model' => $model,
-    'action' => Yii::app()->request->baseUrl . '/' . $user->type . '/changeAvatar',
+    'action' => Yii::app()->controller->createUrl($user->type . '/changeAvatar'),
     'modelAttributes' => array(
         'avatarFileAtt' => 'newAvatar',
         'avatarX' => 'avatarX',
@@ -16,14 +16,14 @@ $this->widget('SAvatarWidget', array(
         'avatarWidth' => 'avatarWidth',
         'avatarHeight' => 'avatarHeight'
     ),
-    'previewMaxWidth' => 600,
-    'previewMaxHeight' => 600,
+    'previewMaxWidth' => 1100,
+    'previewMaxHeight' => 1100,
     'maxImageWidth' => 5000,
     'maxImageHeight' => 5000,
-    'minImageWidth' => 200,
-    'minImageHeight' => 200,
+    'minImageWidth' => 190,
+    'minImageHeight' => 190,
     'maxImageRatio' => 3,
     'minImageRatio' => 0.25,
-    'maxImageSize' => 1536000
+    'maxImageSize' => 2048000
 ));
 ?>

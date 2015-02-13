@@ -40,7 +40,7 @@ class DefaultForm extends CFormModel
         return array(
             'rememberMe' => 'Запомнить',
             'password' => 'Пароль',
-            'email' => 'e-mail'
+            'email' => 'Email'
         );
     }
 

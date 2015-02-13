@@ -18,7 +18,7 @@ return array(
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
     'name' => 'TestHub',
     'aliases' => array(
-        'avatarFolder' => 'webroot.avatars',
+        'avatarDir' => 'webroot.uploads.avatars',
         'forewordImages' => 'webroot.uploads.testImages.foreword',
         'questionImages' => 'webroot.uploads.testImages.question'
     ),
@@ -32,11 +32,11 @@ return array(
     'import' => array(
         'application.models.*',
         'application.components.*',
+        'application.components.DynamicTabularForm.*',
         'ext.giix-components.*',
         'ext.CSLinkPager',
         'ext.smailer.*',
         'ext.savatar.*',
-        'ext.DynamicTabularForm.*',
         'ext.CJuiDateTimePicker.*',
         'ext.imperavi-redactor-widget.*'
     ),
@@ -74,9 +74,10 @@ return array(
         ),
         'urlManager' => array(
             'urlFormat' => 'path',
+            //'urlSuffix' => '/',
             'showScriptName' => false,
             'rules' => array(
-                'avatars/<id:\d+>/<res:\d+x\d+>/<method:[a-zA-z]+>/<img:[\w.]+>' => 'site/getAvatar',
+                '/uploads/avatars/<id:\d+>/<res:\d+x\d+>/<method:[a-zA-z]+>/<img:[\w.]+>' => 'site/getAvatar',
                 '' => 'site/index',
                '<_c:(studentTest|test|group|student)>/<_a:(myTests|teacher|list)>' => '<_c>/<_a>',
             )
@@ -86,11 +87,7 @@ return array(
                 'jquery' => array(
                     'baseUrl' => '//ajax.googleapis.com/ajax/libs/jquery/1.11.1/',
                     'js' => array('jquery.min.js'),
-                ),
-                'jquery.ui'=>array(
-                    'baseUrl'=>'//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/',
-                    'js'=>array('jquery-ui.min.js'),
-                ),
+                )
             )
         ),
         
@@ -167,7 +164,7 @@ return array(
             '190x190',
             '30x30'
         ),
-        'avatarRelativePath' => '/avatars',
+        'avatarRelativePath' => '/uploads/avatars',
         'rememberMeTime' => 3600 * 24 * 30, // Запоминаем пользователя на указанный срок
         'privateConfig' => require (dirname(__FILE__) . '/private.php'),
         'siteEmail' => array(
@@ -180,7 +177,7 @@ return array(
         'dater' => $dater,
         'dataHandler' => $dataHandler,
         'timezoneDetector' => $timezoneDetector,
-        'tmpFolder' => '/uploads/tmp', // Папка для временных файлов загружаемых пользователем
+        'tmpDir' => '/uploads/tmp', // Папка для временных файлов загружаемых пользователем
         'testImages' => '/uploads/testImages', // Папка с изображениями, которые содержит тест
     )
 );

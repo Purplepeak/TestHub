@@ -23,19 +23,19 @@ $userFunctions = array(
     array(
         'label' => 'Профиль',
         'url' => array(
-            '/' . $userType . '/profile'
+            $userType . '/profile'
         )
     ),
     array(
         'label' => 'Сменить аватар',
         'url' => array(
-            '/' . $userType . '/changeAvatar/'
+            $userType . '/changeAvatar/'
         )
     ),
     array(
         'label' => 'Выйти',
         'url' => array(
-            '/site/logout'
+            'site/logout'
         )
     )
 );
@@ -45,19 +45,20 @@ if ($userType === 'teacher') {
         'createTest' => array(
             'label' => 'Создать тест',
             'url' => array(
-                '/test/create'
+                'test/create'
             )
         ),
         'teacherTests' => array(
             'label' => 'Мои тесты',
             'url' => array(
-                '/test/teacher'
+                'test/teacher'
             )
         ),
         'myGroups' => array(
             'label' => 'Мои Группы',
             'url' => array(
-                '/group/list/f/mygroups'
+                'group/list',
+                'f' => 'mygroups'
             )
         ),
     ) + array_slice($userFunctions, 1, count($userFunctions) - 1, true);
@@ -68,7 +69,8 @@ if($userType === 'student') {
         'studentTests' => array(
             'label' => 'Мои тесты',
             'url' => array(
-                '/studentTest/myTests'
+                'studentTest/myTests',
+                'status' => 'notpassed'
             )
         ),
     ) + array_slice($userFunctions, 1, count($userFunctions) - 1, true);
@@ -86,7 +88,7 @@ if($userType === 'student') {
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/form.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/bootstrap-social.css">
-    <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/bootstrap/css/font-awesome.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/custom-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/mainpage.css">
     <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/pager.css">

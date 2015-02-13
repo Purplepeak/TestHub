@@ -4,6 +4,21 @@ class TestForewordImage extends TestImages
 {
 
     public $_type = 'test';
+    
+    protected $imageDir;
+    
+    protected $idAttribute;
+    
+    protected $type;
+    
+    public function init()
+    {
+        $this->imageDir = Yii::getPathOfAlias('forewordImages');
+        
+        $this->idAttribute = 'test_id';
+        
+        parent::init();
+    }
 
     public function defaultScope()
     {

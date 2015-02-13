@@ -1,3 +1,8 @@
+<script>
+  eval('var questionPreviewContainer_'.concat(<?= $key ?>, '=' ,'"question-preview-container-<?= $key ?>";'));
+  eval('var questionRedactorDetach_'.concat(<?= $key ?>,';'));
+</script>
+
 <?php 
 $rowId = "question-" . $key;
 
@@ -5,54 +10,67 @@ $answerOptionNumber = 0;
 $csrfTokenName = Yii::app()->request->csrfTokenName;
 $csrfToken = Yii::app()->request->csrfToken;
 $scenario = $model->scenario;
-/*
-if($model->type === 'select_one' || $model->type === 'select_many') {
-    $a = array();
-    foreach($model->answerOptions as $option) {
-        $a[$option->option_number] = $option->option_text;
-    }
-    
-    $model->answerOptionsArray = $a;
-}
-*/
-$this->widget('ImperaviRedactorWidget', array(
-    'selector' => '.question-text-' . $key,
 
-    'options' => array(
-        'lang' => 'ru',
-        'toolbarFixed' => false,
-        'imageUpload' => Yii::app()->createUrl('questionImages/tmpUpload'),
-        'imageUploadParam' => 'QuestionImage[imageFile]',
-        'imageUploadErrorCallback' => 'js:function(json){ alert(json.message); }',
-        'uploadImageFields' => array(
-            Yii::app()->request->csrfTokenName => Yii::app()->request->csrfToken
-        ),
-        'uploadFileFields' => array(
-            Yii::app()->request->csrfTokenName => Yii::app()->request->csrfToken
-        )
-    )
-));
-
-//var_dump($model);
-//echo $form->errorSummary($model);
-//echo $form->hiddenField($model, "[$key]id");
+Yii::app()->clientScript->registerScript("QuestionRedactor-{$key}", "
+    $('.question-text-".$key."').redactor({
+        lang: 'ru',
+        buttonsHide: ['link'],
+        toolbarFixed: false,
+        pastePlainText: true,
+        imageLink: false,
+        imageUpload: '".Yii::app()->createUrl('questionImages/tmpUpload')."',
+        imageUploadParam: 'QuestionImage[imageFile]',
+        pasteCallback: function(html) {
+            return html.replace(/<p>(.*?)<\/p>/gi, '$1');
+        },
+        initCallback: function(){
+            var redactorEditor = $('.question-forms').find('div[class=redactor-editor]');
+            redactorEditor.addClass('redactor-editor-question redactor-editor-".$key."');
+            redactorEditor.attr('data-question-number','".$key."');
+        },
+        imageUploadErrorCallback: function(json){
+            alert(json.message);
+        },
+        imageDeleteCallback: function(url, image){
+            $.ajax({
+                url:'" . $this->createUrl('questionImages/deleteTmpImage') . "',
+                type: 'POST',
+                data: {
+                    url:url,
+                    " . $csrfTokenName . ": '" . $csrfToken . "'
+                },
+            });
+        },
+        uploadImageFields: {
+            '" . $csrfTokenName . "': '" . $csrfToken . "'
+        },
+        uploadFileFields: {
+            '" . $csrfTokenName . "': '" . $csrfToken . "'
+        },
+        plugins: ['viewTextarea']
+    });
+", CClientScript::POS_END);
 
 ?>
 <div class='row-fluid' id="<?php echo $rowId ?>">
     <?php echo $form->hiddenField($model, "[$key]id");?>
     <?php echo $form->updateTypeField($model, $key, "updateType", array('key' => $key));?>
     <div class="question-header">
-      <div class="delete-question-button">
-        <?php echo $form->deleteFormButton($rowId, $key);?>
+      <div class="delete-question-button" data-delete = <?= $rowId ?> data-key = <?= $key ?>>
+        <i class="fa fa-times fa-2x"></i>
       </div>
       <div class="question-counter" id="question-key-<?= $key ?>">
-        Вопрос №<?= $questionNumber ?>
+        <a id="Question<?= $questionNumber ?>">Вопрос №<?= $questionNumber ?></a>
       </div>
     </div>
-    <div class="row">
+    <div class="row"  onkeyup="questionPreview<?= $key ?>.Update()">
 		<?php echo $form->labelEx($model,"title"); ?>
 		<?php echo $form->textArea($model,"[$key]title",array('rows'=>6, 'cols'=>50, 'class' => 'questionField question-text-'.$key)); ?>
 		<?php echo $form->error($model,"[$key]title", array(), false, false); ?>
+	</div>
+	<div class="question-preview-container-<?= $key ?>" style="visibility:hidden; position:absolute; top:0; left: 0">
+	    <div class="question-preview question-preview-<?= $key ?> process-mathjax"></div>
+        <div class="question-buffer question-buffer-<?= $key ?> process-mathjax" style="position:absolute; top:0; left: 0"></div>
 	</div>
 
 	<div class="row">
@@ -67,14 +85,37 @@ $this->widget('ImperaviRedactorWidget', array(
     <?php foreach($model->optionsNumber as $i): ?>
         <?php $answerOptionNumber++;?>
 	    <div class="row answer-option-<?= $i ?>">
-	    <div class="answer-option-number-<?= $i ?>"><?= $answerOptionNumber ?>)</div>
-	    <?php echo $form->textArea($model, "[$key]answerOptionsArray[{$i}]", array('rows'=>2, 'cols'=>30,'class' => 'questionField')); ?>
-	    <?php echo CHtml::button('', array('class' => 'deleteAnswerOption', 'onclick' => "deleteOption(this)"));?>
-	    <?php echo $form->error($model, "[$key]answerOptionsArray[{$i}]", array('class' => 'errorMessage answerOptionError'), false, false); ?>
+	      <div class="answer-option-number-<?= $i ?>"><?= $answerOptionNumber ?>)</div>
+	      <?php echo $form->textField($model, "[$key]answerOptionsArray[{$i}]", array('class' => "answer-text-area-{$key}-{$i} questionField", 'onkeyup' => "optionPreview{$key}{$i}.Update()")); ?>
+	      <ul class="answer-option-bar">
+	        <li title="Показать формулы" data-option-number="<?= $i ?>" data-question-number="<?= $key ?>" onclick="showAnswerOptionPreview(this)">
+	          <i class="show-math-button fa fa-superscript"></i>
+	        </li>
+	        <li title="Удалить" data-option-number="<?= $i ?>" data-question-number="<?= $key ?>" onclick="deleteOption(this)">
+	          <i class="deleteAnswerOption fa fa-times-circle-o fa-2x"></i>
+	        </li>
+	      </ul>
+	      <?php echo $form->error($model, "[$key]answerOptionsArray[{$i}]", array('class' => 'errorMessage answerOptionError'), false, false); ?>
+	      <div class="option-preview-container-<?= $key ?>-<?= $i ?> options-preview-container" style="visibility:hidden; position:absolute; top:0; left: 0">
+	        <div class="answer-option-preview answer-option-preview-<?= $key ?>-<?= $i ?> process-mathjax"></div>
+            <div class="answer-option-buffer answer-option-buffer-<?= $key ?>-<?= $i ?> process-mathjax" style="position:absolute; top:0; left: 0"></div>
+	      </div>
+	      <script>
+	    	  var optionNumber = <?= $i ?>;
+	    	  eval("var optionPreview<?= $key ?>"+optionNumber+"=new Preview('answer-option-preview-<?= $key ?>-'+optionNumber,'answer-option-buffer-<?= $key ?>-'+optionNumber,'answer-text-area-<?= $key ?>-'+optionNumber);");
+	    	  eval("optionPreview<?= $key ?>"+optionNumber+".callback=MathJax.Callback(['CreatePreview',optionPreview<?= $key ?>"+optionNumber+"]);");
+	    	  eval("optionPreview<?= $key ?>"+optionNumber+".callback.autoReset=true;");
+
+	    	  if($('.answer-option-preview-<?= $key ?>-'+optionNumber).is(':empty')) {
+	    		  eval("optionPreview<?= $key ?>"+optionNumber+".Update();");
+	    	  }
+	      </script>
 	    </div>
 	<?php endforeach;?>
 	</div>
-	<?php echo CHtml::button('Добавить вариант ответа', array('class' => 'addAnswerOption', 'data-add' => "js-options-{$key}", 'onclick' => "addOption(this)"));?>
+	<div class="addAnswerOption" data-add="js-options-<?= $key ?>" onclick="addOption(this)">
+	  <i class="fa fa-plus-square fa-3x"></i>
+	</div>
 	
     <div class="row">
 	    <?php echo $form->labelEx($model,"correctAnswers"); ?>
@@ -111,3 +152,16 @@ $this->widget('ImperaviRedactorWidget', array(
     
     <?php echo $form->hiddenField($model,"[$key]modelScenario", array('value' => $scenario, 'class' => 'js-question-type')); ?>
 </div>
+
+<script>
+$('.row-fluid').parent().addClass('ignore-mathjax');
+
+var counter = <?= $key?>;
+eval("var questionPreview"+counter+"=new Preview('question-preview-<?= $key ?>','question-buffer-<?= $key ?>','redactor-editor-<?= $key?>');");
+eval("questionPreview"+counter+".callback=MathJax.Callback(['CreatePreview',questionPreview"+counter+"]);");
+eval("questionPreview"+counter+".callback.autoReset=true;");
+
+if($('.question-preview-'+counter).is(':empty')) {
+	eval("questionPreview"+counter+".Update();");
+}
+</script>

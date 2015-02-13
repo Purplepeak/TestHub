@@ -1,30 +1,85 @@
 <?php
-/* @var $this TestController */
-/* @var $model Test */
-$this->menu=array(
-	array('label'=>'List Test', 'url'=>array('index')),
-	array('label'=>'Create Test', 'url'=>array('create')),
-	array('label'=>'Update Test', 'url'=>array('update', 'id'=>$model->id)),
-	array('label'=>'Delete Test', 'url'=>'#', 'linkOptions'=>array('submit'=>array('delete','id'=>$model->id),'confirm'=>'Are you sure you want to delete this item?')),
-	array('label'=>'Manage Test', 'url'=>array('admin')),
-);
+if($studentTestModel) {
+    $testUrl = Yii::app()->createUrl('test/init', array('id'=>$model->id));
+    $startButtonLabel = 'Начать тест';
+    
+    if($testInProgress) {
+        $testUrl = Yii::app()->createUrl('test/process', array('id'=>$model->id));
+        $startButtonLabel = 'Продолжить тест';
+    }
+}
+
+if($isTeacher) {
+    $updateTestUrl = Yii::app()->createUrl('test/update', array('id'=>$model->id));
+    $deleteTestUrl = Yii::app()->createUrl('test/delete', array('id'=>$model->id));
+}
 ?>
 
-<h1>View Test #<?php echo $model->id; ?></h1>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    showProcessingMessages: false,
+    showMathMenu: false,
+    messageStyle: "none",
+    tex2jax: { 
+        inlineMath: [['$','$'],['\\(','\\)']],
+        displayMath: [ ['\\[','\\]'] ],
+        processEscapes: false,
+        processClass: "process-mathjax",
+        ignoreClass: "ignore-mathjax"
+    }
+  });
+</script>
 
-<?php $this->widget('zii.widgets.CDetailView', array(
+<?php
+    Yii::app()->clientScript->registerScriptFile('https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML');
+    Yii::app()->clientScript->registerScript('DeliteConfirmation', "
+        $('.delete-test-view').click(function() {
+            if (confirm('Вы уверены, что хотите удалить тест?')) {
+                return true;
+            } else {
+                return false;
+            }
+        });        
+    ");
+?>
+
+<h2 class='first-header'><?= CHtml::encode($model->name) ?></h2>
+
+<div class="test-view-foreword process-mathjax">
+  <div class="test-view-paragraph">
+    <h3>Предисловие</h3>
+  </div>
+  <?= $model->foreword ?>
+</div>
+
+<div class="test-view-info">
+  <div  class="test-view-paragraph">
+    <h3>Информация</h3>
+  </div>
+  <?php $this->widget('zii.widgets.CDetailView', array(
 	'data'=>$model,
+    'cssFile'=>Yii::app()->request->baseUrl.'/css/custom-detail-view.css',
 	'attributes'=>array(
-		'id',
-		'name',
-		'foreword',
-		'rules',
+        array(
+            'label' => 'Количество вопросов',
+            'type' => 'raw',
+            'value' => count($model->question)
+        ),
 		'minimum_score',
 		'time_limit',
 		'attempts',
-		'difficulty',
-		'create_time',
 		'deadline',
-		'teacher_id',
+		array(               
+            'label'=>'Преподаватель',
+            'type'=>'raw',
+            'value'=>CHtml::link(CHtml::encode($model->teacher->getFullName()), array('teacher/view','id'=>$model->teacher->id)),
+        ),
 	),
-)); ?>
+  )); ?>
+</div>
+<?php if($isTeacher):?>
+<a class="general-button update-test-view" type="button" href="<?= $updateTestUrl ?>">Изменить</a>
+<?php endif;?>
+<?php if($studentTestModel):?>
+<a class="start-test-button" type="button" href="<?= $testUrl ?>"><?= $startButtonLabel ?></a>
+<?php endif;?>

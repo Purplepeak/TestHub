@@ -3,9 +3,14 @@
 /* @var $error array */
 
 $this->pageTitle=Yii::app()->name . ' - Error';
+if($code == 403) {
+	$messageHeader = 'Отказано в доступе';
+} else {
+	$messageHeader = "Ошибка {$code}";
+}
 ?>
 
-<h2>Ошибка <?php echo $code; ?></h2>
+<h2><?= $messageHeader ?></h2>
 
 <div class="error">
 <?php echo CHtml::encode($message); ?>

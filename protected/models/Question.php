@@ -25,11 +25,15 @@ class Question extends CActiveRecord
 
     public $answerOptionsArray;
 
+    public $answerIdTextPair;
+    
+    public $questionNumber;
+
     /**
      * В массиве $optionsNumber содержатся уникальные номера для css класса
      * "answer-option-#".
-     * С добавлением и удалением вариантов ответа массив
-     * будет массив будет изменяться. Колличество элементов массива соответствует
+     * С добавлением и удалением вариантов ответа массив будет изменяться
+     * Колличество элементов массива соответствует
      * количеству вариантов ответа (по умолчанию 2).
      */
     public $optionsNumber = array(
@@ -47,15 +51,15 @@ class Question extends CActiveRecord
 
     const TYPE_NUMERIC = 'numeric';
 
-    const DEFAULT_PRECISION = 0.00001;
+    const DEFAULT_PRECISION = '0.00001';
 
-    const NUMBER_M = 9;
+    const NUMBER_M = 11;
 
     const NUMBER_D = 4;
 
-    const PRECISION_M = 3;
+    const PRECISION_M = 6;
 
-    const PRECISION_D = 3;
+    const PRECISION_D = 5;
 
     public function tableName()
     {
@@ -77,18 +81,22 @@ class Question extends CActiveRecord
             array(
                 'title, difficulty',
                 'required',
-                'message' => 'Поле не должно быть пустым'
+                'message' => 'Поле не должно быть пустым.'
+            ),
+            array(
+                'id, updateType, modelScenario',
+                'safe',
             ),
             array(
                 'answer_number',
                 'required',
-                'message' => 'Поле не должно быть пустым',
+                'message' => 'Поле не должно быть пустым.',
                 'on' => 'numeric'
             ),
             array(
                 'answer_text',
                 'required',
-                'message' => 'Поле не должно быть пустым',
+                'message' => 'Поле не должно быть пустым.',
                 'on' => 'string'
             ),
             array(
@@ -106,7 +114,7 @@ class Question extends CActiveRecord
             array(
                 'correctAnswers, answerOptionsArray',
                 'required',
-                'message' => 'Поле не должно быть пустым',
+                'message' => 'Поле не должно быть пустым.',
                 'on' => 'select'
             ),
             array(
@@ -118,13 +126,20 @@ class Question extends CActiveRecord
                 'correctAnswers',
                 'match',
                 'pattern' => '/^[\d,\s]+$/',
-                'message' => 'Необходимо указать номера правильных ответов из вышепреведенных вариантов. Если ответов несколько, разделите их запятой: 1, 3',
+                'message' => 'Необходимо указать номера правильных ответов из вышепреведенных вариантов. Если ответов несколько, разделите их запятой: 1, 3.',
                 'on' => 'select'
             ),
             array(
                 'correctAnswers',
                 'formatCorrectAnswers',
                 'on' => 'select'
+            ),
+            array(
+                'precision_percent',
+                'default',
+                //'setOnEmpty' => true,
+                'value' => self::DEFAULT_PRECISION,
+                'on' => 'numeric'
             ),
             array(
                 'answer_id, test_id',
@@ -135,7 +150,7 @@ class Question extends CActiveRecord
                 'difficulty',
                 'numerical',
                 'integerOnly' => true,
-                'message' => 'Баллы должны быть в виде числа'
+                'message' => 'Баллы должны быть в виде числа.'
             ),
             array(
                 'type',
@@ -146,13 +161,13 @@ class Question extends CActiveRecord
                     self::TYPE_STRING,
                     self::TYPE_NUMERIC
                 ),
-                'message' => 'Указаный тип ответа не поддерживается'
+                'message' => 'Указаный тип ответа не поддерживается.'
             ),
             array(
                 'answer_text',
                 'length',
                 'max' => 50,
-                'tooLong' => 'Ответ в виде текста должен содержать не более 50 символов'
+                'tooLong' => 'Ответ в виде текста должен содержать не более 50 символов.'
             ),
             array(
                 'picture',
@@ -163,7 +178,7 @@ class Question extends CActiveRecord
                 'answer_number',
                 'length',
                 'max' => 9,
-                'tooLong' => 'Поле может содержать не более 9 символов'
+                'tooLong' => 'Поле может содержать не более 9 символов.'
             ),
             array(
                 'id, title, type, difficulty, answer_id, answer_text, answer_number, precision_percent, picture, test_id',
@@ -208,6 +223,17 @@ class Question extends CActiveRecord
         );
     }
 
+    public function beforeDelete()
+    {
+        $file = Yii::app()->file->set(Yii::getPathOfAlias('questionImages') . '/' . $this->id, true);
+        
+        if ($file->exists) {
+            $file->delete();
+        }
+        
+        return parent::beforeDelete();
+    }
+
     /**
      * Метод выполняет валидацию каждого отдельного
      */
@@ -230,6 +256,14 @@ class Question extends CActiveRecord
     {
         if (! preg_match_all('/\d+/', $this->correctAnswers, $correctAnswersArray)) {
             $this->addError('correctAnswers', 'Необходимо указать номера правильных ответов из вышепреведенных вариантов. Если ответов несколько, разделите их запятой: 1, 3');
+        }
+        
+        if (is_array($this->answerOptionsArray)) {
+            foreach ($correctAnswersArray[0] as $correctNumber) {
+                if ($correctNumber == 0 || $correctNumber > count($this->answerOptionsArray)) {
+                    $this->addError('correctAnswers', 'Вариант с номером "' . $correctNumber . '" не найден.');
+                }
+            }
         }
         
         $this->correctAnswers = implode(', ', $correctAnswersArray[0]);
@@ -264,6 +298,7 @@ class Question extends CActiveRecord
         foreach ($this->answerOptions as $answerOption) {
             $this->answerOptionsArray[$answerOption->option_number] = $answerOption->option_text;
             $this->optionsNumber[] = $answerOption->option_number;
+            $this->answerIdTextPair[$answerOption->id] = $answerOption->option_text;
             
             if ($this->type === 'select_one' && $answerOption->id == $this->answer_id) {
                 $this->correctAnswers = $answerOption->option_number;
@@ -282,7 +317,7 @@ class Question extends CActiveRecord
         
         if ($this->type === 'numeric') {
             $this->answer_number = floatval($this->answer_number);
-            $this->precision_percent = floatval($this->precision_percent);
+            $this->precision_percent = sprintf('%.'.self::PRECISION_D.'f', floatval($this->precision_percent));
         }
     }
 
@@ -292,15 +327,15 @@ class Question extends CActiveRecord
             $this->correctAnswers = explode(', ', $this->correctAnswers);
             
             switch ($this->scenario) {
-            	case 'string':
-            	    $this->type = self::TYPE_STRING;
-            	    break;
-            	case 'numeric':
-            	    $this->type = self::TYPE_NUMERIC;
-            	    break;
-            	default:
-            	    $type = '';
-            	    break;
+                case 'string':
+                    $this->type = self::TYPE_STRING;
+                    break;
+                case 'numeric':
+                    $this->type = self::TYPE_NUMERIC;
+                    break;
+                default:
+                    $type = '';
+                    break;
             }
             
             if ($this->scenario === 'select') {
@@ -310,11 +345,11 @@ class Question extends CActiveRecord
                     $this->type = self::TYPE_ONE;
                 }
             }
-            
+            /*
             if ($this->scenario === 'numeric' && isset($this->precision_percent) == false) {
                 $this->precision_percent = self::DEFAULT_PRECISION;
             }
-            
+            */
             $this->title = SHelper::purifyHtml($this->title);
             
             return true;
@@ -330,7 +365,7 @@ class Question extends CActiveRecord
         if ($this->scenario === 'select') {
             if (! $this->isNewRecord) {
                 AnswerOptions::model()->deleteAll('question_id=:questionId', array(
-                ':questionId' => $this->id
+                    ':questionId' => $this->id
                 ));
             }
             

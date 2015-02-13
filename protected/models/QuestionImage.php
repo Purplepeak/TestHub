@@ -4,6 +4,21 @@ class QuestionImage extends TestImages
 {
 
     public $_type = 'question';
+    
+    public $imageDir;
+    
+    public $idAttribute;
+    
+    protected $type;
+    
+    public function init()
+    {
+        $this->imageDir = Yii::getPathOfAlias('questionImages');
+    
+        $this->idAttribute = 'question_id';
+    
+        parent::init();
+    }
 
     public function defaultScope()
     {

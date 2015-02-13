@@ -1,5 +1,6 @@
-<?php
+<h2 class='first-header'>Преподаватели</h2>
 
+<?php
 $this->widget('zii.widgets.grid.CGridView', array(
     'id' => 'teacher-grid',
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',

@@ -1,3 +1,5 @@
+<h2 class='first-header'>Студенты</h2>
+
 <?php
 $group = Group::model()->findByPk($model->searchGroup);
 

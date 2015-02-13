@@ -21,6 +21,12 @@ class TestImages extends CActiveRecord
 
     public $_type;
 
+    protected $imageDir;
+
+    protected $idAttribute;
+
+    protected $type;
+
     const TYPE_FOREWORD = 'test';
 
     const TYPE_QUESTION = 'question';
@@ -144,14 +150,15 @@ class TestImages extends CActiveRecord
          * уже существующего текста).
          */
         $regexr = "{src=[\"\'](%s(%s[\/\.\w]*))[\"\']}ui";
-        $tmpImageRegexr = sprintf($regexr, addcslashes(Yii::app()->baseUrl, '/'), addcslashes(Yii::app()->params['tmpFolder'], '/'));
+        $tmpImageRegexr = sprintf($regexr, addcslashes(Yii::app()->baseUrl, '/'), addcslashes(Yii::app()->params['tmpDir'], '/'));
         $existImageRegexr = sprintf($regexr, addcslashes(Yii::app()->baseUrl, '/'), addcslashes(Yii::app()->params['testImages'], '/'));
+        $resultImageDir = $this->imageDir . "/{$model->id}";
         
         if (preg_match_all($tmpImageRegexr, $model->{$attribute}, $tmpImages) === false || preg_match_all($existImageRegexr, $model->{$attribute}, $existImages) === false) {
             throw new RegExrException("An error ooccurred while performing a regular expression match for string: {$model->{$attribute}}");
         }
         
-        if (empty($tmpImages[0]) && empty($existImages[0]) && strpos($model->{$attribute}, '<img')) {
+        if (empty($tmpImages[0]) && empty($existImages[0]) && mb_strpos($model->{$attribute}, '<img') !== false) {
             throw new RegExrException("Regular expressions don't match with any image 'src' attribute in string: {$model->{$attribute}}");
         }
         
@@ -160,11 +167,17 @@ class TestImages extends CActiveRecord
          */
         if (! empty($modelImagesRelation)) {
             foreach ($modelImagesRelation as $existImage) {
-                if (strpos($model->{$attribute}, $existImage->link) === false) {
+                if (mb_strpos($model->{$attribute}, $existImage->link) === false) {
                     $file = Yii::app()->file->set(Yii::getPathOfAlias('webroot') . $existImage->link, true);
                     $file->delete();
                     $existImage->delete();
                 }
+            }
+            
+            $imageDir = Yii::app()->file->set($resultImageDir, true);
+            
+            if ($imageDir->isEmpty) {
+                $imageDir->delete();
             }
         }
         
@@ -175,30 +188,17 @@ class TestImages extends CActiveRecord
          * изменим исходную строку.
          */
         if (! empty($tmpImages[0])) {
-            switch ($this->_type) {
-                case 'test':
-                    $imageFolder = Yii::getPathOfAlias('forewordImages');
-                    $idAttribute = 'test_id';
-                    $type = 'test';
-                    break;
-                case 'question':
-                    $imageFolder = Yii::getPathOfAlias('questionImages');
-                    $idAttribute = 'question_id';
-                    $type = 'question';
-                    break;
-            }
-            
-            $resultImageFolder = $imageFolder . "/{$model->id}/";
             $testImageArray = array();
+            $newImageDir = Yii::app()->file->set($resultImageDir, true);
+            
+            if (!$newImageDir->exists) {
+                $newImageDir->createDir(0777, $newImageDir->realpath);
+            }
             
             foreach ($tmpImages[2] as $key => $tmpImage) {
                 $imageFile = Yii::app()->file->set(Yii::getPathOfAlias('webroot') . $tmpImage, true);
                 
-                if (file_exists($resultImageFolder) === false) {
-                    $imageFile->createDir(0777, $resultImageFolder);
-                }
-                
-                $resultImage = $imageFile->move($resultImageFolder . $imageFile->basename);
+                $resultImage = $imageFile->move($resultImageDir . '/' . $imageFile->basename);
                 
                 $realImagePath = $resultImage->getRealPath();
                 $rootPathLen = mb_strlen(Yii::getPathOfAlias('webroot'));
@@ -208,39 +208,39 @@ class TestImages extends CActiveRecord
                 
                 $imgRegexr = addcslashes($tmpImages[1][$key], '/');
                 $model->{$attribute} = preg_replace("/{$imgRegexr}/", Yii::app()->baseUrl . $relativeImagePath, $model->{$attribute});
-                /*
-                $forewordImages = new TestForewordImage('saveRecord');
-                $forewordImages->link = $relativeImagePath;
-                $forewordImages->{$idAttribute} = $model->id;
                 
-                if ($forewordImages->validate()) {
-                    $forewordImages->save(false);
-                }
-                */
-                
-                $testImageArray[] = array('attributeId'=>$model->id, 'link'=>$relativeImagePath);
+                $testImageArray[] = array(
+                    'attributeId' => $model->id,
+                    'link' => $relativeImagePath
+                );
             }
             
-            $connection=Yii::app()->db;
+            $connection = Yii::app()->db;
             
             $insertValues = '';
             
-            foreach($testImageArray as $key=>$testImage) {
-                if($insertValues !== '') {
-                    $insertValues .=',';
+            foreach ($testImageArray as $key => $testImage) {
+                if ($insertValues !== '') {
+                    $insertValues .= ',';
                 }
-            
+                
                 $insertValues .= "(:link{$key}, :type{$key}, :attId{$key})";
             }
             
-            $sql="INSERT INTO test_images(link, type, {$idAttribute}) VALUES".$insertValues;
+            $sql = "INSERT INTO test_images(link, type, {$this->idAttribute}) VALUES" . $insertValues;
             
-            $command=$connection->createCommand($sql);
-            //$type = 'test';
-            foreach($testImageArray as $key=>$testImage) {
-                $command->bindParam(":link{$key}",$testImage['link'],PDO::PARAM_STR);
-                $command->bindParam(":type{$key}",$type,PDO::PARAM_STR);
-                $command->bindParam(":attId{$key}",$testImage['attributeId'],PDO::PARAM_STR);
+            $command = $connection->createCommand($sql);
+            
+            if ($this->_type === 'test') {
+                $type = 'test';
+            } elseif ($this->_type === 'question') {
+                $type = 'question';
+            }
+            
+            foreach ($testImageArray as $key => $testImage) {
+                $command->bindParam(":link{$key}", $testImage['link'], PDO::PARAM_STR);
+                $command->bindParam(":type{$key}", $type, PDO::PARAM_STR);
+                $command->bindParam(":attId{$key}", $testImage['attributeId'], PDO::PARAM_STR);
             }
             
             $command->execute();

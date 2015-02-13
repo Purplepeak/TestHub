@@ -15,48 +15,60 @@
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'email'); ?>
 	    </div>
-		<?php echo $form->emailField($model,'email'); ?>
-		<?php echo $form->error($model,'email'); ?>
+	    <div class="form-field-container">
+	      <?php echo $form->emailField($model,'email'); ?>
+		  <?php echo $form->error($model,'email'); ?>
+	    </div>
 	</div>
 
 	<div class="row">
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'passwordText'); ?>
 	    </div>
-		<?php echo $form->passwordField($model,'passwordText'); ?>
-		<?php echo $form->error($model,'passwordText'); ?>
+	    <div class="form-field-container">
+	      <?php echo $form->passwordField($model,'passwordText'); ?>
+		  <?php echo $form->error($model,'passwordText'); ?>
+	    </div>
 	</div>
 	
 	<div class="row">
 	    <div class="field-label">
 	         <?php echo $form->labelEx($model,'password2'); ?>
 	    </div>
-		<?php echo $form->passwordField($model,'password2'); ?>
-		<?php echo $form->error($model,'password2'); ?>
+	    <div class="form-field-container">
+	      <?php echo $form->passwordField($model,'password2'); ?>
+		  <?php echo $form->error($model,'password2'); ?>
+	    </div>
 	</div>
 	
 	<div class="row">
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'name'); ?>
 	    </div>
-		<?php echo $form->textField($model,'name'); ?>
-		<?php echo $form->error($model,'name'); ?>
+	    <div class="form-field-container">
+		  <?php echo $form->textField($model,'name'); ?>
+		  <?php echo $form->error($model,'name'); ?>
+		</div>
 	</div>
 	
 	<div class="row">
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'surname'); ?>
 	    </div>
-		<?php echo $form->textField($model,'surname'); ?>
-		<?php echo $form->error($model,'surname'); ?>
+	    <div class="form-field-container">
+	      <?php echo $form->textField($model,'surname'); ?>
+		  <?php echo $form->error($model,'surname'); ?>
+	    </div>
 	</div>
 	
 	<div class="row">
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'gender'); ?>
 	    </div>
-		<?php echo $form->radioButtonList($model,'gender', array(Users::GENDER_MALE=>'Мужской', Users::GENDER_FEMALE=>'Женский'), array('separator'=>'  ', 'labelOptions'=>array('style'=>'display:inline; font-size:11px'))); ?>
-		<?php echo $form->error($model,'gender'); ?>
+	    <div class="form-field-container">
+		  <?php echo $form->radioButtonList($model,'gender', array(Users::GENDER_MALE=>'Мужской', Users::GENDER_FEMALE=>'Женский'), array('separator'=>'  ', 'labelOptions'=>array('style'=>'display:inline; font-size:11px'))); ?>
+		  <?php echo $form->error($model,'gender'); ?>
+		</div>
 	</div>
 <?php endif;?>	
 
@@ -65,9 +77,11 @@
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'groups'); ?>
 	    </div>
-		<?php echo $form->textField($model,'groups'); ?>
+	    <div class="form-field-container">
+		  <?php echo $form->textField($model,'groups'); ?>
+		  <?php echo $form->error($model,'groups'); ?>
+		</div>
 		<em>Группы в которых вы преподаете. Если групп несколько, можно указать их через запятые/пробелы или же перечислить несколько подряд идущих групп 1050-1053.</em>
-		<?php echo $form->error($model,'groups'); ?>
 	  </div>
 	<?php endif;?>
 	
@@ -76,9 +90,11 @@
 	    <div class="field-label">
 	         <?php echo $form->labelEx($model,'group'); ?>
 	    </div>
-		<?php echo $form->textField($model,'group'); ?>
+	    <div class="form-field-container">
+		  <?php echo $form->textField($model,'group'); ?>
+		  <?php echo $form->error($model,'group'); ?>
+		</div>
 		<em>Укажите номер группы в которой вы обучаетесь.</em>
-		<?php echo $form->error($model,'group'); ?>
 	</div>
 	<?php endif;?>	
 	
@@ -87,8 +103,10 @@
 	    <div class="field-label">
 	        <?php echo $form->labelEx($model,'accessCode'); ?>
 	    </div>
-		<?php echo $form->textField($model,'accessCode'); ?>
-		<?php echo $form->error($model,'accessCode'); ?>
+	    <div class="form-field-container">
+		  <?php echo $form->textField($model,'accessCode'); ?>
+		  <?php echo $form->error($model,'accessCode'); ?>
+		</div>
 	  </div>
     <?php endif;?>
  <?php if($model->scenario == 'register'):?>

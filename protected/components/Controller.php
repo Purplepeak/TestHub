@@ -12,23 +12,23 @@ class Controller extends CController
     public $layout = '//layouts/column1';
 
     public $menu = array();
-    
+
     public $userData;
-    
+
     protected $model;
-    
+
     protected $defaultModel;
-    
+
     public function init()
     {
-        if(!Yii::app()->user->isGuest && !empty(Yii::app()->user->__userData)) {
+        if (! Yii::app()->user->isGuest && ! empty(Yii::app()->user->__userData)) {
             $this->userData = Yii::app()->user->__userData;
         }
     }
 
     protected function performAjaxValidation($model)
     {
-        if (isset($_POST['ajax']) && ($_POST['ajax'] === 'register-form' || $_POST['ajax'] === 'change-pass-form' || $_POST['ajax'] === 'group-form' || $_POST['ajax'] === 'avatar-form' || $_POST['ajax']==='test-form')) {
+        if (isset($_POST['ajax']) && ($_POST['ajax'] === 'register-form' || $_POST['ajax'] === 'change-pass-form' || $_POST['ajax'] === 'group-form' || $_POST['ajax'] === 'avatar-form' || $_POST['ajax'] === 'test-form' || $_POST['ajax'] === 'answer-form')) {
             echo CActiveForm::validate($model);
             Yii::app()->end();
         }
@@ -45,20 +45,20 @@ class Controller extends CController
             $this->redirect($redirectAction);
         }
     }
-    
+
     public function loadModel($id)
     {
         if ($this->model === null) {
             $this->model = $this->defaultModel->findByPk($id);
         }
-    
+        
         if ($this->model === null) {
             throw new CHttpException(404, 'The requested page does not exist.');
         }
-    
+        
         return $this->model;
     }
-    
+
     public function getModelByActionId($actionId)
     {
         if ($this->action->id === $actionId && ! empty($this->actionParams) && $this->actionParams['id']) {

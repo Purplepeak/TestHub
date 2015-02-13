@@ -6,7 +6,7 @@ $attributes = array(
 );
 
 if($model->cropped_avatar) {
-    $avatar = Yii::app()->request->baseUrl .'/avatars/' .$model->id. '/190x190/crop/'. CHtml::encode($model->cropped_avatar);
+    $avatar = Yii::app()->request->baseUrl .Yii::app()->params['avatarRelativePath'].'/'.$model->id. '/190x190/crop/'. CHtml::encode($model->cropped_avatar);
 } else {
     $avatar = Yii::app()->request->baseUrl . Yii::app()->params['defaultMainAvatar'];
 }

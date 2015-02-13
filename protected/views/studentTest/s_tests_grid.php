@@ -1,6 +1,12 @@
 <?php
+$testAction = "test/view";
+
+if($model->testStatus === 'passed' || $model->testStatus === 'failed') {
+    $testAction = "test/result";
+}
+
 $this->widget('zii.widgets.grid.CGridView', array(
-    'id' => 'teacher-grid',
+    'id' => 'student-tests-grid',
     'cssFile' => Yii::app()->baseUrl . '/css/grid-view.css',
     'dataProvider' => $model->searchMyTests(),
     'emptyText' => 'Тестов не найдено',
@@ -15,9 +21,9 @@ $this->widget('zii.widgets.grid.CGridView', array(
             'name' => 'testName',
             'header' => 'Название теста',
             'type' => 'html',
-            'value' => function($data)
+            'value' => function($data) use ($testAction)
             {
-                return CHtml::link(CHtml::encode($data->test->name), Yii::app()->createUrl("test/view", array('id' => $data->test->id)));
+                return CHtml::link(CHtml::encode($data->test->name), Yii::app()->createUrl($testAction, array('id' => $data->test->id)));
             }
         ),
         array(
@@ -40,11 +46,12 @@ $this->widget('zii.widgets.grid.CGridView', array(
             ),
             'buttons' => array(
                 'startTest' => array(
-                    'label' => 'Начать тест',
+                    'label' => 'Страница теста',
                     'imageUrl' => Yii::app()->request->baseUrl . '/css/start-test.png',
                     'options' => array(
-                        'class' => 'start-test-button'
+                        'class' => 'start-test-icon'
                     ),
+                    /*
                     'click' => 'function(){
                         if(confirm("Тест неоходимо выполнить в течении отведенного времени. Вы уверены, что хотите продолжить?")) {
                             return true;
@@ -52,7 +59,8 @@ $this->widget('zii.widgets.grid.CGridView', array(
                             return false;
                         }
                     }',
-                    'url' => "Yii::app()->createUrl('student/startTest')"
+                    */
+                    'url' => "Yii::app()->createUrl('test/view', array('id' => \$data->test->id))"
                 )
             )
         )

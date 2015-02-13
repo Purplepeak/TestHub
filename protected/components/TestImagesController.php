@@ -16,7 +16,7 @@ class TestImagesController extends Controller
     
     //protected $imageModel;
     
-    private $tmpFolder;
+    private $tmpDir;
 
     /**
      *
@@ -45,7 +45,8 @@ class TestImagesController extends Controller
                     'index',
                     'view',
                     'tmpUpload',
-                    'bub'
+                    'bub',
+                    'deleteTmpImage'
                 ),
                 'users' => array(
                     '*'
@@ -91,7 +92,7 @@ class TestImagesController extends Controller
                 'createDirectoryMode' => 0777,
                 'createDirectoryRecursive' => true,
                 'filenameRule' => 'md5(date("m-d-H-i-s")).".".$file->extensionName',
-                'path' => realpath(Yii::app()->basePath . '/..') . Yii::app()->params['tmpFolder'] . '/',
+                'path' => realpath(Yii::app()->basePath . '/..') . Yii::app()->params['tmpDir'] . '/',
     
                 'onBeforeUpload' => function ($event)
                 {
@@ -109,7 +110,7 @@ class TestImagesController extends Controller
                         $result = CJSON::encode(array('error' => true, 'message' => $event->sender->getErrors()));
                     } else {
                         $file = array(
-                            'filelink' => Yii::app()->baseUrl . Yii::app()->params['tmpFolder']  .'/'. $event->sender->filename
+                            'filelink' => Yii::app()->baseUrl . Yii::app()->params['tmpDir']  .'/'. $event->sender->filename
                         );
     
                         $result = CJSON::encode($file);
@@ -123,11 +124,17 @@ class TestImagesController extends Controller
     
     public function actionBub()
     {
-        //$result = CJSON::encode(array('error' => true, 'message' => 'Выбранный файл не является изображением'));
+        $a = 50;
+        $resultImageDir = Yii::getPathOfAlias('questionImages') . "/{$a}";
+        $imageDir = Yii::app()->file->set($resultImageDir, true);
         
-        //echo stripcslashes(CJSON::encode(array('filelink' =>'asffas')));
-        //exit();
-        var_dump(CHtml::activeName($this->defaultModel,'imageFile'));
+       if($imageDir->isEmpty) {
+           echo 'pusto';
+       } else {
+           echo 'polno';
+       }
+       
+       var_dump($imageDir->dirname);
     }
 
     /**
@@ -210,5 +217,18 @@ class TestImagesController extends Controller
         $this->render('admin', array(
             'model' => $model
         ));
+    }
+    
+    public function actionDeleteTmpImage()
+    {
+        if (isset($_POST['url'])) {
+            $imageRelativeUrl = mb_substr($_POST['url'], mb_strlen(Yii::app()->request->hostInfo.Yii::app()->request->baseUrl));
+            
+            if(mb_strpos($imageRelativeUrl, Yii::app()->params['tmpDir']) !== false) {
+                $file = Yii::app()->file->set(Yii::getPathOfAlias('webroot') . $imageRelativeUrl, true);
+                
+                $file->delete();
+            }
+        }
     }
 }

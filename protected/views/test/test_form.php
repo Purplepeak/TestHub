@@ -8,23 +8,33 @@
             'validateOnSubmit'=>false,
         ),
     ));
+    
+    $errorModels = $questions;
+    array_unshift($errorModels, $test);
+    //var_dump(strtotime('2015-02-15 21:00:00'), $test->deadline);
 ?>
 
-<div class="form th-test-from">
+<div class="form th-test-from ignore-mathjax">
     <div class="test-fields">
-    <?php echo $form->errorSummary($test); ?>
+    <?php echo $form->errorSummary($errorModels, '<p>Пожалуйста, исправьте следующие ошибки:</p>'); ?>
     <div class="row">
 		<?php echo $form->labelEx($test,'name'); ?>
 		<?php echo $form->textField($test,'name',array('size'=>45,'maxlength'=>255, 'class' => 'test-name-field')); ?>
 		<?php echo $form->error($test,'name'); ?>
 	</div>
-
-	<div class="row">
+    
+    
+    
+	<div class="row" onkeyup="forewordPreview.Update()">
 		<?php echo $form->labelEx($test,'foreword'); ?>
 		<?php echo $form->textArea($test,'foreword',array('rows'=>10, 'cols'=>70, 'class'=>'foreword-redactor')); ?>
 		<?php echo $form->error($test,'foreword'); ?>
 	</div>
-
+	<div class="foreword-preview-container" style="visibility:hidden; position:absolute; top:0; left: 0">
+	    <div class="foreword-preview process-mathjax"></div>
+        <div class="foreword-buffer process-mathjax"></div>
+	</div>
+    
 	<div class="row">
 		<?php echo $form->labelEx($test,'minimum_score'); ?>
 		<em>Минимальное количество баллов, необходимых для прохождения теста</em>
@@ -52,7 +62,7 @@
 		<?php 
 		    $dateTimeHtmlOptions = array();
 		
-		    if(!$test->deadline) {
+		    if(!strtotime($test->deadline)) {
                 $dateTimeHtmlOptions = array('value'=>'гггг-мм-дд чч:мм');
             }
 		    
@@ -80,3 +90,14 @@
 <?php $this->endWidget(); ?>
 
 </div>
+
+<script>
+var forewordPreview = new Preview('foreword-preview','foreword-buffer','redactor-editor-foreword');
+forewordPreview.callback = MathJax.Callback(["CreatePreview",forewordPreview]);
+forewordPreview.callback.autoReset = true;
+
+if($('.foreword-preview').is(':empty')) {
+	forewordPreview.Update();
+}
+
+</script>

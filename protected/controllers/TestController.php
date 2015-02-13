@@ -11,13 +11,15 @@ class TestController extends Controller
     public $layout = '//layouts/column2';
 
     protected $model;
-    
+
     protected $defaultModel;
-    
+
+    protected $testTimeOut = false;
+
     public function init()
     {
         $this->defaultModel = Test::model();
-    
+        
         parent::init();
     }
 
@@ -28,8 +30,8 @@ class TestController extends Controller
     public function filters()
     {
         return array(
-            'accessControl', // perform access control for CRUD operations
-            'postOnly + delete' // we only allow deletion via POST request
+            'accessControl',
+            'postOnly + delete + postQuestion'
                 );
     }
 
@@ -37,7 +39,7 @@ class TestController extends Controller
     {
         return array(
             'getRowForm' => array(
-                'class' => 'ext.DynamicTabularForm.actions.GetRowForm',
+                'class' => 'application.components.DynamicTabularForm.actions.GetRowForm',
                 'view' => 'question_form',
                 'modelClass' => 'Question'
             )
@@ -54,12 +56,29 @@ class TestController extends Controller
     {
         return array(
             array(
-                'allow', // allow all users to perform 'index' and 'view' actions
+                'allow',
                 'actions' => array(
-                    'view'
+                    'view',
+                    'postQuestion',
+                    'result'
                 ),
                 'roles' => array(
                     'viewTest'
+                )
+            ),
+            array(
+                'allow',
+                'actions' => array(
+                    'process',
+                    'init'
+                ),
+                'roles' => array(
+                    'beginTest' => array(
+                        'beginAccess' => $this->beginTestAccessRule(array(
+                            'process',
+                            'init'
+                        ))
+                    )
                 )
             ),
             array(
@@ -106,16 +125,16 @@ class TestController extends Controller
             ),
             
             array(
-                'allow', // allow admin user to perform 'admin' and 'delete' actions
+                'allow',
                 'actions' => array(
-                    'admin',
+                    'admin'
                 ),
                 'roles' => array(
                     'adminTest'
                 )
             ),
             array(
-                'deny', // deny all users
+                'deny',
                 'users' => array(
                     '*'
                 )
@@ -124,16 +143,307 @@ class TestController extends Controller
     }
 
     /**
-     * Displays a particular model.
-     *
-     * @param integer $id
-     *            the ID of the model to be displayed
+     * Отображает информацию о тесте. У студента есть возможность начать тест, у преподавателя изменить.
      */
     public function actionView($id)
     {
-        $this->render('view', array(
-            'model' => $this->loadModel($id)
+        $model = $this->loadModel($id);
+        
+        $studentTest = StudentTest::model()->find('test_id=:testId AND student_id=:studentId', array(
+            'testId' => $id,
+            'studentId' => Yii::app()->user->id
         ));
+        
+        $testInProgress = false;
+        
+        if ($studentTest) {
+            $model->attempts = $studentTest->attempts;
+            $model->deadline = Yii::app()->params["dataHandler"]->handleDataTimezone($studentTest->deadline . '[Y-m-d H:i]');
+            $testInProgress = $studentTest->checkTestInProgress();
+        }
+        
+        $isTeacher = false;
+        
+        if ($model->teacher->id == Yii::app()->user->id) {
+            $isTeacher = true;
+        }
+        
+        $this->render('view', array(
+            'model' => $model,
+            'studentTestModel' => $studentTest,
+            'testInProgress' => $testInProgress,
+            'isTeacher' => $isTeacher
+        ));
+    }
+
+    /**
+     * Действие выполняется при начале теста студентом.
+     */
+    public function actionInit($id)
+    {
+        $studentTest = StudentTest::model()->find('test_id=:testId AND student_id=:studentId', array(
+            'testId' => $id,
+            'studentId' => Yii::app()->user->id
+        ));
+        
+        // $studentTest->attempts = $studentTest->attempts - 1;
+        $studentTest->start_time = date('Y-m-d H:i:s');
+        $studentTest->result = null;
+        $studentTest->end_time = null;
+        $studentTest->update();
+        
+        StudentAnswer::model()->deleteAll('test_result=:testResult', array(
+            ':testResult' => $studentTest->id
+        ));
+        
+        $this->redirect(array(
+            'process',
+            'id' => $id
+        ));
+    }
+
+    /**
+     * Выполнение теста.
+     */
+    public function actionProcess($id)
+    {
+        if (isset($_POST['StudentAnswer'])) {
+            
+            /**
+             * Перед тем как принять на проверку ответ, проверяем не вышло ли время на выполнение теста.
+             * Если время вышло, редиректим на страницу с результатом.
+             */
+            
+            if (! Test::model()->checkTestTimeLimit($_POST['testStartTime'], $_POST['testTimeLimit'])) {
+                Yii::app()->user->setState('endTest', true);
+                if (Yii::app()->request->isAjaxRequest) {
+                    echo json_encode(array(
+                        'redirect' => $this->createUrl('test/result', array(
+                            'id' => $_POST['testId']
+                        ))
+                    ));
+                    
+                    Yii::app()->end();
+                } else {
+                    $this->redirect(array(
+                        'result',
+                        'id' => $_POST['testId']
+                    ));
+                }
+            }
+            
+            /**
+             * Назначаем и сохраняем ответ.
+             */
+            
+            $studentAnswer = StudentAnswer::model()->getAnswerModel($_POST['StudentAnswer']['question_id'], $_POST['StudentAnswer']['scenario'], $_POST['testId']);
+            
+            $studentAnswer->attributes = $_POST['StudentAnswer'];
+            
+            if (isset($_POST['StudentAnswer']['selectedAnswers'])) {
+                $studentAnswer->selectedAnswers = $_POST['StudentAnswer']['selectedAnswers'];
+            }
+            
+            if ($studentAnswer->validate()) {
+                $studentAnswer->save(false);
+                echo CJSON::encode(array(
+                    'validateStatus' => 'success'
+                ));
+                Yii::app()->end();
+            } else {
+                $error = CActiveForm::validate($studentAnswer);
+                if ($error != '[]')
+                    echo $error;
+                Yii::app()->end();
+            }
+        }
+        
+        /**
+         * Ниже извлекаем информацию о тесте и вопросах к нему относящихся. Если через GET передан
+         * номер вопроса, рендерим его, иначе рендерим первый вопрос теста.
+         */
+        
+        $test = $this->loadModel($id);
+        
+        $directQuestionNumber = 1;
+        
+        if ($directQuestionNumber = Yii::app()->request->getQuery('q')) {
+            if ($directQuestionNumber === 'end') {
+                $this->redirect(array(
+                    'process',
+                    'id' => $test->id
+                ));
+            }
+        } else {
+            $directQuestionNumber = 1;
+        }
+        
+        if ($directQuestionNumber > count($test->question)) {
+            throw new CHttpException(404);
+        }
+        
+        $studentTest = StudentTest::model()->find('test_id=:testId AND student_id=:studentId', array(
+            'testId' => $test->id,
+            'studentId' => Yii::app()->user->id
+        ));
+        
+        if (empty($studentTest->start_time) || !empty($studentTest->end_time)) {
+            $this->redirect(array(
+                'view',
+                'id' => $test->id
+            ));
+        }
+        
+        $questionDataArray = array(); // Массив содержащий необходимую информацию  о всех вопросах
+        $questionNumberIdPair = array(); // Массив номер вопроса => ID вопроса
+        
+        foreach ($test->question as $key => $question) {
+            $questionDataArray[$key + 1] = array(
+                'id' => $question->id,
+                'title' => $question->title,
+                'type' => $question->type,
+                'answerIdTextPair' => $question->answerIdTextPair  // Массив содержит пару ID варианта ответа => Текст варианта ответа
+            );
+            $questionNumberIdPair[$key + 1] = $question->id;
+        }
+        
+        $answerModel = StudentAnswer::model()->getAnswerModel($questionDataArray[$directQuestionNumber]['id'], $questionDataArray[$directQuestionNumber]['type'], $test->id);
+        
+        $this->render('test_starter', array(
+            'test' => $test,
+            'directQuestionNumber' => $directQuestionNumber,
+            'answerModel' => $answerModel,
+            'questionDataArray' => $questionDataArray,
+            'questionNumberIdPair' => $questionNumberIdPair,
+            'testTimeLimit' => $test->time_limit * 60,
+            'testStartTime' => strtotime($studentTest->start_time)
+        ));
+    }
+    
+    /**
+     * Если тест еще не выполнялся или выполняется повторно, действие подсчитывает 
+     * результат теста и приводит запись в таблице Student_test к соответствующему виду 
+     * (присваиваются значения столбцам result и end_time). Иначе просто выводим результат 
+     * выполнения теста.
+     */
+
+    public function actionResult($id)
+    {
+        $studentTest = StudentTest::model()->find('test_id=:testId AND student_id=:studentId', array(
+            ':testId' => $id,
+            ':studentId' => Yii::app()->user->id
+        ));
+        
+        if ($studentTest) {
+            $studentTotalScore = $studentTest->result;
+            $timeOutMessage = '';
+            
+            if (isset($_POST['endTest']) || Yii::app()->user->getState('endTest') === true) {
+                
+                $studentTotalScore = 0;
+                if (! empty($studentTest->studentAnswers)) {
+                    foreach ($studentTest->studentAnswers as $answer) {
+                        $studentTotalScore = $studentTotalScore + $answer->result;
+                    }
+                }
+                
+                $studentTest->result = $studentTotalScore;
+                $studentTest->end_time = date('Y-m-d H:i');
+                
+                $timeLimit = strtotime($studentTest->start_time) + $studentTest->test->time_limit * 60;
+                
+                if (strtotime($studentTest->end_time) > $timeLimit) {
+                    $studentTest->end_time = date('Y-m-d H:i', $timeLimit);
+                }
+                
+                $studentTest->update();
+                
+                if (Yii::app()->user->getState('endTest')) {
+                    $timeOutMessage = 'Время, отведенное на выполнение теста, вышло.';
+                }
+                
+                Yii::app()->user->setState('endTest', null);
+                
+                $this->redirect(array(
+                    'result',
+                    'id' => $id
+                ));
+            }
+            
+            if (is_null($studentTotalScore)) {
+                $this->redirect(array(
+                    'view',
+                    'id' => $id
+                ));
+            }
+            
+            $message = 'Тест был успешно сдан.';
+            $testPassed = true;
+            
+            if ($studentTotalScore < $studentTest->test->minimum_score) {
+                $message = 'Вы набрали недостаточно баллов для прохождения теста';
+                $testPassed = false;
+            }
+            
+            $this->render('test_result', array(
+                'totalScore' => $studentTotalScore,
+                'studentTest' => $studentTest,
+                'message' => $message,
+                'timeOutMessage' => $timeOutMessage,
+                'testPassed' => $testPassed
+            ));
+        } else {
+            $this->redirect(array(
+                'view',
+                'id' => $id
+            ));
+        }
+    }
+    
+    /**
+     * Действие допускает только POST запросы и предназначено для динамического отображения запрашиваемого вопроса.
+     */
+
+    public function actionPostQuestion()
+    {
+        if (! empty($_POST) && isset($_POST['questionNumber']) && isset($_POST['questionNumberIdPair'])) {
+            $questionNumber = $_POST['questionNumber'];
+            $numberOfQuestions = count($_POST['questionNumberIdPair']);
+            
+            $questionDataArray = array();
+            $studentAnswersQuestionId = array();
+            $answerModel = null;
+            
+            if (Yii::app()->request->getPost('questionDataArray')) {
+                $questionDataArray = $_POST['questionDataArray'];
+                $answerModel = StudentAnswer::model()->getAnswerModel($questionDataArray['id'], $questionDataArray['type'], $_POST['testID']);
+            }
+            
+            $studentAnswersQuestionId = Test::model()->getStudentAnswersByQuestionsId($_POST['questionNumberIdPair']);
+            
+            $questionAlert = '';
+            
+            if ($questionNumber == 'end') {
+                $questionAlert = 'Завершить тест?';
+                
+                if (count($studentAnswersQuestionId) < $numberOfQuestions) {
+                    $questionAlert = 'Вы ответили не на все вопросы. ' . $questionAlert;
+                }
+            }
+            
+            $this->renderPartial('test_question', array(
+                'answerModel' => $answerModel,
+                'testID' => $_POST['testID'],
+                'questionNumber' => $questionNumber,
+                'questionNumberIdPair' => $_POST['questionNumberIdPair'],
+                'questionDataArray' => $questionDataArray,
+                'questionAlert' => $questionAlert,
+                'numberOfQuestions' => $numberOfQuestions,
+                'studentAnswersQuestionId' => $studentAnswersQuestionId,
+                'testTimeLimit' => $_POST['testTimeLimit'],
+                'testStartTime' => $_POST['testStartTime']
+            ), false, true);
+        }
     }
 
     public function actionCreate()
@@ -221,7 +531,10 @@ class TestController extends Controller
                     $transaction->rollback();
                 }
                 
-                // $this->redirect(array('site/index'));
+                $this->redirect(array(
+                    'test/view',
+                    'id' => $test->id
+                ));
             }
         }
         $this->render('create', array(
@@ -265,8 +578,10 @@ class TestController extends Controller
                     $question->scenario = $value['modelScenario'];
                     
                     if ($question->scenario === 'select') {
-                        $question->answerOptionsArray = $value['answerOptionsArray'];
+                        $numberOfOptions = range(1, count($value['answerOptionsArray']));
+                        $question->answerOptionsArray = array_combine($numberOfOptions, $value['answerOptionsArray']);
                         $question->correctAnswers = $value['correctAnswers'];
+                        
                         $answerOptionsId = array();
                         
                         foreach ($value['answerOptionsArray'] as $id => $option) {
@@ -301,7 +616,7 @@ class TestController extends Controller
                 }
                 
                 $this->redirect(array(
-                    'test/update',
+                    'test/view',
                     'id' => $test->id
                 ));
             }
@@ -312,6 +627,10 @@ class TestController extends Controller
             'questions' => $questions
         ));
     }
+    
+    /**
+     * Выводит тесты относящиеся к преподавателю
+     */
 
     public function actionTeacher()
     {
@@ -338,12 +657,6 @@ class TestController extends Controller
     public function actionDelete($id)
     {
         $this->loadModel($id)->delete();
-        
-        // if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-        if (! isset($_GET['ajax']))
-            $this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array(
-                'admin'
-            ));
     }
 
     /**
@@ -370,5 +683,21 @@ class TestController extends Controller
         $this->render('admin', array(
             'model' => $model
         ));
+    }
+
+    private function beginTestAccessRule($actionsArray)
+    {
+        if (in_array($this->action->id, $actionsArray) && ! empty($this->actionParams) && $this->actionParams['id']) {
+            $studentTest = StudentTest::model()->find('test_id=:testId AND student_id=:studentId AND attempts >= 1 AND deadline > NOW()', array(
+                'testId' => $this->actionParams['id'],
+                'studentId' => Yii::app()->user->id
+            ));
+            
+            if (is_null($studentTest)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
     }
 }
