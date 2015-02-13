@@ -167,9 +167,10 @@ return array(
         'avatarRelativePath' => '/uploads/avatars',
         'rememberMeTime' => 3600 * 24 * 30, // Запоминаем пользователя на указанный срок
         'privateConfig' => require (dirname(__FILE__) . '/private.php'),
+        // Почта для отправки пользователям различной информации, например, при регистрации, изменении пароля и т.д.
         'siteEmail' => array(
-            'email' => 'testhubv2@gmail.com', // Почта для отправки пользователям различной информации, например, при регистрации
-            'password' => '901117testhub'
+            'email' => '', 
+            'password' => ''
         ),
         'adminEmail' => 'admin@th.ru',
         'teacherAccessCode' => 'testaccess',
