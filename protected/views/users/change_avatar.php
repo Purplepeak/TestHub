@@ -25,5 +25,5 @@ $this->widget('SAvatarWidget', array(
     'maxImageRatio' => 3,
     'minImageRatio' => 0.25,
     'maxImageSize' => $model->avatarMaxSize*1024*1024
-));var_dump(Yii::app()->request->cookies);
+));
 ?>
