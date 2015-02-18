@@ -1,0 +1,52 @@
+body {
+   background-color: #eee;
+}
+
+.header-img {
+	margin-right:10px;
+}
+
+.th-jumbotron {
+	background-color: white;
+}
+
+.th-navbar-default {
+	background-color: white;
+}
+
+.th-navbar-default .th-navbar-nav>li>a {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.th-navbar-default .th-navbar-nav > li > a:hover, .dropdown-menu>li>a:hover {
+    color: #fab055;
+    background-color: transparent;
+}
+
+.th-jumbotron h1{
+	font-size: 50px;
+}
+
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 0px;
+    margin-bottom: 15px;
+}
+
+.fa-mail {
+  background-image: url(../images/mailru_icon.png);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.btn-mail {
+    color: #fff;
+    background-color: #1087dd;
+    border-color: rgba(0,0,0,0.2);
+}
+
+.btn-mail:hover, .btn-mail:focus, .btn-mail:active, .btn-mail.active, .open .dropdown-toggle.btn-mail {
+    color: #fff;
+    background-color: #0d70b7;
+    border-color: rgba(0,0,0,0.2);
+}
