@@ -186,7 +186,7 @@ class TestController extends Controller
             'studentId' => Yii::app()->user->id
         ));
         
-        // $studentTest->attempts = $studentTest->attempts - 1;
+        $studentTest->attempts = $studentTest->attempts - 1;
         $studentTest->start_time = date('Y-m-d H:i:s');
         $studentTest->result = null;
         $studentTest->end_time = null;
