@@ -84,11 +84,11 @@ class SiteController extends Controller
     {
         $this->render('index');
     }
-    
+
     public function actionGetServerTime()
     {
-        $now = new DateTime(); 
-        echo $now->format("M j, Y H:i:s O"); 
+        $now = new DateTime();
+        echo $now->format("M j, Y H:i:s O");
     }
 
     public function actionError()
@@ -120,18 +120,18 @@ class SiteController extends Controller
                 }
                 
                 switch ($error['type']) {
-                	case 'SOauthException':
-                	    $error['message'] = 'Сервис временно испытывает проблемы с входом через социальные сети, повторите попытку позже. Приносим извинения за временные неудобства.';
-                	    break;
-                	case 'Swift_SwiftException':
-                	    $error['message'] = $defaultMessage;
-                	    break;
-                	case 'SAvatarCropperException':
-                	    $error['message'] = $defaultMessage;
-                	    break;
-                	case 'RegExrException':
-                	    $error['message'] = 'Возникла ошибка не позволяющая обработать ваш запрос. Пожалуйста, свяжитесь с администрацией воспользовавшись ссылкой ниже.';
-                	    break;
+                    case 'SOauthException':
+                        $error['message'] = 'Сервис временно испытывает проблемы с входом через социальные сети, повторите попытку позже. Приносим извинения за временные неудобства.';
+                        break;
+                    case 'Swift_SwiftException':
+                        $error['message'] = $defaultMessage;
+                        break;
+                    case 'SAvatarCropperException':
+                        $error['message'] = $defaultMessage;
+                        break;
+                    case 'RegExrException':
+                        $error['message'] = 'Возникла ошибка не позволяющая обработать ваш запрос. Пожалуйста, свяжитесь с администрацией воспользовавшись ссылкой ниже.';
+                        break;
                 }
                 
                 $this->render($layout, $error);
@@ -168,9 +168,17 @@ class SiteController extends Controller
                 
                 if (! empty($oauthModel)) {
                     Yii::app()->session['oauth_model'] = $oauthModel;
-                    $this->redirect(array(
-                        'userType'
-                    ));
+                    
+                    if ($userType = Yii::app()->request->getQuery('type')) {
+                        $this->redirect(array(
+                            'socialRegistration',
+                            'userType' => $userType
+                        ));
+                    } else {
+                        $this->redirect(array(
+                            'userType'
+                        ));
+                    }
                 }
                 
                 $this->redirect(Yii::app()->user->returnUrl);
@@ -218,12 +226,16 @@ class SiteController extends Controller
             ));
         }
         
-        if ($userType == 'student') {
-            $userModel = new Student();
-        }
-        
-        if ($userType == 'teacher') {
-            $userModel = new Teacher();
+        switch($userType) {
+        	case 'student':
+        	    $userModel = new Student();
+        	    break;
+        	case 'teacher':
+        	    $userModel = new Teacher();
+        	    break;
+        	default:
+        	    throw new CHttpException(404);
+        	    break;
         }
         
         $userModel->scenario = 'oauth';

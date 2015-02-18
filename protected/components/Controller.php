@@ -61,7 +61,7 @@ class Controller extends CController
 
     public function getModelByActionId($actionId)
     {
-        if ($this->action->id === $actionId && ! empty($this->actionParams) && $this->actionParams['id']) {
+        if ($this->action->id === $actionId && $this->actionParams && $this->actionParams['id']) {
             return $this->loadModel($this->actionParams['id']);
         }
     }

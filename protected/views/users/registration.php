@@ -17,7 +17,7 @@
 <?php if($model->scenario == 'register'):?>
   <p>Вы можете зарегистрироваться через предложенные социальные сети, либо пройти обычную процедуру с заполнением необходимых полей.</p>
   <div class='social-registration'>
-        <?php Yii::app()->soauth->renderWidget(array('action' => "{$model->_type}/login" , 'scenario' => 'registration')); ?>
+        <?php Yii::app()->soauth->renderWidget(array('action' => "site/login" , 'scenario' => 'registration', 'additionalQuery' => array('type'=>$model->_type))); ?>
   </div>
 <?php endif;?>
 <?php $this->renderPartial('//users/register_form', array('model'=>$model));?>

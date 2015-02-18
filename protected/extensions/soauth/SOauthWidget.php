@@ -16,6 +16,8 @@ class SOauthWidget extends CWidget
 
     public $cssFile = true;
     
+    public $additionalQuery = array();
+    
     // Для использования представления 'bootstrap-buttons', необходимо иметь установленный Bootstrap и Social Buttons for Bootstrap
     private $view = 'bootstrap-buttons';
 
@@ -39,6 +41,7 @@ class SOauthWidget extends CWidget
             'id' => $this->getId(),
             'services' => $this->services,
             'action' => $this->action,
+            'additionalQuery' => $this->additionalQuery,
             'scenario' => $this->scenario
         ));
     }

@@ -81,7 +81,7 @@ class AccountInteractionController extends Controller
 
     public function actionSendNewConfirmation()
     {
-        $model = new AccountInteractionForm;
+        $model = new AccountInteractionForm();
         $model->scenario = 'newConfirm';
         $model->userClass = Users::model();
         
@@ -162,9 +162,9 @@ class AccountInteractionController extends Controller
                 }
                 
                 $confirmedUser = Users::model()->findByPk($confirmedAccountId);
-                Users::model()->updateByPk($confirmedUser->id, array(
-                    'active' => true
-                ));
+                $confirmedUser->active = true;
+                $confirmedUser->update(array('active'));
+                $confirmedUser->assignTests();
                 
                 $identity = UserIdentity::forceLogin($confirmedUser);
                 Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
@@ -265,9 +265,7 @@ class AccountInteractionController extends Controller
             $this->render('change_error');
         }
     }
-    
+
     public function actionAvatar()
-    {
-        
-    }
+    {}
 }

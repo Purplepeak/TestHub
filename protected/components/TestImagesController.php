@@ -99,7 +99,7 @@ class TestImagesController extends Controller
                     if(CUploadedFile::getInstanceByName($event->sender->name) === null) {
                         $result = CJSON::encode(array('error' => true, 'message' => 'Выбранный файл не является изображением'));
     
-                        echo stripcslashes($result);
+                        echo $result;
                         exit();
                     }
                 },
@@ -115,26 +115,11 @@ class TestImagesController extends Controller
     
                         $result = CJSON::encode($file);
                     }
-                    echo stripcslashes($result);
+                    echo $result;
                     exit();
                 }
             )
         );
-    }
-    
-    public function actionBub()
-    {
-        $a = 50;
-        $resultImageDir = Yii::getPathOfAlias('questionImages') . "/{$a}";
-        $imageDir = Yii::app()->file->set($resultImageDir, true);
-        
-       if($imageDir->isEmpty) {
-           echo 'pusto';
-       } else {
-           echo 'polno';
-       }
-       
-       var_dump($imageDir->dirname);
     }
 
     /**

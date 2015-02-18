@@ -201,7 +201,7 @@ class Test extends CActiveRecord
     {
         parent::afterFind();
         
-        if (! empty($this->groups)) {
+        if ($this->groups) {
             $groupNumbers = array();
             
             foreach ($this->groups as $group) {
@@ -279,7 +279,7 @@ class Test extends CActiveRecord
 
     public function isTeacherGroupExist()
     {
-        if (! empty($this->testGroups)) {
+        if ($this->testGroups) {
             $testGroups = Group::model()->normalizeGroups($this->testGroups, $this, 'testGroups');
             
             $teacher = Teacher::model()->findByPk($this->teacher_id);
@@ -367,10 +367,7 @@ class Test extends CActiveRecord
             )
         );
         
-        /*
-         * if (! empty($this->name)) { $criteria->addSearchCondition('t.name', $this->name); }
-         */
-        if (isset($this->testGroups) && ! empty($this->testGroups)) {
+        if ($this->testGroups) {
             $criteria->compare('groups.number', '=' . $this->testGroups, true);
         }
         

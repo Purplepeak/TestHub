@@ -129,7 +129,7 @@ class Teacher extends Users
      */
     public function isGroupExist()
     {
-        if (! empty($this->groups)) {
+        if ($this->groups) {
             $groupArray = Group::model()->normalizeGroups($this->groups, $this, 'groups');
             $teacherGroups = array();
             
@@ -161,7 +161,7 @@ class Teacher extends Users
             )
         );
         
-        if (isset($this->groupNumber) && ! empty($this->groupNumber)) {
+        if ($this->groupNumber) {
             $criteria->compare('groups1.number', '=' . $this->groupNumber, true);
         }
     }

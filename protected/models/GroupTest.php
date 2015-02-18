@@ -6,6 +6,13 @@ class GroupTest extends CActiveRecord
 	{
 		return 'group_test';
 	}
+	
+	public function defaultScope()
+	{
+	    return array(
+	        'alias' => $this->tableName()
+	    );
+	}
 
 	public function rules()
 	{

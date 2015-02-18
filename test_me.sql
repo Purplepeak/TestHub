@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: localhost
--- Время создания: Фев 05 2015 г., 16:19
+-- Время создания: Фев 18 2015 г., 23:08
 -- Версия сервера: 5.6.15-log
 -- Версия PHP: 5.5.6
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `account_interaction` (
   `scenario` enum('confirm','restore') NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_account_interaction` (`user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `answer_options` (
   `option_number` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_options_question_idx` (`question_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=798 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=852 ;
 
 -- --------------------------------------------------------
 
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `question` (
   `test_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_question_test_idx` (`test_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=68 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=71 ;
 
 -- --------------------------------------------------------
 
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `social_accounts` (
   `url` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_social_user_idx` (`user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
 
 -- --------------------------------------------------------
 
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `student_answer` (
   PRIMARY KEY (`id`),
   KEY `FK_answer_question_idx` (`question_id`),
   KEY `FK_answer_test_result_idx` (`test_result`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=156 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=77 ;
 
 -- --------------------------------------------------------
 
@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `student_test` (
   PRIMARY KEY (`id`),
   KEY `FK_test_idx` (`test_id`),
   KEY `FK_student_idx` (`student_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11287 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11543 ;
 
 -- --------------------------------------------------------
 
@@ -240,11 +240,11 @@ CREATE TABLE IF NOT EXISTS `test` (
   `time_limit` int(11) NOT NULL,
   `attempts` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `deadline` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deadline` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `teacher_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_teacher_test_idx` (`teacher_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=35 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=37 ;
 
 -- --------------------------------------------------------
 
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `test_images` (
   PRIMARY KEY (`id`),
   KEY `FK_question_image_idx` (`question_id`),
   KEY `FK_test_image_idx` (`test_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=182 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=187 ;
 
 -- --------------------------------------------------------
 
@@ -288,7 +288,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `cropped_avatar` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_student_group_idx` (`group_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2019 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2024 ;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц

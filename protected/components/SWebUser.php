@@ -24,7 +24,7 @@ class SWebUser extends CWebUser
         return parent::__get($name);
     }
 
-    public function login($identity, $duration)
+    public function login($identity, $duration=0)
     {
         $userData = $identity->getUserData();
         

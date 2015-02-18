@@ -31,14 +31,14 @@ class Student extends Users
     public $group;
 
     public $_type = 'student';
-    
+
     protected $searchPageSize = 20;
 
     public function defaultScope()
     {
         return array(
             'condition' => "student.type='{$this->_type}'",
-            'alias' => 'student',
+            'alias' => 'student'
         );
     }
 
@@ -105,10 +105,12 @@ class Student extends Users
     protected function afterSave()
     {
         parent::afterSave();
-        $groupId = $this->studentGroupId($this->group);
-        $this->updateByPk($this->id, array(
-            'group_id' => $groupId
-        ));
+        if($this->isNewRecord) {
+            $groupId = $this->studentGroupId($this->group);
+            $this->updateByPk($this->id, array(
+                'group_id' => $groupId
+            ));
+        }
     }
 
     public function studentGroupId($number)
@@ -122,11 +124,9 @@ class Student extends Users
         
         return $group->id;
     }
-    
+
     public function groupToString()
-    {
-        
-    }
+    {}
 
     /**
      * Проверяет, существует ли введенная студентом группа
@@ -134,7 +134,7 @@ class Student extends Users
      */
     public function isGroupExist()
     {
-        if (! empty($this->group)) {
+        if ($this->group) {
             $normalizeGroup = mb_strtolower($this->group);
             $group = Group::model()->findByAttributes(array(
                 'number' => $normalizeGroup
@@ -145,14 +145,57 @@ class Student extends Users
             }
         }
     }
-    
+
     public function addSearchConditions($criteria)
     {
-        if(isset($this->searchGroup)) {
-            $criteria->addInCondition('group_id', array($this->searchGroup));
+        if (isset($this->searchGroup)) {
+            $criteria->addInCondition('group_id', array(
+                $this->searchGroup
+            ));
         }
     }
-    
+
+    public function assignTests()
+    {
+        $group = $this->student_group;
+        
+        $test = Test::model();
+        $criteria = new CDbCriteria();
+        $criteria->addCondition($test->getTableAlias() . '.deadline > NOW()');
+        
+        $criteria->with = array(
+            'groups' => array(
+                'select' => array(
+                    'groups.id'
+                ),
+                'together' => true
+            )
+        );
+        
+        $criteria->addCondition('groups.id=:groupId');
+        
+        $criteria->params = array(
+            ':groupId' => $group->id
+        );
+        
+        $tests = $test->findAll($criteria);
+        
+        $studentTestData = array();
+        
+        foreach ($tests as $test) {
+            $studentTestData[] = array(
+                'attempts' => $test->attempts,
+                'deadline' => $test->deadline,
+                'test_id' => $test->id,
+                'student_id' => $this->id
+            );
+        }
+        
+        $builder = Yii::app()->db->schema->commandBuilder;
+        $command = $builder->createMultipleInsertCommand('student_test', $studentTestData);
+        $command->execute();
+    }
+
     public static function model($className = __CLASS__)
     {
         return parent::model($className);

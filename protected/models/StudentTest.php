@@ -216,7 +216,7 @@ class StudentTest extends CActiveRecord
 
     public function checkTestInProgress()
     {
-        if (! empty($this->start_time) && empty($this->end_time) && empty($this->result) && Test::model()->checkTestTimeLimit(strtotime($this->start_time), $this->test->time_limit * 60)) {
+        if ($this->start_time && !$this->end_time && !$this->result && Test::model()->checkTestTimeLimit(strtotime($this->start_time), $this->test->time_limit * 60)) {
             return true;
         }
         

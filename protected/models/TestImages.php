@@ -26,6 +26,9 @@ class TestImages extends CActiveRecord
     protected $idAttribute;
 
     protected $type;
+    
+    // максимальны размер загружаемого изображения в мегабайтах
+    private $imageMaxSize = 2;
 
     const TYPE_FOREWORD = 'test';
 
@@ -78,8 +81,8 @@ class TestImages extends CActiveRecord
                 'safe' => true,
                 'types' => 'jpg, gif, png',
                 'allowEmpty' => true,
-                'maxSize' => 2000 * 1024,
-                'tooLarge' => 'Размер картинки не должен превышать 2МБ.',
+                'maxSize' => $this->imageMaxSize * 1024 * 1024,
+                'tooLarge' => "Размер картинки не должен превышать ". $this->imageMaxSize ."МБ.",
                 'wrongType' => 'Допустимые расширения изображения: jpg, gif, png.'
             ),
             array(
@@ -158,14 +161,14 @@ class TestImages extends CActiveRecord
             throw new RegExrException("An error ooccurred while performing a regular expression match for string: {$model->{$attribute}}");
         }
         
-        if (empty($tmpImages[0]) && empty($existImages[0]) && mb_strpos($model->{$attribute}, '<img') !== false) {
+        if (!$tmpImages[0] && !$existImages[0] && mb_strpos($model->{$attribute}, '<img') !== false) {
             throw new RegExrException("Regular expressions don't match with any image 'src' attribute in string: {$model->{$attribute}}");
         }
         
         /**
          * Если изображение находится в базе, но ссылки на него нет в отредактированном тексте - удаляем.
          */
-        if (! empty($modelImagesRelation)) {
+        if ($modelImagesRelation) {
             foreach ($modelImagesRelation as $existImage) {
                 if (mb_strpos($model->{$attribute}, $existImage->link) === false) {
                     $file = Yii::app()->file->set(Yii::getPathOfAlias('webroot') . $existImage->link, true);
@@ -187,7 +190,7 @@ class TestImages extends CActiveRecord
          * Ниже мы сделаем из временных файлов постоянные и в соответствии с этим
          * изменим исходную строку.
          */
-        if (! empty($tmpImages[0])) {
+        if ($tmpImages[0]) {
             $testImageArray = array();
             $newImageDir = Yii::app()->file->set($resultImageDir, true);
             

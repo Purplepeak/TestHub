@@ -287,7 +287,7 @@ class TestController extends Controller
             'studentId' => Yii::app()->user->id
         ));
         
-        if (empty($studentTest->start_time) || !empty($studentTest->end_time)) {
+        if (!isset($studentTest->start_time) || isset($studentTest->end_time)) {
             $this->redirect(array(
                 'view',
                 'id' => $test->id
@@ -341,7 +341,7 @@ class TestController extends Controller
             if (isset($_POST['endTest']) || Yii::app()->user->getState('endTest') === true) {
                 
                 $studentTotalScore = 0;
-                if (! empty($studentTest->studentAnswers)) {
+                if ($studentTest->studentAnswers) {
                     foreach ($studentTest->studentAnswers as $answer) {
                         $studentTotalScore = $studentTotalScore + $answer->result;
                     }
@@ -406,7 +406,7 @@ class TestController extends Controller
 
     public function actionPostQuestion()
     {
-        if (! empty($_POST) && isset($_POST['questionNumber']) && isset($_POST['questionNumberIdPair'])) {
+        if (isset($_POST) && isset($_POST['questionNumber']) && isset($_POST['questionNumberIdPair'])) {
             $questionNumber = $_POST['questionNumber'];
             $numberOfQuestions = count($_POST['questionNumberIdPair']);
             
@@ -687,7 +687,7 @@ class TestController extends Controller
 
     private function beginTestAccessRule($actionsArray)
     {
-        if (in_array($this->action->id, $actionsArray) && ! empty($this->actionParams) && $this->actionParams['id']) {
+        if (in_array($this->action->id, $actionsArray) && $this->actionParams && $this->actionParams['id']) {
             $studentTest = StudentTest::model()->find('test_id=:testId AND student_id=:studentId AND attempts >= 1 AND deadline > NOW()', array(
                 'testId' => $this->actionParams['id'],
                 'studentId' => Yii::app()->user->id

@@ -179,13 +179,13 @@ class StudentAnswer extends CActiveRecord
     {
         parent::afterFind();
         
-        if (! empty($this->manyAnswers1)) {
+        if ($this->manyAnswers1) {
             foreach ($this->manyAnswers1 as $selectedOption) {
                 $this->selectedAnswers[] = $selectedOption->id;
             }
         }
         
-        if (! empty($this->answer_number)) {
+        if ($this->answer_number) {
             $this->answer_number = floatval($this->answer_number);
         }
     }
@@ -201,7 +201,7 @@ class StudentAnswer extends CActiveRecord
                     ':answerId' => $this->id
                 ));
             }
-            if (! empty($this->selectedAnswers)) {
+            if ($this->selectedAnswers) {
                 $selectedAnswersId = array();
                 foreach ($this->selectedAnswers as $selectedAnswer) {
                     array_push($selectedAnswersId, array(
@@ -234,7 +234,7 @@ class StudentAnswer extends CActiveRecord
                 $correctOptionsId[] = $optionObject->id;
             }
             
-            if (count($this->selectedAnswers) == count($correctOptionsId) && empty(array_diff($correctOptionsId, $this->selectedAnswers))) {
+            if (count($this->selectedAnswers) == count($correctOptionsId) && array_diff($correctOptionsId, $this->selectedAnswers) == false) {
                 $this->result = $this->question->difficulty;
             }
         }

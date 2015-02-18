@@ -16,14 +16,14 @@ $this->widget('SAvatarWidget', array(
         'avatarWidth' => 'avatarWidth',
         'avatarHeight' => 'avatarHeight'
     ),
-    'previewMaxWidth' => 1100,
-    'previewMaxHeight' => 1100,
+    'previewMaxWidth' => 600,
+    'previewMaxHeight' => 600,
     'maxImageWidth' => 5000,
     'maxImageHeight' => 5000,
     'minImageWidth' => 190,
     'minImageHeight' => 190,
     'maxImageRatio' => 3,
     'minImageRatio' => 0.25,
-    'maxImageSize' => 2048000
-));
+    'maxImageSize' => $model->avatarMaxSize*1024*1024
+));var_dump(Yii::app()->request->cookies);
 ?>

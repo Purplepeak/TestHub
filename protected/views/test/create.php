@@ -58,7 +58,6 @@ $cs->registerScript("ForewordRedactor", "
         imageUploadParam: 'TestForewordImage[imageFile]',
         pasteCallback: function(html) {
             return html.replace(/<p>(.*?)<\/p>/gi, '$1');
-    console.log('gasgs');
         },
         initCallback: function(){
             $('.test-fields').find('div[class=redactor-editor]').addClass('redactor-editor-foreword');

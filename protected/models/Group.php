@@ -73,7 +73,12 @@ class Group extends CActiveRecord
                 self::HAS_MANY,
                 'Student',
                 'group_id'
-            )
+            ),
+            'tests' => array(
+                self::MANY_MANY,
+                'Test',
+                'group_test(group_id, test_id)'
+            ),
         );
     }
 

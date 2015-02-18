@@ -38,6 +38,9 @@ class Users extends CActiveRecord
     public $avatarWidth;
 
     public $avatarHeight;
+    
+    // максимальный размер аватара в мегабайтах
+    public $avatarMaxSize = 2;
 
     const GENDER_MALE = 'male';
 
@@ -98,8 +101,8 @@ class Users extends CActiveRecord
                 'safe' => true,
                 'types' => 'jpg, gif, png',
                 'allowEmpty' => true,
-                'maxSize' => 2000 * 1024,
-                'tooLarge' => 'Размер картинки не должен превышать 2МБ.',
+                'maxSize' => $this->avatarMaxSize * 1024 * 1024,
+                'tooLarge' => 'Размер картинки не должен превышать '. $this->avatarMaxSize .'МБ.',
                 'wrongType' => 'Допустимые расширения аватара: jpg, gif, png.',
                 'on' => 'changeAvatar'
             ),
@@ -243,7 +246,7 @@ class Users extends CActiveRecord
             true
         ));
         
-        if (! empty($this->fullname)) {
+        if ($this->fullname) {
             $criteria->addSearchCondition('surname', $this->fullname);
             $criteria->addSearchCondition('name', $this->fullname, true, 'OR');
         }
