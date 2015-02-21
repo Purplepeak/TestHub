@@ -84,7 +84,7 @@ class Question extends CActiveRecord
                 'message' => 'Поле не должно быть пустым.'
             ),
             array(
-                'id, updateType, modelScenario',
+                'updateType, modelScenario',
                 'safe',
             ),
             array(
@@ -179,6 +179,10 @@ class Question extends CActiveRecord
                 'length',
                 'max' => 9,
                 'tooLong' => 'Поле может содержать не более 9 символов.'
+            ),
+            array(
+                'answerOptionsArray, correctAnswers',
+                'safe'
             ),
             array(
                 'id, title, type, difficulty, answer_id, answer_text, answer_number, precision_percent, picture, test_id',

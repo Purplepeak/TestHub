@@ -45,6 +45,10 @@ class Group extends CActiveRecord
                 'length',
                 'max' => 45
             ),
+            array(
+                'fullname',
+                'safe'
+            ),
             // The following rule is used by search().
             // @todo Please remove those attributes that should not be searched.
             array(

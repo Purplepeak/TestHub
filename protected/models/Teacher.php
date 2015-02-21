@@ -36,14 +36,14 @@ class Teacher extends Users
     public $groupNumber = '';
 
     protected $searchPageSize = 80;
-    
+
     public $testName;
 
     public function defaultScope()
     {
         return array(
             'condition' => "teacher.type='{$this->_type}'",
-            'alias' => 'teacher',
+            'alias' => 'teacher'
         );
     }
 
@@ -79,6 +79,9 @@ class Teacher extends Users
         ), array(
             'groups',
             'isGroupExist'
+        ), array(
+            'groupNumber',
+            'safe',
         ), array(
             'fullname',
             'safe',
@@ -178,7 +181,7 @@ class Teacher extends Users
                     'deadline'
                 ),
                 'together' => true
-            ),
+            )
         );
         
         return new CActiveDataProvider($this, array(
@@ -205,7 +208,7 @@ class Teacher extends Users
         
         return implode(', ', $groupLinks);
     }
-    
+
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
