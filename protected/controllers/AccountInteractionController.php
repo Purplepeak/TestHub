@@ -164,7 +164,10 @@ class AccountInteractionController extends Controller
                 $confirmedUser = Users::model()->findByPk($confirmedAccountId);
                 $confirmedUser->active = true;
                 $confirmedUser->update(array('active'));
-                $confirmedUser->assignTests();
+                
+                if($confirmedUser->type === 'student') {
+                    $confirmedUser->assignTests();
+                }
                 
                 $identity = UserIdentity::forceLogin($confirmedUser);
                 Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
