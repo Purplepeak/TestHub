@@ -60,11 +60,11 @@ if(!empty($questionDataArray)) {
     	    $attrID = get_class($answerModel).'_answer_id'.'_em_';
     	    break;
     	case 'numeric':
-    	    $questionAnswer = $form->numberField($answerModel, 'answer_number');
+    	    $questionAnswer = $form->numberField($answerModel, 'answer_number', array('autocomplete' => 'off'));
     	    $attrID = get_class($answerModel).'_answer_number'.'_em_';
     	    break;
     	case 'string':
-    	    $questionAnswer = $form->textField($answerModel,'answer_text');
+    	    $questionAnswer = $form->textField($answerModel,'answer_text', array('autocomplete' => 'off'));
     	    $attrID = get_class($answerModel).'_answer_text'.'_em_';
     	    break;
     }

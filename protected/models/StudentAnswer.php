@@ -90,7 +90,7 @@ class StudentAnswer extends CActiveRecord
             array(
                 'answer_number',
                 'numerical',
-                'numberPattern' => '/^\d{1,' . self::NUMBER_M . '}\.?\d{0,' . self::NUMBER_D . '}$/',
+                'numberPattern' => '/^-?\d{1,' . self::NUMBER_M . '}\.?\d{0,' . self::NUMBER_D . '}$/',
                 'message' => 'Число должно быть либо целым, либо с плавающей точкой. Максимум знаков относительно запятой: ' . self::NUMBER_M . ' — перед запятой, ' . self::NUMBER_D . ' — после.'
             ),
             array(
