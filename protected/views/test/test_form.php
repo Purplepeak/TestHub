@@ -62,7 +62,7 @@
 		<?php 
 		    $dateTimeHtmlOptions = array();
 		
-		    if(!strtotime($test->deadline)) {
+		    if(!strtotime($test->deadline) || strtotime($test->deadline) < 0) {
                 $dateTimeHtmlOptions = array('value'=>'гггг-мм-дд чч:мм');
             }
 		    

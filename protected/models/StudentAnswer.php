@@ -239,7 +239,7 @@ class StudentAnswer extends CActiveRecord
             }
         }
         
-        if ($this->scenario == 'number') {
+        if ($this->scenario == 'numeric') {
             $userAnswerPrecision = ($this->answer_number / 100) * $this->question->precision_percent;
             
             if (abs($this->question->answer_number - $this->answer_number) <= $userAnswerPrecision) {

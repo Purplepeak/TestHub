@@ -121,7 +121,7 @@ window.onload = function() {
 	}
 	
 	$('.test-countdown-clock').countdown({
-		until: new Date("<?= date('Y-m-d H:i:s', $testStartTime + $testTimeLimit) ?>"),
+		until: new Date("<?= date('Y/m/d H:i:s', $testStartTime + $testTimeLimit) ?>"),
 		serverSync: serverTime,
 		format: countdownFormat,
 		compact: true,

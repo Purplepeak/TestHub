@@ -249,13 +249,13 @@ class TestController extends Controller
                 echo CJSON::encode(array(
                     'validateStatus' => 'success'
                 ));
-                Yii::app()->end();
             } else {
                 $error = CActiveForm::validate($studentAnswer);
                 if ($error != '[]')
                     echo $error;
-                Yii::app()->end();
             }
+            
+            Yii::app()->end();
         }
         
         /**
