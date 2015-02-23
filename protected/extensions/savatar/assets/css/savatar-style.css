@@ -1,0 +1,43 @@
+.s-avatar-form, .s-js-error {
+	width: 500px;
+	display: block;
+	margin-top: 20px;
+}
+
+.s-upload-button, .s-avatar-send, .s-src-avatar {
+	display: inline-block;
+}
+
+.s-avatar-send {
+	margin-right: 20px;
+}
+
+.s-src-avatar {
+	margin-top: 20px;
+}
+
+div.s-avatar-form div.error label:first-child,
+div.s-avatar-form label.error,
+div.s-avatar-form span.error
+{
+	color: #C00;
+}
+
+div.s-avatar-form div.error input,
+div.s-avatar-form div.error textarea,
+div.s-avatar-form div.error select,
+div.s-avatar-form input.error,
+div.s-avatar-form textarea.error,
+div.s-avatar-form select.error
+{
+	background: #FEE;
+	border-color: #C00;
+}
+
+div.s-avatar-form .errorMessage, .s-js-error
+{
+	color: red;
+	font-size: 0.9em;
+	margin-top: 5px;
+}
+
