@@ -178,22 +178,22 @@ class Student extends Users
             ':groupId' => $group->id
         );
         
-        $tests = $test->findAll($criteria);
-        
-        $studentTestData = array();
-        
-        foreach ($tests as $test) {
-            $studentTestData[] = array(
-                'attempts' => $test->attempts,
-                'deadline' => $test->deadline,
-                'test_id' => $test->id,
-                'student_id' => $this->id
-            );
+        if($tests = $test->findAll($criteria)) {
+            $studentTestData = array();
+            
+            foreach ($tests as $test) {
+                $studentTestData[] = array(
+                    'attempts' => $test->attempts,
+                    'deadline' => $test->deadline,
+                    'test_id' => $test->id,
+                    'student_id' => $this->id
+                );
+            }
+            
+            $builder = Yii::app()->db->schema->commandBuilder;
+            $command = $builder->createMultipleInsertCommand('student_test', $studentTestData);
+            $command->execute();
         }
-        
-        $builder = Yii::app()->db->schema->commandBuilder;
-        $command = $builder->createMultipleInsertCommand('student_test', $studentTestData);
-        $command->execute();
     }
 
     public static function model($className = __CLASS__)

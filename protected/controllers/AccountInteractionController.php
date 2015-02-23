@@ -155,7 +155,9 @@ class AccountInteractionController extends Controller
                 $this->render('failed_confirm');
             } else {
                 $confirmedAccountId = $account->user_id;
-                $account->deleteByPk($account->id);
+                $confirmModel->deleteAll('user_id=:userId', array(
+                    ':userId' => $confirmedAccountId
+                ));
                 
                 if (Yii::app()->session && isset(Yii::app()->session['regModel'])) {
                     unset(Yii::app()->session['regModel']);
@@ -163,9 +165,11 @@ class AccountInteractionController extends Controller
                 
                 $confirmedUser = Users::model()->findByPk($confirmedAccountId);
                 $confirmedUser->active = true;
-                $confirmedUser->update(array('active'));
+                $confirmedUser->update(array(
+                    'active'
+                ));
                 
-                if($confirmedUser->type === 'student') {
+                if ($confirmedUser->type === 'student') {
                     $confirmedUser->assignTests();
                 }
                 

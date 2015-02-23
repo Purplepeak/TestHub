@@ -109,6 +109,7 @@ class AccountInteraction extends CActiveRecord
         $this->key = md5($this->email . time());
         
         if ($this->validate()) {
+            /*
             $exist = $this->find('email=:email AND scenario=:scenario', array(
                 ':email' => $this->email,
                 ':scenario' => $this->scenario
@@ -121,6 +122,8 @@ class AccountInteraction extends CActiveRecord
             } else {
                 $this->save(false);
             }
+            */
+            $this->save(false);
             
             if ($scenario == 'confirm') {
                 $title = 'Добро пожаловать на TestHub';
