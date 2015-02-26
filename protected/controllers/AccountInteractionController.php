@@ -176,7 +176,7 @@ class AccountInteractionController extends Controller
                 $identity = UserIdentity::forceLogin($confirmedUser);
                 Yii::app()->user->login($identity, Yii::app()->params['rememberMeTime']);
                 
-                Yii::app()->user->setFlash('success', "Ваш аккаунт был успешно активирован.");
+                Yii::app()->user->setFlash('success', "Ваш аккаунт был успешно активирован");
                 
                 $this->redirect(array(
                     'site/index'

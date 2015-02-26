@@ -10,7 +10,7 @@ $userId = '';
 $userMainAvatar = '';
 $userMenuAvatar = '';
 
-if(!Yii::app()->user->isGuest && !empty(Yii::app()->user->__userData)) {
+if(!Yii::app()->user->isGuest && Yii::app()->user->__userData) {
     $userType = CHtml::encode(Yii::app()->user->__userData['type']);
     $userId = CHtml::encode(Yii::app()->user->__userData['id']);
     $userMainAvatar = CHtml::encode(Yii::app()->user->__userMainAvatar);

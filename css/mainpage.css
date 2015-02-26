@@ -1,9 +1,45 @@
+.main-page-intro {
+	text-align: center;
+}
+
+.main-page-intro h1,.main-reg-user-type {
+	font-family: Arial Black;
+	color: #ff9251;
+	text-shadow: #333333 6px 0px, #333333 1px 1px, #333333 0px 1px, #333333 -1px 1px, #333333
+		-1px 0px, #333333 -1px -1px, #333333 0px -1px, #333333 1px -1px, #333333 0 0 3px, #333333
+		0 0 3px, #333333 0 0 3px, #333333 0 0 3px, #333333 0 0 3px, #333333 0 0 3px, #333333 0 0
+		3px, #333333 0 0 3px;
+}
+
+.th-info {
+	width: 70%;
+	display: table;
+	margin: 0 auto;
+}
+
+.main-register-pics {
+	margin-top: 40px;
+}
+
+.main-student-pic {
+	margin-right: 35px;
+}
+
+.main-teacher-pic {
+	margin-left: 35px;
+}
+
+.main-student-pic>img,.main-teacher-pic>img {
+	height: 300px;
+}
+
 /*LOGIN PAGE*/
-.th-link, .th-link:hover, .th-link:active, .th-link:link, .th-link:visited, .sign-in-question, .sign-in-question:hover, .sign-in-question:link, .sign-in-question:active, .sign-in-question:visited, .pass-restore, .pass-restore:hover, .pass-restore:link, .pass-restore:active, .pass-restore:visited {
+.th-link,.th-link:hover,.th-link:active,.th-link:link,.th-link:visited,.sign-in-question,.sign-in-question:hover,.sign-in-question:link,.sign-in-question:active,.sign-in-question:visited,.pass-restore,.pass-restore:hover,.pass-restore:link,.pass-restore:active,.pass-restore:visited
+	{
 	text-decoration: none;
 }
 
-.th-link:hover, .sign-in-question:hover, .pass-restore:hover {
+.th-link:hover,.sign-in-question:hover,.pass-restore:hover {
 	color: #27384C;
 }
 
@@ -12,7 +48,7 @@
 	margin-top: 15px;
 }
 
-.question-anchor, .test-question-counter {
+.question-anchor,.test-question-counter {
 	width: 30px;
 	font-size: 13px;
 	padding: 5px 0;
@@ -34,7 +70,7 @@
 	border: 1px solid rgba(0, 0, 0, .2);
 }
 
-.question-anchor, .question-anchor:hover, .question-anchor:link {
+.question-anchor,.question-anchor:hover,.question-anchor:link {
 	text-decoration: none;
 }
 
@@ -58,7 +94,7 @@ div.question-anchors {
 	clear: both;
 }
 
-.question-anchor:hover, .test-question-counter:hover {
+.question-anchor:hover,.test-question-counter:hover {
 	border: 1px solid rgba(0, 0, 0, .6);
 }
 
@@ -282,7 +318,7 @@ div.th-register-from label,.field-label {
 	margin-right: 20px;
 }
 
-.th-submit-button,.create-test-button,.login-button,.start-test-button,.submit-answer-button,.skip-question,.end-test-button, .my-tests-button, .general-button
+.th-submit-button,.create-test-button,.login-button,.start-test-button,.submit-answer-button,.skip-question,.end-test-button,.my-tests-button,.general-button
 	{
 	background: #ff9251;
 	border: 1px solid transparent;
@@ -320,7 +356,7 @@ div.th-register-from label,.field-label {
 	text-align: center;
 }
 
-.th-submit-button:hover,.login-button:hover,.start-test-button:hover,.submit-answer-button:hover,.skip-question:hover,.end-test-button:hover, .my-tests-button:hover, .general-button:hover
+.th-submit-button:hover,.login-button:hover,.start-test-button:hover,.submit-answer-button:hover,.skip-question:hover,.end-test-button:hover,.my-tests-button:hover,.general-button:hover
 	{
 	background: #E58349;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #E58349
@@ -331,13 +367,13 @@ div.th-register-from label,.field-label {
 	background-color: #E58349;
 }
 
-.th-submit-button:active,.login-button:active,.start-test-button:active,.submit-answer-button:active,.skip-question:active,.end-test-button:active, .my-tests-button:active, .general-button:active
+.th-submit-button:active,.login-button:active,.start-test-button:active,.submit-answer-button:active,.skip-question:active,.end-test-button:active,.my-tests-button:active,.general-button:active
 	{
 	position: relative;
 	top: 1px;
 }
 
-.skip-question, .my-tests-button, .delete-test-view {
+.skip-question,.my-tests-button,.delete-test-view, .new-test-button {
 	background: #15B1B2;
 	border: 1px solid transparent;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #15B1B2
@@ -348,7 +384,7 @@ div.th-register-from label,.field-label {
 	background-color: #15B1B2;
 }
 
-.skip-question:hover, .my-tests-button:hover, .delete-test-view:hover {
+.skip-question:hover,.my-tests-button:hover,.delete-test-view:hover, .new-test-button:hover {
 	background: #0D7272;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #0D7272
 		), color-stop(1, #0D7272));
@@ -369,7 +405,7 @@ div.th-register-from label,.field-label {
 	height: 40px;
 }
 
-.th-submit-button,.create-test-button,.login-button,.delete-question-button,.start-test-button,.submit-answer-button,.skip-question,.end-test-button, .my-tests-button
+.th-submit-button,.create-test-button,.login-button,.delete-question-button,.start-test-button,.submit-answer-button,.skip-question,.end-test-button,.my-tests-button
 	{
 	outline: none;
 }
@@ -520,7 +556,8 @@ div.th-register-from label,.field-label {
 	padding: 4px 6px;
 }
 
-.question-answer input[type="text"],.question-answer input[type="number"] {
+.question-answer input[type="text"],.question-answer input[type="number"]
+	{
 	width: 20%;
 }
 
@@ -763,7 +800,7 @@ div.qeustions-empty-error {
 /* *********STUDENT TESTS VIEW************ */
 .student-test-status-nav>li.active>a {
 	color: #fff;
-    background-color: #17BEBF;
+	background-color: #17BEBF;
 }
 
 .student-test-status-nav>li.active>a:hover {
@@ -790,11 +827,11 @@ div.qeustions-empty-error {
 	line-height: 30px;
 }
 
-.start-test-button, .my-tests-button, .general-button {
+.start-test-button,.my-tests-button,.general-button {
 	margin: 25px 0 0 2px;
 }
 
-.general-button, .general-button:hover, .general-button:active, .general-button:link, .general-button:visited, a.start-test-button:hover,a.start-test-button:visited,a.start-test-button:active,a.start-test-button:link,.skip-question:hover,.skip-question:active,.skip-question:visited,.skip-question:link, a.my-tests-button, a.my-tests-button:hover, a.my-tests-button:visited, a.my-tests-button:link, a.my-tests-button:active
+.general-button,.general-button:hover,.general-button:active,.general-button:link,.general-button:visited,a.start-test-button:hover,a.start-test-button:visited,a.start-test-button:active,a.start-test-button:link,.skip-question:hover,.skip-question:active,.skip-question:visited,.skip-question:link,a.my-tests-button,a.my-tests-button:hover,a.my-tests-button:visited,a.my-tests-button:link,a.my-tests-button:active
 	{
 	text-decoration: none;
 	color: #fff;

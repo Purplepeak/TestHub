@@ -1,0 +1,11 @@
+.main-student-pic > img, .main-teacher-pic > img {
+	height: 200px;
+}
+
+.main-page-intro h1 {
+	font-size: 35px;
+}
+
+.main-page-intro p {
+	font-size: 17px;
+}

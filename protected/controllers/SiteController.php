@@ -82,6 +82,27 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
+        /**
+         * TODO В зависимости от того, залогинен ли поьзователь, контент на главной странице
+         * должен отличаться
+         */
+        
+        
+        if (! Yii::app()->user->isGuest && Yii::app()->user->__userData) {
+            if (Yii::app()->user->__userData['type'] === 'student') {
+                $this->redirect(array(
+                    'studentTest/myTests',
+                    'status' => 'notpassed'
+                ));
+            }
+            
+            if (Yii::app()->user->__userData['type'] === 'teacher') {
+                $this->redirect(array(
+                    'test/teacher'
+                ));
+            }
+        }
+        
         $this->render('index');
     }
 
@@ -226,16 +247,16 @@ class SiteController extends Controller
             ));
         }
         
-        switch($userType) {
-        	case 'student':
-        	    $userModel = new Student();
-        	    break;
-        	case 'teacher':
-        	    $userModel = new Teacher();
-        	    break;
-        	default:
-        	    throw new CHttpException(404);
-        	    break;
+        switch ($userType) {
+            case 'student':
+                $userModel = new Student();
+                break;
+            case 'teacher':
+                $userModel = new Teacher();
+                break;
+            default:
+                throw new CHttpException(404);
+                break;
         }
         
         $userModel->scenario = 'oauth';
