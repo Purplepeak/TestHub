@@ -254,12 +254,12 @@ class AccountInteractionController extends Controller
                     
                     $account->newPassword = $_POST['Users']['passwordText'];
                     
-                    $account->sendEmail('passChange');
+                    $account->sendEmail(SMailer::PASS_CHANGE);
                     
                     $changeModel->deleteByPk($account->id);
                     
                     $this->redirect(array(
-                        $user->type . '/login',
+                        'site/login',
                         'newPassword' => 1
                     ));
                 }

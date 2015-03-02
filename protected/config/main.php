@@ -33,6 +33,7 @@ return array(
         'application.models.*',
         'application.components.*',
         'application.components.DynamicTabularForm.*',
+        'application.components.smailer.SMailer',
         'ext.giix-components.*',
         'ext.CSLinkPager',
         'ext.smailer.*',
@@ -143,6 +144,9 @@ return array(
                     'class' => 'MailRuService'
                 )
             )
+        ),
+        'smailer' => array(
+            'class' => 'application.components.smailer.SMailer'
         )
     ),
     

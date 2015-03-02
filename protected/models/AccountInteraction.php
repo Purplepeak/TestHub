@@ -8,12 +8,13 @@
  */
 class AccountInteraction extends CActiveRecord
 {
+
     /**
      * Свойство необходимое для отправки пользователю письма
      * с новым паролем.
      */
     public $newPassword;
-    
+
     public function tableName()
     {
         return 'account_interaction';
@@ -110,40 +111,32 @@ class AccountInteraction extends CActiveRecord
         
         if ($this->validate()) {
             /*
-            $exist = $this->find('email=:email AND scenario=:scenario', array(
-                ':email' => $this->email,
-                ':scenario' => $this->scenario
-            ));
-            
-            if ($exist != null) {
-                $this->updateByPk($exist->id, array(
-                    'key' => $this->key
-                ));
-            } else {
-                $this->save(false);
-            }
-            */
+             * $exist = $this->find('email=:email AND scenario=:scenario', array( ':email' => $this->email, ':scenario' => $this->scenario )); if ($exist != null) { $this->updateByPk($exist->id, array( 'key' => $this->key )); } else { $this->save(false); }
+             */
             $this->save(false);
             
-            if ($scenario == 'confirm') {
-                $title = 'Добро пожаловать на TestHub';
-                $template = '/signup_template.';
-            } elseif ($scenario == 'restore') {
-                $title = "Здравствуйте, {$this->user->name}";
-                $template = '/restore_template.';
+            switch($scenario) {
+            	case 'confirm':
+            	    $mailerScenario = SMailer::EMAIL_CONFIRM;
+            	    break;
+            	case 'restore':
+            	    $mailerScenario = SMailer::EMAIL_RESTORE;
+            	    break;
             }
             
-            $this->sendEmail($scenario);
+            $this->sendEmail($mailerScenario);
         }
     }
-    
+
     public function sendEmail($scenario)
     {
-        $mailer = new SMailer;
-        $mailer->init($scenario, $this->user->name, $this->email, $this->key, $this->newPassword);
-        
         try {
-            $mailer->sendEmail();
+            Yii::app()->smailer->send($scenario, array(
+                'username' => $this->user->name,
+                'email' => $this->email,
+                'key' => $this->key,
+                'password' => $this->newPassword
+            ));
         } catch (Swift_SwiftException $e) {
             Yii::log($e->getMessage(), 'error', 'application.models.accountinteraction');
             throw new Swift_SwiftException($e->getMessage());
