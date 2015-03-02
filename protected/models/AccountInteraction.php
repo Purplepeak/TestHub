@@ -14,6 +14,10 @@ class AccountInteraction extends CActiveRecord
      * с новым паролем.
      */
     public $newPassword;
+    
+    const CONFIRM_SCENARIO = 'confirm';
+    
+    const RESTORE_SCENARIO = 'restore';
 
     public function tableName()
     {
@@ -31,8 +35,8 @@ class AccountInteraction extends CActiveRecord
                 'scenario',
                 'in',
                 'range' => array(
-                    'confirm',
-                    'restore'
+                    self::CONFIRM_SCENARIO,
+                    self::RESTORE_SCENARIO,
                 )
             ),
             array(
@@ -115,13 +119,10 @@ class AccountInteraction extends CActiveRecord
              */
             $this->save(false);
             
-            switch($scenario) {
-            	case 'confirm':
-            	    $mailerScenario = SMailer::EMAIL_CONFIRM;
-            	    break;
-            	case 'restore':
-            	    $mailerScenario = SMailer::EMAIL_RESTORE;
-            	    break;
+            if($scenario === self::CONFIRM_SCENARIO) {
+                $mailerScenario = SMailer::EMAIL_CONFIRM;
+            } elseif($scenario === self::RESTORE_SCENARIO) {
+                $mailerScenario = SMailer::EMAIL_RESTORE;
             }
             
             $this->sendEmail($mailerScenario);
