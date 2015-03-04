@@ -267,8 +267,9 @@ class StudentAnswer extends CActiveRecord
 
     public function getAnswerModel($questionId, $questionType, $testId)
     {
-        $studentCurrentAnswer = $this->find('question_id=:questionId', array(
-            ':questionId' => $questionId
+        $studentCurrentAnswer = $this->find('question_id=:questionId AND student_id=:studentId', array(
+            ':questionId' => $questionId,
+            ':studentId' => Yii::app()->user->id
         ));
         
         if ($studentCurrentAnswer) {

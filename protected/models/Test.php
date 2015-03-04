@@ -170,15 +170,15 @@ class Test extends CActiveRecord
         
         return false;
     }
-    
+
     public function beforeDelete()
     {
-        $file = Yii::app()->file->set(Yii::getPathOfAlias('forewordImages') .'/'. $this->id, true);
-    
-        if($file->exists) {
+        $file = Yii::app()->file->set(Yii::getPathOfAlias('forewordImages') . '/' . $this->id, true);
+        
+        if ($file->exists) {
             $file->delete();
         }
-    
+        
         return parent::beforeDelete();
     }
 
@@ -242,20 +242,23 @@ class Test extends CActiveRecord
         
         $this->deadline = Yii::app()->params["dataHandler"]->handleDataTimezone($this->deadline . '[Y-m-d H:i]');
     }
-    
+
     /**
      * Метод возвращает массив из ID вопросов теста на которые студент уже ответил
      */
-    
     public function getStudentAnswersByQuestionsId($questionNumberIdPair)
     {
         $studentAnswersCriteria = new CDbCriteria();
+        $studentAnswersCriteria->addCondition('student_id=:studentId');
+        $studentAnswersCriteria->params = array(
+            ':studentId' => Yii::app()->user->id
+        );
         $studentAnswersCriteria->addInCondition('question_id', $questionNumberIdPair);
         $studentAnswers = StudentAnswer::model()->findAll($studentAnswersCriteria);
         
         $studentAnswersQuestionId = array();
         
-        foreach($studentAnswers as $studentAnswer) {
+        foreach ($studentAnswers as $studentAnswer) {
             $studentAnswersQuestionId[] = $studentAnswer->question_id;
         }
         
@@ -272,11 +275,10 @@ class Test extends CActiveRecord
             }
         }
     }
-    
+
     /**
      * Метод проверяет существует ли группа и преподает ли в ней пользователь
      */
-
     public function isTeacherGroupExist()
     {
         if ($this->testGroups) {
@@ -381,17 +383,16 @@ class Test extends CActiveRecord
                         )
         ));
     }
-    
+
     /**
      * Метод вернет false, если время на выполнение теста вышло
      */
-    
     public function checkTestTimeLimit($startTime, $timeLimit)
     {
         if (time() >= ($startTime + $timeLimit)) {
             return false;
         }
-    
+        
         return true;
     }
 
@@ -410,13 +411,8 @@ class Test extends CActiveRecord
         $criteria->compare('deadline', $this->deadline);
         $criteria->compare('teacher_id', $this->teacher_id);
         /*
-         * <ul>
-    <?php foreach($questions as $key=>$question):?>
-      <li><a class="fa fa-angle-right" href="#Question<?= $key+1 ?>">Вопрос №<?= $key+1 ?></a></li>
-    <?php endforeach;?>
-  </ul>
-         * 
-         * */
+         * <ul> <?php foreach($questions as $key=>$question):?> <li><a class="fa fa-angle-right" href="#Question<?= $key+1 ?>">Вопрос №<?= $key+1 ?></a></li> <?php endforeach;?> </ul>
+         */
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria
         ));
